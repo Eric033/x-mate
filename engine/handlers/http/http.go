@@ -11,6 +11,15 @@ import (
 	"github.com/Eric033/x-mate/engine/internal/xmlhelper"
 )
 
+// splitHostPort splits "ip:port" into (ip, port).
+func splitHostPort(addr string) (string, string) {
+	colonIdx := strings.LastIndex(addr, ":")
+	if colonIdx < 0 {
+		return addr, ""
+	}
+	return addr[:colonIdx], addr[colonIdx+1:]
+}
+
 // jsonpathGet extracts a value from JSON using a simple JSONPath expression.
 // Supports $.field.subfield and $[index] patterns.
 func jsonpathGet(jsonPath, jsonStr string) string {
@@ -66,10 +75,32 @@ type HTTPHandler struct {
 func (h *HTTPHandler) Execute(data *handler.StepData, ctx *context.TestContext) *handler.StepResult {
 	// Resolve server IP/port
 	var serverIP, serverPort string
+
 	if h.UseDamper {
-		serverIP = ctx.GetOrDefault("httpDamServerIP", "")
-		serverPort = ctx.GetOrDefault("httpDamServerPort", "")
+		// Damper: look for DAMPER service or fallback to legacy
+		if svc, ok := ctx.GetService("DAMPER"); ok && svc.HTTPPort > 0 {
+			ip, _ := splitHostPort(svc.Address)
+			serverIP = ip
+			serverPort = fmt.Sprintf("%d", svc.HTTPPort)
+		} else {
+			serverIP = ctx.GetOrDefault("httpDamServerIP", "")
+			serverPort = ctx.GetOrDefault("httpDamServerPort", "")
+		}
+	} else if data.Server != "" {
+		// New: service name
+		if svc, ok := ctx.GetService(data.Server); ok {
+			ip, _ := splitHostPort(svc.Address)
+			serverIP = ip
+			serverPort = ""
+			// port is set from the service's address, which will be overridden
+			// by the full address or action attrs below
+			if addr, ok := ctx.GetServiceAddrForStep(data.Server); ok {
+				_, p := splitHostPort(addr)
+				serverPort = p
+			}
+		}
 	} else {
+		// Legacy fallback
 		if ip, ok := ctx.Get("serverIP"); ok {
 			serverIP = ip
 		}

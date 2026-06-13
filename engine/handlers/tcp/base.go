@@ -51,10 +51,18 @@ func (b *Base) BuildAndSend(data *handler.StepData, ctx *context.TestContext) (r
 		payload = append(prefix, payload...)
 	}
 
-	// Determine target address
-	serverIP := ctx.GetOrDefault("serverIP", "")
-	serverPort := ctx.GetOrDefault("serverPort", "")
-	addr := fmt.Sprintf("%s:%s", serverIP, serverPort)
+	// Determine target address (service name or legacy)
+	var addr string
+	if data.Server != "" {
+		if a, ok := ctx.GetServiceAddrForStep(data.Server); ok {
+			addr = a
+		}
+	}
+	if addr == "" {
+		serverIP := ctx.GetOrDefault("serverIP", "")
+		serverPort := ctx.GetOrDefault("serverPort", "")
+		addr = fmt.Sprintf("%s:%s", serverIP, serverPort)
+	}
 
 	// Send TCP
 	cfg := sampler.DefaultTCPConfig()

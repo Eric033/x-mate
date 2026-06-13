@@ -220,7 +220,11 @@ func (r *Runner) runStep(ctx *context.TestContext, phase string, s stepXML) Step
 	r.Logger("--- STEP [%s] %s: type=%s ---", phase, s.Desc, stepData.StepType)
 
 	// Generate system variables for this step
-	ctx.GenerateSystemVars(stepData.ServerIndex)
+	if stepData.Server != "" {
+		ctx.GenerateSystemVars(stepData.Server)
+	} else {
+		ctx.GenerateSystemVarsLegacy(stepData.ServerIndex)
+	}
 
 	// Route to handler
 	h := r.Registry.Get(stepData.StepType)

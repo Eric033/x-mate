@@ -12,6 +12,7 @@ func ParseStep(rawXML string) (*StepData, error) {
 	type actionElem struct {
 		XMLName     xml.Name `xml:"Action"`
 		Type        string   `xml:"type,attr"`
+		Server      string   `xml:"server,attr"`
 		ServerIndex string   `xml:"server_index,attr"`
 		TranCode    string   `xml:"trancode,attr"`
 		Sleep       string   `xml:"sleep,attr"`
@@ -99,12 +100,16 @@ func ParseStep(rawXML string) (*StepData, error) {
 		Attrs:    make(map[string]string),
 	}
 
-	// Parse server_index
-	data.ServerIndex = 1
-	if step.Action.ServerIndex != "" {
+	// Parse server (service name) — new, preferred
+	data.Server = step.Action.Server
+
+	// Parse server_index — legacy, ignored when Server is set
+	if data.Server == "" && step.Action.ServerIndex != "" {
 		if idx, err := strconv.Atoi(step.Action.ServerIndex); err == nil {
 			data.ServerIndex = idx
 		}
+	} else {
+		data.ServerIndex = 1 // default when no server info provided
 	}
 
 	data.TranCode = step.Action.TranCode
@@ -119,6 +124,9 @@ func ParseStep(rawXML string) (*StepData, error) {
 	// Store all action attrs
 	if step.Action.Type != "" {
 		data.Attrs["type"] = step.Action.Type
+	}
+	if step.Action.Server != "" {
+		data.Attrs["server"] = step.Action.Server
 	}
 	if step.Action.ServerIndex != "" {
 		data.Attrs["server_index"] = step.Action.ServerIndex

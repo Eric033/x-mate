@@ -35,8 +35,19 @@ func (h *TCPDamperSetHandler) Execute(data *handler.StepData, ctx *context.TestC
 	// Add @ prefix to TRAN_CODE
 	parametrized, _ = xmlhelper.Set("//TRAN_CODE", "@"+getTranCode(parametrized), parametrized)
 
-	// Send to damper TCP server
-	addr := ctx.DamperTCP
+	// Send to damper TCP server (service name or legacy)
+	addr := ""
+	if svc, ok := ctx.GetService("DAMPER"); ok {
+		if svc.TCPPort > 0 {
+			ip, _ := splitHostPort(svc.Address)
+			addr = fmt.Sprintf("%s:%d", ip, svc.TCPPort)
+		} else {
+			addr = svc.Address
+		}
+	}
+	if addr == "" {
+		addr = ctx.DamperTCP
+	}
 	if addr == "" {
 		addr = ctx.GetOrDefault("tcpDamServerIP", "") + ":" + ctx.GetOrDefault("tcpDamServerPort", "")
 	}
@@ -110,8 +121,19 @@ func (h *MCADamperSetHandler) Execute(data *handler.StepData, ctx *context.TestC
 	// Append \r\n
 	payload := append([]byte(parametrized), '\r', '\n')
 
-	// Send to damper TCP server
-	addr := ctx.DamperTCP
+	// Send to damper TCP server (service name or legacy)
+	addr := ""
+	if svc, ok := ctx.GetService("DAMPER"); ok {
+		if svc.TCPPort > 0 {
+			ip, _ := splitHostPort(svc.Address)
+			addr = fmt.Sprintf("%s:%d", ip, svc.TCPPort)
+		} else {
+			addr = svc.Address
+		}
+	}
+	if addr == "" {
+		addr = ctx.DamperTCP
+	}
 	if addr == "" {
 		addr = ctx.GetOrDefault("tcpDamServerIP", "") + ":" + ctx.GetOrDefault("tcpDamServerPort", "")
 	}
@@ -165,3 +187,12 @@ func getTranCode(xml string) string {
 }
 
 var _ = strings.TrimSpace
+
+// splitHostPort splits "ip:port" into (ip, port).
+func splitHostPort(addr string) (string, string) {
+	colonIdx := strings.LastIndex(addr, ":")
+	if colonIdx < 0 {
+		return addr, ""
+	}
+	return addr[:colonIdx], addr[colonIdx+1:]
+}

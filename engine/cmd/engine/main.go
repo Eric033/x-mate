@@ -11,6 +11,7 @@ import (
 	"github.com/Eric033/x-mate/engine/internal/handler"
 	"github.com/Eric033/x-mate/engine/internal/report"
 	"github.com/Eric033/x-mate/engine/internal/runner"
+	"github.com/Eric033/x-mate/engine/internal/sampler"
 	"github.com/Eric033/x-mate/engine/handlers/damper"
 	httpHandler "github.com/Eric033/x-mate/engine/handlers/http"
 	"github.com/Eric033/x-mate/engine/handlers/rsa"
@@ -22,8 +23,10 @@ func main() {
 	cfg := config.Default()
 
 	fs := flag.NewFlagSet("engine", flag.ExitOnError)
+	fs.StringVar(&cfg.ConfigPath, "config", "", "Path to YAML config file")
+	fs.StringVar(&cfg.ActiveProfile, "profile", "default", "Active profile for multi-env config")
 	fs.StringVar(&cfg.TestBase, "test-base", "", "Test case root directory (required)")
-	fs.StringVar(&cfg.Server, "server", "", "Target server address ip:port or ip1:port1@ip2:port2 (required)")
+	fs.StringVar(&cfg.Server, "server", "", "Target server address ip:port or ip1:port1@ip2:port2")
 	fs.StringVar(&cfg.Flags, "flags", "core", "Case tag filter")
 	fs.BoolVar(&cfg.Verbose, "verbose", false, "Enable verbose logging")
 	fs.BoolVar(&cfg.DryRun, "dry-run", false, "Validate only, do not execute")
@@ -36,8 +39,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	if cfg.TestBase == "" || cfg.Server == "" {
-		fmt.Fprintln(os.Stderr, "Error: --test-base and --server are required")
+	// Load YAML config (if found)
+	if err := cfg.LoadYAML(); err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: config load: %v\n", err)
+	}
+
+	if cfg.TestBase == "" {
+		fmt.Fprintln(os.Stderr, "Error: --test-base is required")
 		fmt.Fprintln(os.Stderr)
 		fs.Usage()
 		os.Exit(1)
@@ -58,7 +66,7 @@ func main() {
 	}
 
 	// Run tests
-	log.Printf("Engine starting — testBase=%s server=%s flags=%s", cfg.TestBase, cfg.Server, cfg.Flags)
+	log.Printf("Engine starting — testBase=%s flags=%s profile=%s", cfg.TestBase, cfg.Flags, cfg.ActiveProfile)
 	result := r.Run(ctx)
 
 	// Print report
@@ -81,10 +89,12 @@ func registerHandlers(reg *handler.Registry, cfg *config.Config) {
 	reg.Register("http", &httpHandler.HTTPHandler{UseDamper: false})
 	reg.Register("damper_set", &httpHandler.HTTPHandler{UseDamper: true})
 
-	// SQL handlers (initialized lazily when DB is configured)
-	if cfg.DBInfo != "" && cfg.DBInfo != "UNDEFINED" {
-		// DB pool initialization would go here
+	// SQL handlers (initialized lazily when services have DB configured)
+	dbManager := sampler.NewDBPoolManager()
+	if len(cfg.Services) > 0 {
+		// DB pool initialization would go here with the real driver
 		// For now, the SQL handlers accept nil pool and will error gracefully
+		_ = dbManager
 	}
 
 	// Damper handlers

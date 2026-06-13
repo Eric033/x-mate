@@ -17,7 +17,8 @@ type StepResult struct {
 type StepData struct {
 	StepType    string
 	Desc        string
-	ServerIndex int
+	Server      string // service name (e.g. "ABC"), overrides ServerIndex
+	ServerIndex int    // legacy numeric index, ignored when Server is set
 	TranCode    string
 	Sleep       int
 	// Raw action attributes

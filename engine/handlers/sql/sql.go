@@ -37,7 +37,7 @@ func (h *SelectHandler) Execute(data *handler.StepData, ctx *context.TestContext
 	sqlText = vars.PreProcess(ctx, sqlText)
 
 	// Execute query
-	result, err := h.PoolManager.Select(data.ServerIndex, sqlText)
+	result, err := h.PoolManager.Select(data.Server, sqlText)
 	if err != nil {
 		return &handler.StepResult{Success: false, FailureMessage: err.Error()}
 	}
@@ -176,7 +176,7 @@ func (h *UpdateHandler) Execute(data *handler.StepData, ctx *context.TestContext
 	sqlText = vars.PreProcess(ctx, sqlText)
 
 	// Execute
-	affected, err := h.PoolManager.Exec(data.ServerIndex, sqlText)
+	affected, err := h.PoolManager.Exec(data.Server, sqlText)
 	if err != nil {
 		return &handler.StepResult{Success: false, FailureMessage: err.Error()}
 	}

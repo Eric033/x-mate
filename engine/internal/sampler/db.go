@@ -3,46 +3,66 @@ package sampler
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
+
+	"github.com/Eric033/x-mate/engine/internal/context"
 )
 
 // DBPoolManager manages database connection pools.
 type DBPoolManager struct {
 	mu    sync.Mutex
-	pools map[int]*sql.DB // keyed by server_index
+	pools map[string]*sql.DB // keyed by service name (e.g. "ABC")
 }
 
 // NewDBPoolManager creates a new DB pool manager.
 func NewDBPoolManager() *DBPoolManager {
-	return &DBPoolManager{pools: make(map[int]*sql.DB)}
+	return &DBPoolManager{pools: make(map[string]*sql.DB)}
 }
 
-// Init creates connection pools from database configs.
+// Init creates connection pools from service definitions.
 // driver can be "oracle", "mysql", "postgres" etc.
-func (m *DBPoolManager) Init(configs []DBConfig, driver string) error {
-	for i, cfg := range configs {
+func (m *DBPoolManager) Init(services map[string]context.ServiceDef, driver string) error {
+	for name, svc := range services {
+		if svc.DB == nil {
+			continue
+		}
+		cfg := DBConfig{
+			IP:     svc.DB.Address,
+			Port:   "",
+			Name:   svc.DB.Database,
+			User:   svc.DB.Username,
+			Passwd: svc.DB.Password,
+			Type:   "UNDEFINED",
+		}
+		// Split address into IP:Port
+		if idx := strings.LastIndex(svc.DB.Address, ":"); idx >= 0 {
+			cfg.IP = svc.DB.Address[:idx]
+			cfg.Port = svc.DB.Address[idx+1:]
+		}
+
 		dsn := buildDSN(cfg, driver)
 		db, err := sql.Open(driver, dsn)
 		if err != nil {
-			return fmt.Errorf("db pool %d init: %w", i+1, err)
+			return fmt.Errorf("db pool %s init: %w", name, err)
 		}
 		db.SetMaxOpenConns(10)
 		db.SetMaxIdleConns(5)
 		db.SetConnMaxLifetime(5 * time.Second)
 		db.SetConnMaxIdleTime(60 * time.Second)
-		m.pools[i+1] = db
+		m.pools[name] = db
 	}
 	return nil
 }
 
-// Get returns the DB pool for a given server_index.
-func (m *DBPoolManager) Get(serverIndex int) (*sql.DB, error) {
+// Get returns the DB pool for a given service name.
+func (m *DBPoolManager) Get(serviceName string) (*sql.DB, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	db, ok := m.pools[serverIndex]
+	db, ok := m.pools[serviceName]
 	if !ok {
-		return nil, fmt.Errorf("no db pool for server_index %d", serverIndex)
+		return nil, fmt.Errorf("no db pool for service %s", serviceName)
 	}
 	return db, nil
 }
@@ -86,8 +106,8 @@ type QueryResult struct {
 }
 
 // Select executes a SELECT query and returns rows as maps.
-func (m *DBPoolManager) Select(serverIndex int, query string, args ...interface{}) (*QueryResult, error) {
-	db, err := m.Get(serverIndex)
+func (m *DBPoolManager) Select(serviceName string, query string, args ...interface{}) (*QueryResult, error) {
+	db, err := m.Get(serviceName)
 	if err != nil {
 		return nil, err
 	}
@@ -128,8 +148,8 @@ func (m *DBPoolManager) Select(serverIndex int, query string, args ...interface{
 }
 
 // Exec executes an UPDATE/INSERT/DELETE and returns rows affected.
-func (m *DBPoolManager) Exec(serverIndex int, query string, args ...interface{}) (int64, error) {
-	db, err := m.Get(serverIndex)
+func (m *DBPoolManager) Exec(serviceName string, query string, args ...interface{}) (int64, error) {
+	db, err := m.Get(serviceName)
 	if err != nil {
 		return 0, err
 	}
