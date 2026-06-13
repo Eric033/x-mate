@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<case title="示例用例-基本TCP测试">
+  <setup>
+    <step desc="数据库准备">
+      <Action type="sql_update" server_index="1" />
+      <value>UPDATE test_table SET status='READY' WHERE id=1</value>
+    </step>
+  </setup>
+  <action>
+    <step desc="发送交易请求">
+      <Action type="xml_set" server_index="1" trancode="TRAN001" sleep="100" />
+      <value name="//Header/TRAN_CODE">TRAN001</value>
+      <value name="//Body/AMOUNT">{{random_8}}</value>
+      <result name="//Response/RET_CODE">000000</result>
+      <save>
+        <key name="order_id">//Response/ORDER_ID</key>
+      </save>
+    </step>
+    <step desc="验证订单已创建">
+      <Action type="sql_select" server_index="1" />
+      <value>SELECT order_id, status FROM orders WHERE id = {{order_id}}</value>
+      <Verify>
+        <value>STATUS[0]@@@ACTIVE</value>
+      </Verify>
+    </step>
+  </action>
+  <teardown>
+    <step desc="清理数据">
+      <Action type="sql_update" server_index="1" />
+      <value>DELETE FROM orders WHERE id = {{order_id}}</value>
+    </step>
+  </teardown>
+</case>
