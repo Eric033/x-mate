@@ -1,10 +1,14 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
+	"sync/atomic"
+	"time"
 
 	"github.com/Eric033/x-mate/engine/internal/config"
 	"github.com/Eric033/x-mate/engine/internal/context"
@@ -35,8 +39,19 @@ func main() {
 	fs.StringVar(&cfg.EnvName, "env-name", "UNDEFINED", "Environment name")
 	fs.StringVar(&cfg.ParentGUID, "parent-guid", "92508788-4c1c-11e9-808b-005056a01111", "Parent GUID")
 
+	var startMock bool
+	fs.BoolVar(&startMock, "start-mock", false, "Start built-in mock HTTP server before running tests")
+
 	if err := fs.Parse(os.Args[1:]); err != nil {
 		os.Exit(1)
+	}
+
+	// Start mock server if requested
+	if startMock {
+		go startMockServer()
+		// Give it a moment to bind
+		time.Sleep(200 * time.Millisecond)
+		log.Printf("Mock server started on :19876")
 	}
 
 	// Load YAML config (if found)
@@ -75,6 +90,62 @@ func main() {
 	if result.FailedCases > 0 {
 		os.Exit(1)
 	}
+}
+
+// startMockServer launches a lightweight HTTP mock in a goroutine.
+// It simulates a simple order management backend for demo purposes.
+func startMockServer() {
+	mux := http.NewServeMux()
+	var orderCounter int64
+
+	mux.HandleFunc("/api/order/create", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, `{"error":"method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+		var req struct {
+			TranCode string `json:"tran_code"`
+			Amount   string `json:"amount"`
+			UserID   string `json:"user_id"`
+		}
+		_ = json.NewDecoder(r.Body).Decode(&req)
+
+		orderID := atomic.AddInt64(&orderCounter, 1)
+		resp := map[string]interface{}{
+			"ret_code":  "000000",
+			"ret_msg":   "success",
+			"order_id":  fmt.Sprintf("ORD%08d", orderID),
+			"tran_code": req.TranCode,
+			"amount":    req.Amount,
+			"status":    "ACTIVE",
+			"timestamp": time.Now().Format("2006-01-02 15:04:05"),
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(resp)
+	})
+
+	mux.HandleFunc("/api/order/query", func(w http.ResponseWriter, r *http.Request) {
+		orderID := r.URL.Query().Get("order_id")
+		if orderID == "" {
+			orderID = r.URL.Query().Get("orderId")
+		}
+		resp := map[string]interface{}{
+			"ret_code": "000000",
+			"ret_msg":  "success",
+			"order_id": orderID,
+			"status":   "ACTIVE",
+			"amount":   "10000",
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(resp)
+	})
+
+	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"status":"ok"}`))
+	})
+
+	log.Fatal(http.ListenAndServe(":19876", mux))
 }
 
 // registerHandlers registers all built-in step type handlers.

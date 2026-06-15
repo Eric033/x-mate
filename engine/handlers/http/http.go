@@ -164,7 +164,7 @@ func (h *HTTPHandler) Execute(data *handler.StepData, ctx *context.TestContext) 
 	ok := true
 	var failureMsg string
 	if len(data.VerifyResults) > 0 {
-		ok, failureMsg = h.verify(resp, data.VerifyResults)
+		ok, failureMsg = h.verify(resp, data.VerifyResults, ctx)
 	}
 
 	// Extract vars
@@ -179,7 +179,7 @@ func (h *HTTPHandler) Execute(data *handler.StepData, ctx *context.TestContext) 
 	}
 }
 
-func (h *HTTPHandler) verify(resp *sampler.HTTPResponse, entries []handler.VerifyEntry) (bool, string) {
+func (h *HTTPHandler) verify(resp *sampler.HTTPResponse, entries []handler.VerifyEntry, ctx *context.TestContext) (bool, string) {
 	var failures []string
 	for _, e := range entries {
 		var actual string
@@ -197,9 +197,10 @@ func (h *HTTPHandler) verify(resp *sampler.HTTPResponse, entries []handler.Verif
 			}
 		}
 
-		if actual != e.Value {
+		expected := vars.ResolveAll(ctx, e.Value)
+		if actual != expected {
 			failures = append(failures,
-				fmt.Sprintf("[ tag %s mismatch: expected=%s actual=%s ]", e.Name, e.Value, actual))
+				fmt.Sprintf("[ tag %s mismatch: expected=%s actual=%s ]", e.Name, expected, actual))
 		}
 	}
 

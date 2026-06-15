@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<case title="Demo-HTTP接口自动化测试">
+  <action>
+    <!-- 步骤1: 创建订单 -->
+    <step desc="创建订单-POST /api/order/create">
+      <Action type="http" server="MOCK" method="POST" api="/api/order/create" />
+      <header name="Content-Type">application/json</header>
+      <body>{"tran_code":"TRAN001","amount":"{{random_8}}","user_id":"demo_user"}</body>
+      <Verify>
+        <result name="$.ret_code">000000</result>
+        <result name="$.ret_msg">success</result>
+        <result name="$.status">ACTIVE</result>
+      </Verify>
+      <save>
+        <key name="order_id" locator="$.order_id" />
+      </save>
+    </step>
+
+    <!-- 步骤2: 查询订单 -->
+    <step desc="查询订单-GET /api/order/query">
+      <Action type="http" server="MOCK" method="GET" api="/api/order/query" />
+      <queryString name="order_id">{{order_id}}</queryString>
+      <Verify>
+        <result name="$.ret_code">000000</result>
+        <result name="$.order_id">{{order_id}}</result>
+        <result name="$.status">ACTIVE</result>
+      </Verify>
+    </step>
+
+    <!-- 步骤3: 健康检查 -->
+    <step desc="健康检查-GET /health">
+      <Action type="http" server="MOCK" method="GET" api="/health" />
+      <Verify>
+        <result name="$.status">ok</result>
+      </Verify>
+    </step>
+  </action>
+</case>

@@ -1,0 +1,9 @@
+engine:
+  test-base: ./sample
+  flags: core
+  verbose: true
+  env-name: DEMO
+
+services:
+  MOCK:
+    address: "127.0.0.1:19876"
