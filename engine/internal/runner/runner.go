@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/Eric033/x-mate/engine/internal/context"
@@ -22,21 +23,48 @@ type CaseResult struct {
 
 // StepReport holds the result of a single step.
 type StepReport struct {
-	Phase  string // setup / action / teardown
-	Desc   string
-	Type   string
-	Pass   bool
+	Phase   string // setup / action / teardown
+	Desc    string
+	Type    string
+	Pass    bool
 	Message string
 }
 
 // Report holds the overall test run report.
 type Report struct {
-	StartTime  time.Time
-	EndTime    time.Time
-	TotalCases int
+	StartTime   time.Time
+	EndTime     time.Time
+	TotalCases  int
 	PassedCases int
 	FailedCases int
-	Results    []CaseResult
+	Results     []CaseResult
+	mu          sync.Mutex // protects Results for concurrent access
+}
+
+// appendResult safely appends a case result to the report.
+func (r *Report) appendResult(cr CaseResult) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.Results = append(r.Results, cr)
+	r.TotalCases++
+	allPass := true
+	for _, s := range cr.Steps {
+		if !s.Pass {
+			allPass = false
+			break
+		}
+	}
+	if allPass {
+		r.PassedCases++
+	} else {
+		r.FailedCases++
+	}
+}
+
+// parallelResult holds the result of a parallel case execution.
+type parallelResult struct {
+	CaseResult CaseResult
+	Err        error
 }
 
 // Runner orchestrates test case execution.
@@ -76,6 +104,17 @@ func (r *Runner) Run(ctx *context.TestContext) *Report {
 	}
 	sort.Strings(caseDirs)
 
+	// Determine concurrency
+	concurrency := ctx.Concurrency
+	if concurrency < 1 {
+		concurrency = 1
+	}
+
+	// Parallel dispatch helpers
+	var wg sync.WaitGroup
+	sem := make(chan struct{}, concurrency) // semaphore for parallel goroutines
+	parallelCh := make(chan parallelResult, len(caseDirs))
+
 	for _, dirName := range caseDirs {
 		// Dry-run mode: skip execution
 		if ctx.DryRun {
@@ -83,24 +122,67 @@ func (r *Runner) Run(ctx *context.TestContext) *Report {
 			continue
 		}
 
-		caseResult := r.runCase(ctx, dirName)
-		report.Results = append(report.Results, caseResult)
-		report.TotalCases++
-		allPass := true
-		for _, s := range caseResult.Steps {
-			if !s.Pass {
-				allPass = false
-				break
-			}
-		}
-		if allPass {
-			report.PassedCases++
+		// Parse XML to check parallel attribute
+		isParallel := r.isCaseParallel(ctx, dirName)
+
+		if isParallel && concurrency > 1 {
+			// Parallel case: acquire semaphore slot, launch goroutine
+			sem <- struct{}{} // blocks if at capacity
+			wg.Add(1)
+			go func(name string) {
+				defer wg.Done()
+				defer func() { <-sem }()
+
+				// Clone context for isolation
+				caseCtx := ctx.Clone()
+				cr := r.runCase(caseCtx, name)
+				parallelCh <- parallelResult{CaseResult: cr}
+			}(dirName)
 		} else {
-			report.FailedCases++
+			// Serial case: wait for all parallel goroutines to finish first
+			wg.Wait()
+			// Drain any remaining parallel results
+			r.drainParallelResults(report, parallelCh)
+
+			// Execute serially
+			caseResult := r.runCase(ctx, dirName)
+			report.appendResult(caseResult)
 		}
 	}
 
+	// Wait for all remaining parallel goroutines
+	wg.Wait()
+	r.drainParallelResults(report, parallelCh)
+
 	return report
+}
+
+// isCaseParallel checks whether a test case has parallel="true" attribute.
+func (r *Runner) isCaseParallel(ctx *context.TestContext, dirName string) bool {
+	xmlPath := filepath.Join(ctx.TestBase, "testcase", dirName, dirName+".xml")
+	data, err := os.ReadFile(xmlPath)
+	if err != nil {
+		return false
+	}
+
+	var tc caseXML
+	if err := xml.Unmarshal(data, &tc); err != nil {
+		return false
+	}
+
+	return strings.EqualFold(tc.Parallel, "true")
+}
+
+// drainParallelResults drains all available results from the parallel channel.
+func (r *Runner) drainParallelResults(report *Report, ch chan parallelResult) {
+	for {
+		select {
+		case pr := <-ch:
+			report.appendResult(pr.CaseResult)
+		default:
+			return
+		}
+	}
 }
 
 // dryRunCase validates a test case XML without executing it.
@@ -119,6 +201,7 @@ type caseXML struct {
 	XMLName  xml.Name `xml:"case"`
 	Tittle   string   `xml:"tittle,attr"`
 	Title    string   `xml:"title,attr"`
+	Parallel string   `xml:"parallel,attr"`
 	Setup    *phaseXML `xml:"setup"`
 	Action   *phaseXML `xml:"action"`
 	Teardown *phaseXML `xml:"teardown"`
@@ -129,8 +212,8 @@ type phaseXML struct {
 }
 
 type stepXML struct {
-	Desc   string `xml:"desc,attr"`
-	Inner  string `xml:",innerxml"`
+	Desc  string `xml:"desc,attr"`
+	Inner string `xml:",innerxml"`
 }
 
 // runCase executes a single test case.
@@ -160,12 +243,6 @@ func (r *Runner) runCase(ctx *context.TestContext, dirName string) CaseResult {
 	}
 	if title == "" {
 		title = dirName
-	}
-
-	// Check flags filter
-	if ctx.Flags != "" {
-		// Simple flags matching: if case has a "flags" attribute, check it
-		// For now, pass through (flags can be extended)
 	}
 
 	ctx.GenerateRandomVars()

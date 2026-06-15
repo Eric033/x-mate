@@ -19,12 +19,13 @@ type AppConfig struct {
 
 // EngineConfig holds engine-level settings.
 type EngineConfig struct {
-	TestBase   string `yaml:"test-base"`
-	Flags      string `yaml:"flags"`
-	Verbose    bool   `yaml:"verbose"`
-	DryRun     bool   `yaml:"dry-run"`
-	EnvName    string `yaml:"env-name"`
-	ParentGUID string `yaml:"parent-guid"`
+	TestBase    string `yaml:"test-base"`
+	Flags       string `yaml:"flags"`
+	Verbose     bool   `yaml:"verbose"`
+	DryRun      bool   `yaml:"dry-run"`
+	EnvName     string `yaml:"env-name"`
+	ParentGUID  string `yaml:"parent-guid"`
+	Concurrency int    `yaml:"concurrency"`
 }
 
 // Config holds all resolved configuration (YAML + CLI overrides).
@@ -42,6 +43,7 @@ type Config struct {
 	// New fields
 	ConfigPath    string
 	ActiveProfile string
+	Concurrency   int     // max concurrent goroutines (0/1 = serial)
 
 	// Resolved services (populated from YAML)
 	Services map[string]context.ServiceDef
@@ -156,6 +158,9 @@ func mergeAppConfig(dst, src *AppConfig) *AppConfig {
 	if src.Engine.ParentGUID != "" {
 		dst.Engine.ParentGUID = src.Engine.ParentGUID
 	}
+	if src.Engine.Concurrency > 0 {
+		dst.Engine.Concurrency = src.Engine.Concurrency
+	}
 
 	// Merge services (deep merge by name)
 	if dst.Services == nil {
@@ -228,6 +233,9 @@ func (c *Config) applyAppConfig(appCfg *AppConfig) {
 	if c.ParentGUID == "92508788-4c1c-11e9-808b-005056a01111" && appCfg.Engine.ParentGUID != "" {
 		c.ParentGUID = appCfg.Engine.ParentGUID
 	}
+	if c.Concurrency == 0 && appCfg.Engine.Concurrency > 0 {
+		c.Concurrency = appCfg.Engine.Concurrency
+	}
 
 	// Services
 	c.Services = appCfg.Services
@@ -241,6 +249,7 @@ func (c *Config) InitContext(ctx *context.TestContext) {
 	ctx.DryRun = c.DryRun
 	ctx.EnvName = c.EnvName
 	ctx.ParentGUID = c.ParentGUID
+	ctx.Concurrency = c.Concurrency
 
 	// Store services
 	ctx.Services = c.Services

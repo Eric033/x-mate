@@ -38,6 +38,7 @@ func main() {
 	fs.StringVar(&cfg.DamperServer, "damper-server", "", "Damper server address ip:port:tcpPort:httpPort")
 	fs.StringVar(&cfg.EnvName, "env-name", "UNDEFINED", "Environment name")
 	fs.StringVar(&cfg.ParentGUID, "parent-guid", "92508788-4c1c-11e9-808b-005056a01111", "Parent GUID")
+	fs.IntVar(&cfg.Concurrency, "concurrency", 1, "Max concurrent test cases (1 = serial)")
 
 	var startMock bool
 	fs.BoolVar(&startMock, "start-mock", false, "Start built-in mock HTTP server before running tests")

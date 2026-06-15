@@ -39,12 +39,13 @@ type TestContext struct {
 	DamperTCP  string // tcpDamServerIP:tcpDamServerPort
 	DamperHTTP string // httpDamServerIP:httpDamServerPort
 
-	TestBase   string
-	Flags      string
-	EnvName    string
-	ParentGUID string
-	Verbose    bool
-	DryRun     bool
+	TestBase    string
+	Flags       string
+	EnvName     string
+	ParentGUID  string
+	Verbose     bool
+	DryRun      bool
+	Concurrency int // max concurrent goroutines (0/1 = serial)
 }
 
 // ServerEntry represents a target server address.
@@ -148,6 +149,40 @@ func (c *TestContext) Delete(key string) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	delete(c.Variables, key)
+}
+
+// Clone creates a deep copy of TestContext for parallel case execution.
+// Variables and Services maps are fully copied to ensure isolation.
+func (c *TestContext) Clone() *TestContext {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	clone := &TestContext{
+		Variables:  make(map[string]string, len(c.Variables)),
+		Services:   make(map[string]ServiceDef, len(c.Services)),
+		Servers:    make([]ServerEntry, len(c.Servers)),
+		DBPools:    make([]DBConfig, len(c.DBPools)),
+		DamperTCP:  c.DamperTCP,
+		DamperHTTP: c.DamperHTTP,
+		TestBase:   c.TestBase,
+		Flags:      c.Flags,
+		EnvName:    c.EnvName,
+		ParentGUID: c.ParentGUID,
+		Verbose:    c.Verbose,
+		DryRun:     c.DryRun,
+		Concurrency: c.Concurrency,
+	}
+
+	for k, v := range c.Variables {
+		clone.Variables[k] = v
+	}
+	for k, v := range c.Services {
+		clone.Services[k] = v
+	}
+	copy(clone.Servers, c.Servers)
+	copy(clone.DBPools, c.DBPools)
+
+	return clone
 }
 
 // CleanupTemporary removes temporary variables after a test case completes.
