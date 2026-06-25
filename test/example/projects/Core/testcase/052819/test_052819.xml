@@ -1,0 +1,48 @@
+<root>
+<preActions>
+	<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>
+    <Action type="xml_setting" tag = "EFFECT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "TRAN_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "SERVICE_CODE">
+		<value type = "string">
+			SVR_FINANCIAL
+		</value>
+	</Action>
+</preActions>
+
+<case id = "0001" tittle = "052819查询贷款批量回收执行明细" trancode = "052819" flag = "core full 1400">
+		<step desc="步骤1">
+			<Action type="xml_set" trancode="052819">
+			    <value name="//Body/CONTRAST_BAT_NO">
+					410199180131000
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+</case>
+
+</root>

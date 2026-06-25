@@ -1,10 +1,12 @@
 package runner
 
 import (
+	"crypto/rand"
 	"encoding/xml"
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 	"sync"
@@ -185,9 +187,69 @@ func (r *Runner) drainParallelResults(report *Report, ch chan parallelResult) {
 	}
 }
 
+// findCaseXML finds the first .xml file in the case directory.
+func findCaseXML(caseDir string) (string, error) {
+	entries, err := os.ReadDir(caseDir)
+	if err != nil {
+		return "", err
+	}
+	for _, e := range entries {
+		if !e.IsDir() && strings.HasSuffix(strings.ToLower(e.Name()), ".xml") {
+			return filepath.Join(caseDir, e.Name()), nil
+		}
+	}
+	return "", fmt.Errorf("no XML case file found in %s", caseDir)
+}
+
+// generateGUID returns a random UUID v4 string.
+func generateGUID() string {
+	b := make([]byte, 16)
+	_, _ = rand.Read(b)
+	b[6] = (b[6] & 0x0f) | 0x40
+	b[8] = (b[8] & 0x3f) | 0x80
+	return fmt.Sprintf("%08x-%04x-%04x-%04x-%012x",
+		b[0:4], b[4:6], b[6:8], b[8:10], b[10:16])
+}
+
+// ensureCaseGUID checks if the <case> element has a guid attribute.
+// If missing, it generates a GUID, writes it into the XML file, and returns the updated data.
+func ensureCaseGUID(data []byte, xmlPath string) ([]byte, string, error) {
+	hasGUID, _ := regexp.Match(`(?i)<case\s[^>]*\bguid\s*=`, data)
+	if hasGUID {
+		re := regexp.MustCompile(`(?i)\bguid\s*=\s*"([^"]*)"`)
+		m := re.FindSubmatch(data)
+		if len(m) >= 2 {
+			return data, string(m[1]), nil
+		}
+		return data, "", nil
+	}
+
+	guid := generateGUID()
+
+	// Find <case ...> opening tag and insert guid attribute
+	re := regexp.MustCompile(`(?i)(<case)([^>]*)(>)`)
+	newData := re.ReplaceAll(data, []byte(`$1 guid="`+guid+`" $2$3`))
+
+	if string(newData) == string(data) {
+		// Fallback: simple replace
+		newData = []byte(strings.Replace(string(data), "<case>", `<case guid="`+guid+`">`, 1))
+	}
+
+	if err := os.WriteFile(xmlPath, newData, 0644); err != nil {
+		return newData, guid, fmt.Errorf("write guid: %w", err)
+	}
+
+	return newData, guid, nil
+}
+
 // dryRunCase validates a test case XML without executing it.
 func (r *Runner) dryRunCase(ctx *context.TestContext, dirName string) {
-	xmlPath := filepath.Join(ctx.TestBase, "testcase", dirName, dirName+".xml")
+	caseDir := filepath.Join(ctx.TestBase, "testcase", dirName)
+	xmlPath, err := findCaseXML(caseDir)
+	if err != nil {
+		r.Logger("DRY-RUN ERROR: %s: %v", dirName, err)
+		return
+	}
 	data, err := os.ReadFile(xmlPath)
 	if err != nil {
 		r.Logger("DRY-RUN ERROR: %s: %v", dirName, err)
@@ -201,6 +263,7 @@ type caseXML struct {
 	XMLName  xml.Name `xml:"case"`
 	Tittle   string   `xml:"tittle,attr"`
 	Title    string   `xml:"title,attr"`
+	GUID     string   `xml:"guid,attr"`
 	Parallel string   `xml:"parallel,attr"`
 	Setup    *phaseXML `xml:"setup"`
 	Action   *phaseXML `xml:"action"`
@@ -216,18 +279,48 @@ type stepXML struct {
 	Inner string `xml:",innerxml"`
 }
 
+// shortGUID truncates a full GUID to its first 8 characters for compact logging.
+func shortGUID(guid string) string {
+	if len(guid) > 8 {
+		return guid[:8]
+	}
+	return guid
+}
+
+// indentLines prepends prefix to every line of s.
+func indentLines(s, prefix string) string {
+	if s == "" {
+		return ""
+	}
+	return prefix + strings.ReplaceAll(s, "\n", "\n"+prefix)
+}
+
 // runCase executes a single test case.
 func (r *Runner) runCase(ctx *context.TestContext, dirName string) CaseResult {
 	start := time.Now()
 	result := CaseResult{CaseName: dirName}
 
-	xmlPath := filepath.Join(ctx.TestBase, "testcase", dirName, dirName+".xml")
+	caseDir := filepath.Join(ctx.TestBase, "testcase", dirName)
+	xmlPath, err := findCaseXML(caseDir)
+	if err != nil {
+		r.Logger("ERROR: %s: %v", dirName, err)
+		result.Duration = time.Since(start)
+		return result
+	}
+
 	data, err := os.ReadFile(xmlPath)
 	if err != nil {
 		r.Logger("ERROR: %s: %v", dirName, err)
 		result.Duration = time.Since(start)
 		return result
 	}
+
+	// Auto-generate GUID if missing
+	data, caseGUID, err := ensureCaseGUID(data, xmlPath)
+	if err != nil {
+		r.Logger("WARN: %s: guid write: %v", dirName, err)
+	}
+	ctx.Set("case_guid", caseGUID)
 
 	var tc caseXML
 	if err := xml.Unmarshal(data, &tc); err != nil {
@@ -245,27 +338,37 @@ func (r *Runner) runCase(ctx *context.TestContext, dirName string) CaseResult {
 		title = dirName
 	}
 
-	ctx.GenerateRandomVars()
-	r.Logger("=== CASE: %s ===", title)
+	// Check flags filter
+	if ctx.Flags != "" {
+		// Simple flags matching: if case has a "flags" attribute, check it
+		// For now, pass through (flags can be extended)
+	}
 
-	// Execute phases
+	ctx.GenerateRandomVars()
+	r.Logger("%s === CASE: %s ===", caseGUID, title)
+
+	// Execute phases with a sequential step counter
+	stepSeq := 0
 	if tc.Setup != nil {
 		for _, s := range tc.Setup.Steps {
-			report := r.runStep(ctx, "setup", s)
+			stepSeq++
+			report := r.runStep(ctx, "setup", s, caseGUID, stepSeq)
 			result.Steps = append(result.Steps, report)
 		}
 	}
 
 	if tc.Action != nil {
 		for _, s := range tc.Action.Steps {
-			report := r.runStep(ctx, "action", s)
+			stepSeq++
+			report := r.runStep(ctx, "action", s, caseGUID, stepSeq)
 			result.Steps = append(result.Steps, report)
 		}
 	}
 
 	if tc.Teardown != nil {
 		for _, s := range tc.Teardown.Steps {
-			report := r.runStep(ctx, "teardown", s)
+			stepSeq++
+			report := r.runStep(ctx, "teardown", s, caseGUID, stepSeq)
 			result.Steps = append(result.Steps, report)
 		}
 	}
@@ -274,12 +377,12 @@ func (r *Runner) runCase(ctx *context.TestContext, dirName string) CaseResult {
 	ctx.CleanupTemporary()
 
 	result.Duration = time.Since(start)
-	r.Logger("=== CASE END: %s (%s) ===", title, result.Duration)
+	r.Logger("%s === CASE END: %s (%s) ===", caseGUID, title, result.Duration)
 	return result
 }
 
 // runStep executes a single step.
-func (r *Runner) runStep(ctx *context.TestContext, phase string, s stepXML) StepReport {
+func (r *Runner) runStep(ctx *context.TestContext, phase string, s stepXML, caseGUID string, stepSeq int) StepReport {
 	report := StepReport{
 		Phase: phase,
 		Desc:  s.Desc,
@@ -294,7 +397,38 @@ func (r *Runner) runStep(ctx *context.TestContext, phase string, s stepXML) Step
 	}
 
 	report.Type = stepData.StepType
-	r.Logger("--- STEP [%s] %s: type=%s ---", phase, s.Desc, stepData.StepType)
+	// Log header prefix: shortGUID + stepN
+	prefix := fmt.Sprintf("%s STEP%d", shortGUID(caseGUID), stepSeq)
+
+	// Step header
+	stepInfo := fmt.Sprintf("type=%s", stepData.StepType)
+	if stepData.TranCode != "" {
+		stepInfo += fmt.Sprintf(", tranCode=%s", stepData.TranCode)
+	}
+	r.Logger("%s --- STEP [%s] %s: %s ---", prefix, phase, s.Desc, stepInfo)
+
+	// Log step input data (test values and expected results)
+	if len(stepData.Values) > 0 {
+		var sb strings.Builder
+		for _, v := range stepData.Values {
+			sb.WriteString(fmt.Sprintf("      %s = %s\n", v.Key, v.Value))
+		}
+		r.Logger("%s   Values:\n%s", prefix, sb.String())
+	}
+	if len(stepData.Results) > 0 {
+		var sb strings.Builder
+		for _, v := range stepData.Results {
+			sb.WriteString(fmt.Sprintf("      %s = %s\n", v.Key, v.Value))
+		}
+		r.Logger("%s   Expected:\n%s", prefix, sb.String())
+	}
+	if len(stepData.VerifyResults) > 0 {
+		var sb strings.Builder
+		for _, v := range stepData.VerifyResults {
+			sb.WriteString(fmt.Sprintf("      %s = %s\n", v.Name, v.Value))
+		}
+		r.Logger("%s   Verify:\n%s", prefix, sb.String())
+	}
 
 	// Generate system variables for this step
 	if stepData.Server != "" {
@@ -316,17 +450,30 @@ func (r *Runner) runStep(ctx *context.TestContext, phase string, s stepXML) Step
 	report.Pass = result.Success
 	report.Message = result.FailureMessage
 
-	if result.RequestData != "" && ctx.Verbose {
-		r.Logger("  Request: %s", truncateLog(result.RequestData))
-	}
-	if result.ResponseData != "" && ctx.Verbose {
-		r.Logger("  Response: %s", truncateLog(result.ResponseData))
+	// Log request data (single log call with embedded newlines)
+	if result.RequestData != "" {
+		r.Logger("%s   Request:\n%s", prefix, indentLines(result.RequestData, "    "))
 	}
 
+	// Log response data (single log call with embedded newlines)
+	if result.ResponseData != "" {
+		r.Logger("%s   Response:\n%s", prefix, indentLines(result.ResponseData, "    "))
+	}
+
+	// Log pass/fail with verification details
 	if result.Success {
-		r.Logger("  ✓ PASS")
+		r.Logger("%s   PASS", prefix)
 	} else {
-		r.Logger("  ✗ FAIL: %s", result.FailureMessage)
+		r.Logger("%s   FAIL: %s", prefix, result.FailureMessage)
+	}
+
+	// Log extracted variables
+	if len(result.ExtractedVars) > 0 {
+		var parts []string
+		for k, v := range result.ExtractedVars {
+			parts = append(parts, fmt.Sprintf("%s=%s", k, v))
+		}
+		r.Logger("%s   Extracted: %s", prefix, strings.Join(parts, ", "))
 	}
 
 	return report

@@ -1,0 +1,59 @@
+<root>
+	<preActions>	
+		<Action type="xml_setting" tag = "TRAN_DATE">
+			<value type = "date">
+			now.YYYYMMDD
+			</value>
+		</Action>	
+		<Action type="xml_setting" tag = "SERVICE_CODE">
+			<value type = "string">
+			SVR_INQUIRY
+			</value>
+		</Action>
+	</preActions>
+	<case id = "0001" tittle = "029917_001" trancode = "029917" flag = "core full">
+		<step desc="步骤1_出库">
+			<Action type="xml_set" trancode = "029917_2">
+				<value name="OPTION_KW">
+					O
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="/Reply_Msg/Body/VOUCHER_MOVE_ID">
+				   VOUCHER_MOVE_ID
+				</key>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2">
+			<Action type="xml_set" trancode = "049917_2">
+				<value name="VOUCHER_MOVE_ID">
+					{{VOUCHER_MOVE_ID}} 
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+		</case>
+</root>

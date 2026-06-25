@@ -1,0 +1,316 @@
+<root>
+<preActions>
+	<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>
+    <Action type="xml_setting" tag = "EFFECT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "TRAN_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "SERVICE_CODE">
+		<value type = "string">
+			SVR_FINANCIAL
+		</value>
+	</Action>
+</preActions>
+
+<case id = "0001" tittle = "020521归集规则信息维护新增" trancode = "020521" flag = "core full">
+		<step desc="步骤1">
+			<Action type="xml_set" trancode="020521">
+			   <value name="//Body/OPTION_KW">
+					01
+				</value>
+				<value name="//Body/GROUP_AGREEMENT_NO">
+					0008034
+				</value>
+				<value name="//Body/DEP_METHOD">
+					EC
+				</value>
+				<value name="//Body/DEP_TYPE">
+					BAL
+				</value>
+				<value name="//Body/DEP_MODE">
+					01
+				</value>
+				<value name="//Body/START_DATE">
+					20280101
+				</value>
+				<value name="//Body/END_DATE">
+					20500101
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2验证新增是否成功">
+			<Action type="sql_exe" >
+				<value>
+				   SELECT count(*) FROM ensemble.cp_dep_rule_info WHERE group_agreement_no = '0008034' AND dep_method = 'EC' AND status = 'A'
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+		<step desc="步骤3取消">
+			<Action type="xml_set" trancode="020521">
+			    <value name="//Body/OPTION_KW">
+					03
+				</value>
+				<value name="//Body/GROUP_AGREEMENT_NO">
+					0008034
+				</value>
+				<value name="//Body/DEP_METHOD">
+					EC
+				</value>
+				<value name="//Body/DEP_TYPE">
+					BAL
+				</value>
+				<value name="//Body/DEP_MODE">
+					01
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+</case>
+
+<case id = "0002" tittle = "020521归集规则信息维护修改为日终归集" trancode = "020521" flag = "core full">
+		<step desc="步骤1新增">
+			<Action type="xml_set" trancode="020521">
+			   <value name="//Body/OPTION_KW">
+					01
+				</value>
+				<value name="//Body/GROUP_AGREEMENT_NO">
+					0006021
+				</value>
+				<value name="//Body/DEP_METHOD">
+					EC
+				</value>
+				<value name="//Body/DEP_TYPE">
+					BAL
+				</value>
+				<value name="//Body/DEP_MODE">
+					01
+				</value>
+				<value name="//Body/START_DATE">
+					20280101
+				</value>
+				<value name="//Body/END_DATE">
+					20500101
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2修改">
+			<Action type="xml_set" trancode="020521">
+				<value name="//Body/OPTION_KW">
+					02
+				</value>
+				<value name="//Body/GROUP_AGREEMENT_NO">
+					0006021
+				</value>
+				<value name="//Body/DEP_METHOD">
+					EC
+				</value>
+				<value name="//Body/DEP_TYPE">
+					BAL
+				</value>
+				<value name="//Body/DEP_MODE">
+					01
+				</value>
+				<value name="//Body/DEP_REMAIN_AMT">
+					500.00
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2验证修改是否成功">
+			<Action type="sql_exe" >
+				<value>
+				   SELECT count(*) FROM ensemble.cp_dep_rule_info WHERE group_agreement_no = '0006021' AND dep_method = 'EC' AND status = 'A' and DEP_REMAIN_AMT=500
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+		<step desc="步骤2取消">
+			<Action type="xml_set" trancode="020521">
+			    <value name="//Body/OPTION_KW">
+					03
+				</value>
+				<value name="//Body/GROUP_AGREEMENT_NO">
+					0006021
+				</value>
+				<value name="//Body/DEP_METHOD">
+					EC
+				</value>
+				<value name="//Body/DEP_TYPE">
+					BAL
+				</value>
+				<value name="//Body/DEP_MODE">
+					01
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+		
+</case>
+<case id = "0003" tittle = "020521归集规则信息维护取消" trancode = "020521" flag = "core full">
+		<step desc="步骤1新增">
+			<Action type="xml_set" trancode="020521">
+			   <value name="//Body/OPTION_KW">
+					01
+				</value>
+				<value name="//Body/GROUP_AGREEMENT_NO">
+					0006019
+				</value>
+				<value name="//Body/DEP_METHOD">
+					EC
+				</value>
+				<value name="//Body/DEP_TYPE">
+					BAL
+				</value>
+				<value name="//Body/DEP_MODE">
+					01
+				</value>
+				<value name="//Body/START_DATE">
+					20280101
+				</value>
+				<value name="//Body/END_DATE">
+					20500101
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2取消">
+			<Action type="xml_set" trancode="020521">
+			    <value name="//Body/OPTION_KW">
+					03
+				</value>
+				<value name="//Body/GROUP_AGREEMENT_NO">
+					0006019
+				</value>
+				<value name="//Body/DEP_METHOD">
+					EC
+				</value>
+				<value name="//Body/DEP_TYPE">
+					BAL
+				</value>
+				<value name="//Body/DEP_MODE">
+					01
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2验证取消是否成功">
+			<Action type="sql_exe" >
+				<value>
+				    SELECT count(*) FROM ensemble.cp_dep_rule_info WHERE group_agreement_no = '0006019' AND dep_method = 'EC' AND status = 'A'
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  0
+				</value>
+			</Verify>
+		</step>
+</case>
+
+
+</root>

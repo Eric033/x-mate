@@ -1,0 +1,96 @@
+<root>
+<preActions>
+	<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "TRAN_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "SERVICE_CODE">
+		<value type = "string">
+			SVR_FINANCIAL
+		</value>
+	</Action>
+</preActions>
+<case id = "0001" tittle = "016016" trancode = "016016" flag = "core full">
+       <step desc="步骤1">	
+			<Action type="xml_set" trancode = "010101">
+				<value name="BASE_ACCT_NO">
+					6210355030000750270
+				</value>
+				<value name="//TRAN_AMT">
+					100
+				</value>
+				<value name="//POST_DATE">
+					{{CurrentDate_1}}
+				</value>
+				<value name="//EFFECT_DATE">
+					{{CurrentDate_1}}
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+
+
+		<step desc="步骤2">
+			<Action type="xml_set" trancode = "016016">
+				<value name="//Body/CARD_NO">
+					6210355030000239670
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+		<step desc="步骤3账务">
+			<Action type="sql_exe" >
+				<value>
+				  select count(*) from ensemble.gl_post_today gl where  gl.reference='{{case_seqno}}' and gl.amount=-1 and gl.branch='411006'  and gl.gl_code='201401' 
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+		<step desc="步骤4交易行账务">
+			<Action type="sql_exe" >
+				<value>
+				  select count(*) from ensemble.gl_post_today gl where  gl.reference='{{case_seqno}}' and gl.amount=1 and gl.branch='{{case_branch_id}}' and  gl.gl_code='300101'
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+</case>
+</root>

@@ -1,0 +1,83 @@
+<root>
+<preActions>
+	<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "TRAN_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>		
+	<Action type="xml_setting" tag = "SERVICE_CODE">
+		<value type = "string">
+			SVR_FINANCIAL
+		</value>
+	</Action>
+</preActions>
+<case id = "0001" tittle = "012321_001" trancode = "012321" flag = "core full">
+		<step desc="步骤2">
+			<Action type="xml_set" trancode = "012321">
+			    <value name="//Sys_Head/SOURCE_TYPE">
+					CB
+				</value>
+				<value name="//LOAN_NO">
+					0001227410
+				</value>
+				<value name="//PAYER">
+					2018583968
+				</value>
+				<value name="//CLIENT_58">
+					2018583968
+				</value>
+				<value name="//CLIENT_56">
+					2018583968
+				</value>
+				<value name="//ACCT_59">
+					8020011000000004670
+				</value>
+				<value name="//BASE_ACCT_NO">
+					8020011000000004670
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+		<step desc="步骤3交易行账务">
+			<Action type="sql_exe" >
+				<value>
+				  select count(*) from ensemble.gl_post_today gl where  gl.reference like'%{{case_seqno}}%' and gl.amount=-1 and gl.branch='411012'  and gl.gl_code='601107' 
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+		<step desc="步骤4开户行账务">
+			<Action type="sql_exe" >
+				<value>
+				  select count(*) from ensemble.gl_post_today gl where  gl.reference like '%{{case_seqno}}%' and gl.amount=1 and gl.branch='411012' and  gl.gl_code='810202'
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+</case>
+</root>

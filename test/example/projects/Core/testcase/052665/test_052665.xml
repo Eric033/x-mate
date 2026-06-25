@@ -1,0 +1,54 @@
+<root>
+<preActions>
+	<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>
+    <Action type="xml_setting" tag = "EFFECT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "TRAN_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "SERVICE_CODE">
+		<value type = "string">
+			SVR_FINANCIAL
+		</value>
+	</Action>
+</preActions>
+
+<case id = "0001" tittle = "052665绩效考核合同号查询" trancode = "052665" flag = "core full 1400">
+		<step desc="步骤1">
+			<Action type="xml_set" trancode="052665">
+			    <value name="//Body/LOAN_NO">
+					0000419232
+				</value>
+				<value name="//Body/DD_NO">
+					1
+				</value>
+				<value name="//Body/CONTRACT_NO">
+					2015071400000062
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+</case>
+
+</root>

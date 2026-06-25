@@ -1,0 +1,860 @@
+<root>
+	<preActions>
+		<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+			<value type = "date">
+			now.YYYYMMDD
+			</value>
+		</Action>	
+		<Action type="xml_setting" tag = "TRAN_DATE">
+			<value type = "date">
+			now.YYYYMMDD
+			</value>
+		</Action>	
+		<Action type="xml_setting" tag = "SERVICE_CODE">
+			<value type = "string">
+			SVR_FINANCIAL
+			</value>
+		</Action>
+	</preActions>
+
+	<case id = "001" tittle = "抵质押001" trancode = "02DEJ058" flag = "core full">
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ058">
+				<value name="AllRuleCheckDecision">LA,LA,LA,LA,LA,</value>
+				<value name="IDNO">410116196810281079</value>
+				<value name="FullName">抵质押1</value>
+				<value name="CompanyYear">1</value>
+				<value name="OperPlaceType">010</value>
+				<value name="MarryStatus">10</value>
+				<value name="AppliedAmout">100000</value>
+				<value name="NationalStandardIndustry">A</value>
+				<value name="HsAge">1</value>
+				<value name="Region">1</value>
+				<value name="PledgeType">1</value>
+				<value name="PledgeValue">1000</value>
+				<value name="CollateralType">1</value>
+				<value name="CollateralValue">1000000</value>
+				<value name= "AnnualSales">2000000</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">01I</value>
+				<value name="PbbcPrincipalBalance">1000</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">xdbHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCLEvent9">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent9","PbbcPrincipalBalance":1000,"AllRuleCheckDecision":"LA","CompanyYear":1,"OperPlaceType":"010","MarryStatus":"10","AppliedAmout":100000,"NationalStandardIndustry":"A","HsAge":1,"Region":"1","PledgeType":"1","PledgeValue":1000,"CollateralType":"1","CollateralValue":1000000, "AnnualSales":2000000,"PbocDifQueryOrg12PLA":0,"PbocMaxDelq24MNum":0,"PbocNoDeLq12MNum":0,"PbocNoNonmortUncld":0,"PbocCcRateOver80Account":0,"PbocLoanPersonBanlance":0}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+
+	<case id = "002" tittle = "抵质押002" trancode = "02DEJ058" flag = "core full">
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ058">
+				<value name="AllRuleCheckDecision">LR,LR,LR,LR,LR,</value>
+				<value name="IDNO">410146196206247550</value>
+				<value name="FullName">抵质押2</value>
+				<value name="CompanyYear">3</value>
+				<value name="OperPlaceType">020</value>
+				<value name="MarryStatus">23</value>
+				<value name="AppliedAmout">120000.36</value>
+				<value name="NationalStandardIndustry">B</value>
+				<value name="HsAge">2</value>
+				<value name="Region">2</value>
+				<value name="PledgeType">2</value>
+				<value name="PledgeValue">1200.36</value>
+				<value name="CollateralType">1</value>
+				<value name="CollateralValue">1230000.23</value>
+				<value name= "AnnualSales">202000.36</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">02I</value>
+				<value name="PbbcPrincipalBalance">10000.63</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">xdbHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCLEvent9">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent9","PbbcPrincipalBalance":10000.63,"AllRuleCheckDecision":"LR","CompanyYear":3,"OperPlaceType":"020","MarryStatus":"23","AppliedAmout":120000.36,"NationalStandardIndustry":"B","HsAge":2,"Region":"2","PledgeType":"2","PledgeValue":1200.36,"CollateralType":"1","CollateralValue":1230000.23, "AnnualSales":202000.36,"PbocDifQueryOrg12PLA":1,"PbocMaxDelq24MNum":1,"PbocNoDeLq12MNum":1,"PbocNoNonmortUncld":1,"PbocCcRateOver80Account":1,"PbocLoanPersonBanlance":100.23}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "003" tittle = "抵质押003" trancode = "02DEJ058" flag = "core full">
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ058">
+				<value name="AllRuleCheckDecision">LRD,LRD,LRD,LRD,LRD,</value>
+				<value name="IDNO">412850197507140027</value>
+				<value name="FullName">抵质押3</value>
+				<value name="CompanyYear">5</value>
+				<value name="OperPlaceType">030</value>
+				<value name="MarryStatus">24</value>
+				<value name="AppliedAmout">1500000.69</value>
+				<value name="NationalStandardIndustry">C</value>
+				<value name="HsAge">3</value>
+				<value name="Region">3</value>
+				<value name="PledgeType">3</value>
+				<value name="PledgeValue">1500.3</value>
+				<value name="CollateralType">2</value>
+				<value name="CollateralValue">352000.36</value>
+				<value name= "AnnualSales">352600.6</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">03I</value>
+				<value name="PbbcPrincipalBalance">50000.6</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">xdbHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCLEvent9">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent9","PbbcPrincipalBalance":50000.6,"AllRuleCheckDecision":"LRD","CompanyYear":5,"OperPlaceType":"030","MarryStatus":"24","AppliedAmout":1500000.69,"NationalStandardIndustry":"C","HsAge":3,"Region":"3","PledgeType":"3","PledgeValue":1500.3,"CollateralType":"2","CollateralValue":352000.36, "AnnualSales":352600.6,"PbocDifQueryOrg12PLA":5,"PbocMaxDelq24MNum":3,"PbocNoDeLq12MNum":20,"PbocNoNonmortUncld":13,"PbocCcRateOver80Account":14,"PbocLoanPersonBanlance":25000.3}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "004" tittle = "抵质押004" trancode = "02DEJ058" flag = "core full">
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ058">
+				<value name="AllRuleCheckDecision">LD,LD,LD,LD,LD,</value>
+				<value name="IDNO">412850196511021464</value>
+				<value name="FullName">抵质押4</value>
+				<value name="CompanyYear">15</value>
+				<value name="OperPlaceType">040</value>
+				<value name="MarryStatus">25</value>
+				<value name="AppliedAmout">1600000.3</value>
+				<value name="NationalStandardIndustry">D</value>
+				<value name="HsAge">4</value>
+				<value name="Region">4</value>
+				<value name="PledgeType">4</value>
+				<value name="PledgeValue">2000.23</value>
+				<value name="CollateralType">2</value>
+				<value name="CollateralValue">250000.3</value>
+				<value name= "AnnualSales">170000</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">05I</value>
+				<value name="PbbcPrincipalBalance">20000.23</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">xdbHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCLEvent9">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent9","PbbcPrincipalBalance":20000.23,"AllRuleCheckDecision":"LD","CompanyYear":15,"OperPlaceType":"040","MarryStatus":"25","AppliedAmout":1600000.3,"NationalStandardIndustry":"D","HsAge":4,"Region":"4","PledgeType":"4","PledgeValue":2000.23,"CollateralType":"2","CollateralValue":250000.3, "AnnualSales":170000,"PbocDifQueryOrg12PLA":10,"PbocMaxDelq24MNum":12,"PbocNoDeLq12MNum":15,"PbocNoNonmortUncld":11,"PbocCcRateOver80Account":17,"PbocLoanPersonBanlance":35214.69}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "005" tittle = "抵质押005" trancode = "02DEJ058" flag = "core full">
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ058">
+				<value name="AllRuleCheckDecision">LA,LA,LR,LRD,LD,</value>
+				<value name="IDNO">412850196604071487</value>
+				<value name="FullName">抵质押5</value>
+				<value name="CompanyYear">20</value>
+				<value name="OperPlaceType">050</value>
+				<value name="MarryStatus">30</value>
+				<value name="AppliedAmout">1700000.45</value>
+				<value name="NationalStandardIndustry">E</value>
+				<value name="HsAge">15</value>
+				<value name="Region">1</value>
+				<value name="PledgeType">1</value>
+				<value name="PledgeValue">10222.23</value>
+				<value name="CollateralType">1</value>
+				<value name="CollateralValue">1632500.69</value>
+				<value name= "AnnualSales">160000.35</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">08I</value>
+				<value name="PbbcPrincipalBalance">100</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">xdbHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCLEvent9">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent9","PbbcPrincipalBalance":100,"AllRuleCheckDecision":"LD","CompanyYear":20,"OperPlaceType":"050","MarryStatus":"30","AppliedAmout":1700000.45,"NationalStandardIndustry":"E","HsAge":15,"Region":"1","PledgeType":"1","PledgeValue":10222.23,"CollateralType":"1","CollateralValue":1632500.69, "AnnualSales":160000.35,"PbocDifQueryOrg12PLA":15,"PbocMaxDelq24MNum":25,"PbocNoDeLq12MNum":32,"PbocNoNonmortUncld":26,"PbocCcRateOver80Account":27,"PbocLoanPersonBanlance":50000}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "006" tittle = "抵质押006" trancode = "02DEJ058" flag = "core full">
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ058">
+				<value name="AllRuleCheckDecision">LA,LA,LRD,LRD,LRD,</value>
+				<value name="IDNO">412850196500041443</value>
+				<value name="FullName">抵质押6</value>
+				<value name="CompanyYear">2</value>
+				<value name="OperPlaceType">010</value>
+				<value name="MarryStatus">40</value>
+				<value name="AppliedAmout">1000</value>
+				<value name="NationalStandardIndustry">F</value>
+				<value name="HsAge">10</value>
+				<value name="Region">1</value>
+				<value name="PledgeType">1</value>
+				<value name="PledgeValue">15000</value>
+				<value name="CollateralType">1</value>
+				<value name="CollateralValue">10000</value>
+				<value name= "AnnualSales">100000</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">19I</value>
+				<value name="PbbcPrincipalBalance">2000</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">xdbHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCLEvent9">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent9","PbbcPrincipalBalance":2000,"AllRuleCheckDecision":"LRD","CompanyYear":2,"OperPlaceType":"010","MarryStatus":"40","AppliedAmout":1000,"NationalStandardIndustry":"F","HsAge":10,"Region":"1","PledgeType":"1","PledgeValue":15000,"CollateralType":"1","CollateralValue":10000, "AnnualSales":100000,"PbocDifQueryOrg12PLA":25,"PbocMaxDelq24MNum":85,"PbocNoDeLq12MNum":12,"PbocNoNonmortUncld":13,"PbocCcRateOver80Account":16,"PbocLoanPersonBanlance":12.12}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "007" tittle = "抵质押007" trancode = "02DEJ058" flag = "core full">
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ058">
+				<value name="AllRuleCheckDecision">LA,LA,LD,LR,LR,</value>
+				<value name="IDNO">412838199505010581</value>
+				<value name="FullName">抵质押7</value>
+				<value name="CompanyYear">4</value>
+				<value name="OperPlaceType">020</value>
+				<value name="MarryStatus">90</value>
+				<value name="AppliedAmout">2000000</value>
+				<value name="NationalStandardIndustry">G</value>
+				<value name="HsAge">5</value>
+				<value name="Region">1</value>
+				<value name="PledgeType">2</value>
+				<value name="PledgeValue">15000.36</value>
+				<value name="CollateralType">1</value>
+				<value name="CollateralValue">100000</value>
+				<value name= "AnnualSales">20000</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">22I</value>
+				<value name="PbbcPrincipalBalance">3000</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">xdbHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCLEvent9">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent9","PbbcPrincipalBalance":3000,"AllRuleCheckDecision":"LD","CompanyYear":4,"OperPlaceType":"020","MarryStatus":"90","AppliedAmout":2000000,"NationalStandardIndustry":"G","HsAge":5,"Region":"1","PledgeType":"2","PledgeValue":15000.36,"CollateralType":"1","CollateralValue":100000, "AnnualSales":20000,"PbocDifQueryOrg12PLA":100,"PbocMaxDelq24MNum":200,"PbocNoDeLq12MNum":15,"PbocNoNonmortUncld":16,"PbocCcRateOver80Account":19,"PbocLoanPersonBanlance":15.23}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "008" tittle = "抵质押008" trancode = "02DEJ058" flag = "core full">
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ058">
+				<value name="AllRuleCheckDecision">LR,LA,LRD,LR,LD,</value>
+				<value name="IDNO">411029195502061050</value>
+				<value name="FullName">抵质押8</value>
+				<value name="CompanyYear">6</value>
+				<value name="OperPlaceType">030</value>
+				<value name="MarryStatus">10</value>
+				<value name="AppliedAmout">300000</value>
+				<value name="NationalStandardIndustry">H</value>
+				<value name="HsAge">7</value>
+				<value name="Region">2</value>
+				<value name="PledgeType">2</value>
+				<value name="PledgeValue">1623.29</value>
+				<value name="CollateralType">1</value>
+				<value name="CollateralValue">100000</value>
+				<value name= "AnnualSales">3000</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">23I</value>
+				<value name="PbbcPrincipalBalance">4000</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">xdbHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCLEvent9">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent9","PbbcPrincipalBalance":4000,"AllRuleCheckDecision":"LD","CompanyYear":6,"OperPlaceType":"030","MarryStatus":"10","AppliedAmout":300000,"NationalStandardIndustry":"H","HsAge":7,"Region":"2","PledgeType":"2","PledgeValue":1623.29,"CollateralType":"1","CollateralValue":100000, "AnnualSales":3000,"PbocDifQueryOrg12PLA":50,"PbocMaxDelq24MNum":32,"PbocNoDeLq12MNum":45,"PbocNoNonmortUncld":46,"PbocCcRateOver80Account":47,"PbocLoanPersonBanlance":100000}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "009" tittle = "抵质押009" trancode = "02DEJ058" flag = "core full">
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ058">
+				<value name="AllRuleCheckDecision">LRD,LA,LRD,LA,LA,</value>
+				<value name="IDNO">411029193409102517</value>
+				<value name="FullName">抵质押9</value>
+				<value name="CompanyYear">8</value>
+				<value name="OperPlaceType">040</value>
+				<value name="MarryStatus">10</value>
+				<value name="AppliedAmout">500000</value>
+				<value name="NationalStandardIndustry">I</value>
+				<value name="HsAge">8</value>
+				<value name="Region">2</value>
+				<value name="PledgeType">3</value>
+				<value name="PledgeValue">100</value>
+				<value name="CollateralType">1</value>
+				<value name="CollateralValue">2000000</value>
+				<value name= "AnnualSales">500000</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">01I</value>
+				<value name="PbbcPrincipalBalance">5000</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">xdbHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCLEvent9">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent9","PbbcPrincipalBalance":5000,"AllRuleCheckDecision":"LRD","CompanyYear":8,"OperPlaceType":"040","MarryStatus":"10","AppliedAmout":500000,"NationalStandardIndustry":"I","HsAge":8,"Region":"2","PledgeType":"3","PledgeValue":100,"CollateralType":"1","CollateralValue":2000000, "AnnualSales":500000,"PbocDifQueryOrg12PLA":"","PbocMaxDelq24MNum":"","PbocNoDeLq12MNum":"","PbocNoNonmortUncld":"","PbocCcRateOver80Account":"","PbocLoanPersonBanlance":""}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "010" tittle = "抵质押010" trancode = "02DEJ058" flag = "core full">
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ058">
+				<value name="AllRuleCheckDecision">LR,LR,LRD,LA,LR,</value>
+				<value name="IDNO">411029193009081016</value>
+				<value name="FullName">抵质押10</value>
+				<value name="CompanyYear">9</value>
+				<value name="OperPlaceType">050</value>
+				<value name="MarryStatus">10</value>
+				<value name="AppliedAmout">600000</value>
+				<value name="NationalStandardIndustry">J</value>
+				<value name="HsAge">9</value>
+				<value name="Region">3</value>
+				<value name="PledgeType">3</value>
+				<value name="PledgeValue">1000.26</value>
+				<value name="CollateralType">2</value>
+				<value name="CollateralValue">2000035</value>
+				<value name= "AnnualSales">600000</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">01I</value>
+				<value name="PbbcPrincipalBalance">6000.69</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">xdbHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCLEvent9">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent9","PbbcPrincipalBalance":6000.69,"AllRuleCheckDecision":"LRD","CompanyYear":9,"OperPlaceType":"050","MarryStatus":"10","AppliedAmout":600000,"NationalStandardIndustry":"J","HsAge":9,"Region":"3","PledgeType":"3","PledgeValue":1000.26,"CollateralType":"2","CollateralValue":2000035, "AnnualSales":600000,"PbocDifQueryOrg12PLA":null,"PbocMaxDelq24MNum":null,"PbocNoDeLq12MNum":null,"PbocNoNonmortUncld":null,"PbocCcRateOver80Account":null,"PbocLoanPersonBanlance":null}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "011" tittle = "抵质押011" trancode = "02DEJ058" flag = "core full">
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ058">
+				<value name="AllRuleCheckDecision">LD,LRD,LRD,LR,LA</value>
+				<value name="IDNO">411029194410151038</value>
+				<value name="FullName">抵质押11</value>
+				<value name="CompanyYear">11</value>
+				<value name="OperPlaceType">010</value>
+				<value name="MarryStatus">90</value>
+				<value name="AppliedAmout">1000000</value>
+				<value name="NationalStandardIndustry">K</value>
+				<value name="HsAge">10</value>
+				<value name="Region">3</value>
+				<value name="PledgeType">4</value>
+				<value name="PledgeValue">1000</value>
+				<value name="CollateralType">2</value>
+				<value name="CollateralValue">23659.12</value>
+				<value name= "AnnualSales">78653</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">01I</value>
+				<value name="PbbcPrincipalBalance">0</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">xdbHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCLEvent9">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent9","PbbcPrincipalBalance":0,"AllRuleCheckDecision":"LD","CompanyYear":11,"OperPlaceType":"010","MarryStatus":"90","AppliedAmout":1000000,"NationalStandardIndustry":"K","HsAge":10,"Region":"3","PledgeType":"4","PledgeValue":1000,"CollateralType":"2","CollateralValue":23659.12, "AnnualSales":78653,"PbocDifQueryOrg12PLA":1,"PbocMaxDelq24MNum":2,"PbocNoDeLq12MNum":1,"PbocNoNonmortUncld":1,"PbocCcRateOver80Account":2,"PbocLoanPersonBanlance":1000}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "012" tittle = "抵质押012" trancode = "02DEJ058" flag = "core full">
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ058">
+				<value name="AllRuleCheckDecision">LD,LA,LA,LRD,LR,</value>
+				<value name="IDNO">411029194601012073</value>
+				<value name="FullName">抵质押12</value>
+				<value name="CompanyYear">13</value>
+				<value name="OperPlaceType">020</value>
+				<value name="MarryStatus">90</value>
+				<value name="AppliedAmout">1786000.89</value>
+				<value name="NationalStandardIndustry">L</value>
+				<value name="HsAge">3</value>
+				<value name="Region">4</value>
+				<value name="PledgeType">4</value>
+				<value name="PledgeValue">1000</value>
+				<value name="CollateralType">2</value>
+				<value name="CollateralValue">200000</value>
+				<value name= "AnnualSales">3265.25</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">01I</value>
+				<value name="PbbcPrincipalBalance">252</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">xdbHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCLEvent9">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent9","PbbcPrincipalBalance":252,"AllRuleCheckDecision":"LD","CompanyYear":13,"OperPlaceType":"020","MarryStatus":"90","AppliedAmout":1786000.89,"NationalStandardIndustry":"L","HsAge":3,"Region":"4","PledgeType":"4","PledgeValue":1000,"CollateralType":"2","CollateralValue":200000, "AnnualSales":3265.25,"PbocDifQueryOrg12PLA":1,"PbocMaxDelq24MNum":2,"PbocNoDeLq12MNum":1,"PbocNoNonmortUncld":2,"PbocCcRateOver80Account":3,"PbocLoanPersonBanlance":1000}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "013" tittle = "抵质押013" trancode = "02DEJ058" flag = "core full">
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ058">
+				<value name="AllRuleCheckDecision">LA,LR,LRD,LRD,LR,</value>
+				<value name="IDNO">411029194606131012</value>
+				<value name="FullName">抵质押13</value>
+				<value name="CompanyYear">12</value>
+				<value name="OperPlaceType">030</value>
+				<value name="MarryStatus">10</value>
+				<value name="AppliedAmout">10000</value>
+				<value name="NationalStandardIndustry">M</value>
+				<value name="HsAge">4</value>
+				<value name="Region">1</value>
+				<value name="PledgeType">1</value>
+				<value name="PledgeValue">1000000</value>
+				<value name="CollateralType">2</value>
+				<value name="CollateralValue">2000</value>
+				<value name= "AnnualSales">1000</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">01I</value>
+				<value name="PbbcPrincipalBalance">25000</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">xdbHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCLEvent9">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent9","PbbcPrincipalBalance":25000,"AllRuleCheckDecision":"LRD","CompanyYear":12,"OperPlaceType":"030","MarryStatus":"10","AppliedAmout":10000,"NationalStandardIndustry":"M","HsAge":4,"Region":"1","PledgeType":"1","PledgeValue":1000000,"CollateralType":"2","CollateralValue":2000, "AnnualSales":1000,"PbocDifQueryOrg12PLA":1,"PbocMaxDelq24MNum":2,"PbocNoDeLq12MNum":1,"PbocNoNonmortUncld":2,"PbocCcRateOver80Account":3,"PbocLoanPersonBanlance":10000}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "014" tittle = "抵质押014" trancode = "02DEJ058" flag = "core full">
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ058">
+				<value name="AllRuleCheckDecision">LA,LR,LD,LR,LA,</value>
+				<value name="IDNO">411029195106171012</value>
+				<value name="FullName">抵质押14</value>
+				<value name="CompanyYear">14</value>
+				<value name="OperPlaceType">040</value>
+				<value name="MarryStatus">10</value>
+				<value name="AppliedAmout">10000</value>
+				<value name="NationalStandardIndustry">N</value>
+				<value name="HsAge">5</value>
+				<value name="Region">1</value>
+				<value name="PledgeType">1</value>
+				<value name="PledgeValue">1000000</value>
+				<value name="CollateralType">1</value>
+				<value name="CollateralValue">20000</value>
+				<value name= "AnnualSales">1000</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">01I</value>
+				<value name="PbbcPrincipalBalance">36255</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">xdbHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCLEvent9">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent9","PbbcPrincipalBalance":36255,"AllRuleCheckDecision":"LD","CompanyYear":14,"OperPlaceType":"040","MarryStatus":"10","AppliedAmout":10000,"NationalStandardIndustry":"N","HsAge":5,"Region":"1","PledgeType":"1","PledgeValue":1000000,"CollateralType":"1","CollateralValue":20000, "AnnualSales":1000,"PbocDifQueryOrg12PLA":1,"PbocMaxDelq24MNum":2,"PbocNoDeLq12MNum":1,"PbocNoNonmortUncld":2,"PbocCcRateOver80Account":3,"PbocLoanPersonBanlance":2000}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "015" tittle = "抵质押015" trancode = "02DEJ058" flag = "core full">
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ058">
+				<value name="AllRuleCheckDecision">LR,LA,LD,LA,LRD,</value>
+				<value name="IDNO">411029193210251013</value>
+				<value name="FullName">抵质押15</value>
+				<value name="CompanyYear">17</value>
+				<value name="OperPlaceType">050</value>
+				<value name="MarryStatus">10</value>
+				<value name="AppliedAmout">100000</value>
+				<value name="NationalStandardIndustry">O</value>
+				<value name="HsAge">5</value>
+				<value name="Region">1</value>
+				<value name="PledgeType">2</value>
+				<value name="PledgeValue">12000</value>
+				<value name="CollateralType">1</value>
+				<value name="CollateralValue">20000</value>
+				<value name= "AnnualSales">1000</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">01I</value>
+				<value name="PbbcPrincipalBalance">23.23</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">xdbHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCLEvent9">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent9","PbbcPrincipalBalance":23.23,"AllRuleCheckDecision":"LD","CompanyYear":17,"OperPlaceType":"050","MarryStatus":"10","AppliedAmout":100000,"NationalStandardIndustry":"O","HsAge":5,"Region":"1","PledgeType":"2","PledgeValue":12000,"CollateralType":"1","CollateralValue":20000, "AnnualSales":1000,"PbocDifQueryOrg12PLA":1,"PbocMaxDelq24MNum":2,"PbocNoDeLq12MNum":1,"PbocNoNonmortUncld":2,"PbocCcRateOver80Account":3,"PbocLoanPersonBanlance":2000}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "016" tittle = "抵质押016" trancode = "02DEJ058" flag = "core full">
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ058">
+				<value name="AllRuleCheckDecision">LR,LRD,LRD,LA,LRD,</value>
+				<value name="IDNO">411029194706241526</value>
+				<value name="FullName">抵质押16</value>
+				<value name="CompanyYear">50</value>
+				<value name="OperPlaceType">010</value>
+				<value name="MarryStatus">10</value>
+				<value name="AppliedAmout">10000</value>
+				<value name="NationalStandardIndustry">P</value>
+				<value name="HsAge">6</value>
+				<value name="Region">1</value>
+				<value name="PledgeType">3</value>
+				<value name="PledgeValue">16000000</value>
+				<value name="CollateralType">1</value>
+				<value name="CollateralValue">200000</value>
+				<value name= "AnnualSales">1000</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">01I</value>
+				<value name="PbbcPrincipalBalance">111.11</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">xdbHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCLEvent9">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent9","PbbcPrincipalBalance":111.11,"AllRuleCheckDecision":"LRD","CompanyYear":50,"OperPlaceType":"010","MarryStatus":"10","AppliedAmout":10000,"NationalStandardIndustry":"P","HsAge":6,"Region":"1","PledgeType":"3","PledgeValue":16000000,"CollateralType":"1","CollateralValue":200000, "AnnualSales":1000,"PbocDifQueryOrg12PLA":1,"PbocMaxDelq24MNum":2,"PbocNoDeLq12MNum":1,"PbocNoNonmortUncld":2,"PbocCcRateOver80Account":3,"PbocLoanPersonBanlance":2000}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "017" tittle = "抵质押017" trancode = "02DEJ058" flag = "core full">
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ058">
+				<value name="AllRuleCheckDecision">LA,LD,LD,LRD,LRD</value>
+				<value name="IDNO">41102919340921253X</value>
+				<value name="FullName">抵质押17</value>
+				<value name="CompanyYear">18</value>
+				<value name="OperPlaceType">020</value>
+				<value name="MarryStatus">90</value>
+				<value name="AppliedAmout">100000</value>
+				<value name="NationalStandardIndustry">Q</value>
+				<value name="HsAge">3</value>
+				<value name="Region">3</value>
+				<value name="PledgeType">4</value>
+				<value name="PledgeValue">16000000</value>
+				<value name="CollateralType">1</value>
+				<value name="CollateralValue">20000</value>
+				<value name= "AnnualSales">1000</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">01I</value>
+				<value name="PbbcPrincipalBalance">222.22</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">xdbHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCLEvent9">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent9","PbbcPrincipalBalance":222.22,"AllRuleCheckDecision":"LD","CompanyYear":18,"OperPlaceType":"020","MarryStatus":"90","AppliedAmout":100000,"NationalStandardIndustry":"Q","HsAge":3,"Region":"3","PledgeType":"4","PledgeValue":16000000,"CollateralType":"1","CollateralValue":20000, "AnnualSales":1000,"PbocDifQueryOrg12PLA":1,"PbocMaxDelq24MNum":2,"PbocNoDeLq12MNum":1,"PbocNoNonmortUncld":2,"PbocCcRateOver80Account":3,"PbocLoanPersonBanlance":2000}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "018" tittle = "抵质押018" trancode = "02DEJ058" flag = "core full">
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ058">
+				<value name="AllRuleCheckDecision">LD,LR,LR,LR,LR,</value>
+				<value name="IDNO">41102919450110101X</value>
+				<value name="FullName">抵质押18</value>
+				<value name="CompanyYear">23</value>
+				<value name="OperPlaceType">030</value>
+				<value name="MarryStatus">90</value>
+				<value name="AppliedAmout">200000</value>
+				<value name="NationalStandardIndustry">R</value>
+				<value name="HsAge">5</value>
+				<value name="Region">1</value>
+				<value name="PledgeType">1</value>
+				<value name="PledgeValue">16000000</value>
+				<value name="CollateralType">1</value>
+				<value name="CollateralValue">20000</value>
+				<value name= "AnnualSales">1000</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">02I</value>
+				<value name="PbbcPrincipalBalance">12.26</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">xdbHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCLEvent9">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent9","PbbcPrincipalBalance":12.26,"AllRuleCheckDecision":"LD","CompanyYear":23,"OperPlaceType":"030","MarryStatus":"90","AppliedAmout":200000,"NationalStandardIndustry":"R","HsAge":5,"Region":"1","PledgeType":"1","PledgeValue":16000000,"CollateralType":"1","CollateralValue":20000, "AnnualSales":1000,"PbocDifQueryOrg12PLA":1,"PbocMaxDelq24MNum":2,"PbocNoDeLq12MNum":1,"PbocNoNonmortUncld":2,"PbocCcRateOver80Account":3,"PbocLoanPersonBanlance":2000}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "019" tittle = "抵质押019" trancode = "02DEJ058" flag = "core full">
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ058">
+				<value name="AllRuleCheckDecision">LRD,LD,LD,LA,LR,</value>
+				<value name="IDNO">411029192706291014</value>
+				<value name="FullName">抵质押19</value>
+				<value name="CompanyYear">21</value>
+				<value name="OperPlaceType">040</value>
+				<value name="MarryStatus">90</value>
+				<value name="AppliedAmout">300000</value>
+				<value name="NationalStandardIndustry">S</value>
+				<value name="HsAge">5</value>
+				<value name="Region">1</value>
+				<value name="PledgeType">1</value>
+				<value name="PledgeValue">16000000</value>
+				<value name="CollateralType">1</value>
+				<value name="CollateralValue">220000</value>
+				<value name= "AnnualSales">1000</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">01I</value>
+				<value name="PbbcPrincipalBalance">15.23</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">xdbHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCLEvent9">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent9","PbbcPrincipalBalance":15.23,"AllRuleCheckDecision":"LD","CompanyYear":21,"OperPlaceType":"040","MarryStatus":"90","AppliedAmout":300000,"NationalStandardIndustry":"S","HsAge":5,"Region":"1","PledgeType":"1","PledgeValue":16000000,"CollateralType":"1","CollateralValue":220000, "AnnualSales":1000,"PbocDifQueryOrg12PLA":1,"PbocMaxDelq24MNum":2,"PbocNoDeLq12MNum":1,"PbocNoNonmortUncld":2,"PbocCcRateOver80Account":3,"PbocLoanPersonBanlance":2000}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "020" tittle = "抵质押020" trancode = "02DEJ058" flag = "core full">
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ058">
+				<value name="AllRuleCheckDecision">LR,LA,LA,LA,LA,</value>
+				<value name="IDNO">411029192605041032</value>
+				<value name="FullName">抵质押20</value>
+				<value name="CompanyYear">22</value>
+				<value name="OperPlaceType">010</value>
+				<value name="MarryStatus">90</value>
+				<value name="AppliedAmout">500000</value>
+				<value name="NationalStandardIndustry">T</value>
+				<value name="HsAge">5</value>
+				<value name="Region">1</value>
+				<value name="PledgeType">1</value>
+				<value name="PledgeValue">16000000</value>
+				<value name="CollateralType">1</value>
+				<value name="CollateralValue">2000</value>
+				<value name= "AnnualSales">1000</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">01I</value>
+				<value name="PbbcPrincipalBalance">0</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">xdbHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCLEvent9">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent9","PbbcPrincipalBalance":0,"AllRuleCheckDecision":"LR","CompanyYear":22,"OperPlaceType":"010","MarryStatus":"90","AppliedAmout":500000,"NationalStandardIndustry":"T","HsAge":5,"Region":"1","PledgeType":"1","PledgeValue":16000000,"CollateralType":"1","CollateralValue":2000, "AnnualSales":1000,"PbocDifQueryOrg12PLA":1,"PbocMaxDelq24MNum":2,"PbocNoDeLq12MNum":1,"PbocNoNonmortUncld":2,"PbocCcRateOver80Account":3,"PbocLoanPersonBanlance":2000}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "021" tittle = "抵质押021" trancode = "02DEJ058" flag = "core full">
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ058">
+				<value name="AllRuleCheckDecision">LR,LR,LA,LR,LA,</value>
+				<value name="IDNO">411029192605261019</value>
+				<value name="FullName">抵质押21</value>
+				<value name="CompanyYear">25</value>
+				<value name="OperPlaceType">010</value>
+				<value name="MarryStatus">90</value>
+				<value name="AppliedAmout">230000</value>
+				<value name="NationalStandardIndustry">S</value>
+				<value name="HsAge">5</value>
+				<value name="Region">1</value>
+				<value name="PledgeType">1</value>
+				<value name="PledgeValue">16000000</value>
+				<value name="CollateralType">1</value>
+				<value name="CollateralValue">200</value>
+				<value name= "AnnualSales">1000</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">02I</value>
+				<value name="PbbcPrincipalBalance">0.23</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">xdbHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCLEvent9">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent9","PbbcPrincipalBalance":0.23,"AllRuleCheckDecision":"LR","CompanyYear":25,"OperPlaceType":"010","MarryStatus":"90","AppliedAmout":230000,"NationalStandardIndustry":"S","HsAge":5,"Region":"1","PledgeType":"1","PledgeValue":16000000,"CollateralType":"1","CollateralValue":200, "AnnualSales":1000,"PbocDifQueryOrg12PLA":1,"PbocMaxDelq24MNum":2,"PbocNoDeLq12MNum":1,"PbocNoNonmortUncld":2,"PbocCcRateOver80Account":3,"PbocLoanPersonBanlance":2000}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "022" tittle = "抵质押022" trancode = "02DEJ058" flag = "core full">
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ058">
+				<value name="AllRuleCheckDecision">LD,LR,LA,LA,LRD,</value>
+				<value name="IDNO">411029195303281018</value>
+				<value name="FullName">抵质押22</value>
+				<value name="CompanyYear">30</value>
+				<value name="OperPlaceType">010</value>
+				<value name="MarryStatus">90</value>
+				<value name="AppliedAmout">1500000</value>
+				<value name="NationalStandardIndustry">J</value>
+				<value name="HsAge">5</value>
+				<value name="Region">1</value>
+				<value name="PledgeType">1</value>
+				<value name="PledgeValue">16000000</value>
+				<value name="CollateralType">1</value>
+				<value name="CollateralValue">300</value>
+				<value name= "AnnualSales">100</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">01I</value>
+				<value name="PbbcPrincipalBalance">8.9</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">xdbHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCLEvent9">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent9","PbbcPrincipalBalance":8.9,"AllRuleCheckDecision":"LD","CompanyYear":30,"OperPlaceType":"010","MarryStatus":"90","AppliedAmout":1500000,"NationalStandardIndustry":"J","HsAge":5,"Region":"1","PledgeType":"1","PledgeValue":16000000,"CollateralType":"1","CollateralValue":300, "AnnualSales":100,"PbocDifQueryOrg12PLA":1,"PbocMaxDelq24MNum":2,"PbocNoDeLq12MNum":1,"PbocNoNonmortUncld":2,"PbocCcRateOver80Account":3,"PbocLoanPersonBanlance":2000}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+
+
+
+</root>

@@ -1,0 +1,329 @@
+<root>
+<preActions>
+	<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>
+    <Action type="xml_setting" tag = "EFFECT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "TRAN_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "SERVICE_CODE">
+		<value type = "string">
+			SVR_FINANCIAL
+		</value>
+	</Action>
+</preActions>
+
+<case id = "0001" tittle = "021511银行承兑汇票提交兑付录入" trancode = "021511" flag = "core full">
+		<step desc="步骤1">
+			<Action type="xml_set" trancode="021511">
+			   <value name="//Body/OPTIONS">
+					01
+				</value>
+				<value name="//Body/REFERENCE">
+					4199992015091600045004
+				</value>
+				<value name="//Body/BILL_NO">
+					3130005227966952
+				</value>
+				<value name="//Body/BILL_TYPE">
+					208
+				</value>
+				<value name="//Body/BILL_MEDIUM_TYPE">
+					P
+				</value>
+				<value name="//Body/ACCEPT_CONTRACT_NO">
+					中原银（医疗）银承字2015第000023号
+				</value>
+				
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+				<key name="//Body/REFERENCE">
+				     reference
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2提交是否成功">
+			<Action type="sql_exe" >
+				<value>
+				  select count(*) from ensemble.ad_cash_msg where reference='{{reference}}'
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+		<step desc="步骤3删除">
+			<Action type="xml_set" trancode="021511">
+			   <value name="//Body/OPTIONS">
+					05
+				</value>
+				<value name="//Body/REFERENCE">
+					{{reference}}
+				</value>
+				<value name="//Body/BILL_NO">
+					3130005227966952
+				</value>
+				<value name="//Body/BILL_TYPE">
+					208
+				</value>
+				<value name="//Body/BILL_MEDIUM_TYPE">
+					P
+				</value>
+				<value name="//Body/ACCEPT_CONTRACT_NO">
+					中原银（医疗）银承字2015第000023号
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+</case>
+
+<case id = "0002" tittle = "021511银行承兑汇票提交兑付修改" trancode = "021511" flag = "core full">
+		<step desc="步骤1录入">
+			<Action type="xml_set" trancode="021511">
+			   <value name="//Body/OPTIONS">
+					01
+				</value>
+				<value name="//Body/REFERENCE">
+					4199992026030100069119
+				</value>
+				<value name="//Body/BILL_NO">
+					3130005228890387
+				</value>
+				<value name="//Body/BILL_TYPE">
+					208
+				</value>
+				<value name="//Body/BILL_MEDIUM_TYPE">
+					P
+				</value>
+				<value name="//Body/ACCEPT_CONTRACT_NO">
+					201806070011
+				</value>
+				
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+				<key name="//Body/REFERENCE">
+				     reference
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2修改">
+			<Action type="xml_set" trancode="021511">
+			   <value name="//Body/OPTIONS">
+					04
+				</value>
+				<value name="//Body/REFERENCE">
+					{{reference}}
+				</value>
+				<value name="//Body/BILL_NO">
+					3130005228890387
+				</value>
+				<value name="//Body/BILL_TYPE">
+					208
+				</value>
+				<value name="//Body/BILL_MEDIUM_TYPE">
+					P
+				</value>
+				<value name="//Body/ACCEPT_CONTRACT_NO">
+					201806070011
+				</value>
+				<value name="//Body/BILL_AMT">
+					500
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+		<step desc="步骤3修改是否成功">
+			<Action type="sql_exe" >
+				<value>
+				  select count(*) from ensemble.ad_cash_msg where reference='{{reference}}' and bill_type='208'
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+		<step desc="步骤4删除">
+			<Action type="xml_set" trancode="021511">
+			   <value name="//Body/OPTIONS">
+					05
+				</value>
+				<value name="//Body/REFERENCE">
+					{{reference}}
+				</value>
+				<value name="//Body/BILL_NO">
+					3130005228890387
+				</value>
+				<value name="//Body/BILL_TYPE">
+					208
+				</value>
+				<value name="//Body/BILL_MEDIUM_TYPE">
+					P
+				</value>
+				<value name="//Body/ACCEPT_CONTRACT_NO">
+					201806070011
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+</case>
+<case id = "0003" tittle = "021511银行承兑汇票提交兑付删除" trancode = "021511" flag = "core full">
+		<step desc="步骤1录入">
+			<Action type="xml_set" trancode="021511">
+			   <value name="//Body/OPTIONS">
+					01
+				</value>
+				<value name="//Body/REFERENCE">
+					4199992024113000067386
+				</value>
+				<value name="//Body/BILL_NO">
+					3130005228890023
+				</value>
+				<value name="//Body/BILL_TYPE">
+					208
+				</value>
+				<value name="//Body/BILL_MEDIUM_TYPE">
+					P
+				</value>
+				<value name="//Body/ACCEPT_CONTRACT_NO">
+					145623
+				</value>
+				
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+				<key name="//Body/REFERENCE">
+				     reference
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2删除">
+			<Action type="xml_set" trancode="021511">
+			   <value name="//Body/OPTIONS">
+					05
+				</value>
+				<value name="//Body/REFERENCE">
+					{{reference}}
+				</value>
+				<value name="//Body/BILL_NO">
+					3130005228890023
+				</value>
+				<value name="//Body/BILL_TYPE">
+					208
+				</value>
+				<value name="//Body/BILL_MEDIUM_TYPE">
+					P
+				</value>
+				<value name="//Body/ACCEPT_CONTRACT_NO">
+					145623
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2删除是否成功">
+			<Action type="sql_exe" >
+				<value>
+				  select count(*) from ensemble.ad_cash_msg where reference='{{reference}}' and status=9
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+</case>
+
+</root>

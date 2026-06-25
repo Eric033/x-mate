@@ -1,0 +1,86 @@
+<root>
+<preActions>
+	<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>
+    <Action type="xml_setting" tag = "EFFECT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "TRAN_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "SERVICE_CODE">
+		<value type = "string">
+			SVR_FINANCIAL
+		</value>
+	</Action>
+</preActions>
+
+<case id = "0001" tittle = "020843" trancode = "020843" flag = "core full">
+		<step desc="步骤1开立">
+			<Action type="xml_set" trancode="020842_2">
+			    <value name="//Body/DOCUMENT_ID">
+					411029196607082063
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+				<key name="//Body/CLIENT_NO">
+				    client_no
+				</key>
+				<key name="//Body/PROD_ID">
+				    prod_id
+				</key>
+			</save>
+		</step>
+
+		<step desc="步骤2撤单">
+			<Action type="xml_set" trancode="020843_22">
+				<value name="//Body/CLIENT_NO">
+					{{client_no}}
+				</value>
+				<value name="//Body/PROD_ID">
+					{{prod_id}}
+				</value>
+				<value name="//Sys_Head/SEQ_NO">
+				   {{case_seqno}}
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+				<key name="//Body/CLIENT_NO">
+				    client_no
+				</key>
+				<key name="//Body/SEQ_NO">
+				    seq_no
+				</key>
+			</save>
+		</step>		
+</case>
+</root>

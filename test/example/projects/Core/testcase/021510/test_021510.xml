@@ -1,0 +1,119 @@
+<root>
+<preActions>
+	<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>
+    <Action type="xml_setting" tag = "EFFECT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "TRAN_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "SERVICE_CODE">
+		<value type = "string">
+			SVR_FINANCIAL
+		</value>
+	</Action>
+</preActions>
+
+<case id = "0001" tittle = "021510" trancode = "021510" flag = "core full">
+		<step desc="步骤1录入">
+			<Action type="xml_set" trancode="021510">
+			   <value name="//Body/OPTIONS">
+					01
+				</value>
+				<value name="//Body/BASE_ACCT_NO">
+					8020014020000000036103035
+				</value>
+				<value name="//Body/BILL_AMT">
+					100
+				</value>
+				<value name="//Body/CR_REFERENCE">
+					{{seq_no}}
+				</value>
+				<value name="//Body/CMISLOAN_NO">
+					{{seq_no}}
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno1
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+				<key name="//Body/REFERENCE">
+				    reference
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2变更">
+			<Action type="xml_set" trancode="021510">
+			   <value name="//Body/OPTIONS">
+					02
+				</value>
+				<value name="//Body/BASE_ACCT_NO">
+					8020014020000000036103035
+				</value>
+				<value name="//Body/BILL_AMT">
+					100
+				</value>
+				<value name="//Body/CR_REFERENCE">
+					{{case_seqno1}}
+				</value>
+				<value name="//Body/CMISLOAN_NO">
+					{{case_seqno1}}
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+		<step desc="步骤4撤销">
+			<Action type="xml_set" trancode="021510">
+			    <value name="//Body/OPTIONS">
+					04
+				</value>
+				<value name="//Body/BASE_ACCT_NO">
+					8020014020000000036103035
+				</value>
+				<value name="//Body/BILL_AMT">
+					100
+				</value>
+				<value name="//Body/CR_REFERENCE">
+					{{case_seqno1}}
+				</value>
+				<value name="//Body/CMISLOAN_NO">
+					{{case_seqno1}}
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+		</step>
+</case>
+
+</root>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Message>
+	<Sys_Head>
+		<TRAN_CODE>02DEJ037</TRAN_CODE>
+		<SERVICE_CODE/>
+		<SEQ_NO>BIL2018110221418021700</SEQ_NO>
+		<USER_ID>V0003</USER_ID>
+		<CUSTOMER_ID/>
+		<BRANCH_ID/>
+		<SOURCE_TYPE>MM</SOURCE_TYPE>
+		<WS_ID>10.101.8.84</WS_ID>
+		<CONSUMER_ID>CMS</CONSUMER_ID>
+		<TRAN_DATE>20281222</TRAN_DATE>
+		<TRAN_TIMESTAMP>20281222</TRAN_TIMESTAMP>
+		<SERVER_ID>10.101.8.84</SERVER_ID>
+		<SOURCE_BRANCH_NO>172501</SOURCE_BRANCH_NO>
+		<DEST_BRANCH_NO/>
+		<TRAN_MODE>ONLINE</TRAN_MODE>
+	</Sys_Head>
+	<Body>
+		<IDNO>430101199305300243</IDNO>
+		 <IdType>Ind01</IdType> 
+		<FullName>衣三</FullName>
+		<Age>12</Age>
+		<Loanterm>1</Loanterm>
+		<PbocAccountType>001</PbocAccountType>
+		<PbocAccountReason>02I</PbocAccountReason>
+		<ServiceID>yzygdPledgor</ServiceID>
+		<ApplyUserId>1</ApplyUserId>
+		<PbocQueryFlag>1</PbocQueryFlag>
+	</Body>
+</Message>

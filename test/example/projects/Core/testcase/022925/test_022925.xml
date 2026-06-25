@@ -1,0 +1,112 @@
+<root>
+<preActions>
+	<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>
+    <Action type="xml_setting" tag = "EFFECT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "TRAN_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "SERVICE_CODE">
+		<value type = "string">
+			SVR_FINANCIAL
+		</value>
+	</Action>
+</preActions>
+
+<case id = "0001" tittle = "022925永续贷透支功能开关参数配置不允许" trancode = "022925" flag = "core full">
+		<step desc="步骤1">
+			<Action type="xml_set" trancode="022925">
+			   <value name="//Body/OD_BS_LIST/Row/BUSINESS_TYPE">
+					YXD001
+				</value>
+				<value name="//Body/OD_BS_LIST/Row/OD_FLAG">
+					N
+				</value>
+				<value name="//Body/OD_BS_LIST/Row/BRANCH">
+					419999
+				</value>
+				
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+				
+			</save>
+		</step>
+		<step desc="步骤2验证登记成功">
+			<Action type="sql_exe" >
+				<value>
+				   SELECT count(*) FROM ensemble.CL_OD_BRANCH_SOURCE_PARA_TBL where branch='419999'
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+		
+</case>
+<case id = "0002" tittle = "022925永续贷透支功能开关参数配置允许" trancode = "022925" flag = "core full">
+		<step desc="步骤1">
+			<Action type="xml_set" trancode="022925">
+			   <value name="//Body/OD_BS_LIST/Row/BUSINESS_TYPE">
+					YXD001
+				</value>
+				<value name="//Body/OD_BS_LIST/Row/OD_FLAG">
+					Y
+				</value>
+				<value name="//Body/OD_BS_LIST/Row/BRANCH">
+					411499,411399,411299,411199
+				</value>
+				
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+				
+			</save>
+		</step>
+		<step desc="步骤2验证登记成功">
+			<Action type="sql_exe" >
+				<value>
+				   SELECT count(*) FROM ensemble.CL_OD_BRANCH_SOURCE_PARA_TBL where branch='411499,411399,411299,411199'
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+		
+</case>
+
+</root>

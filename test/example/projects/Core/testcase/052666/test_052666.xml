@@ -1,0 +1,82 @@
+<root>
+<preActions>
+	<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>
+    <Action type="xml_setting" tag = "EFFECT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "TRAN_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "SERVICE_CODE">
+		<value type = "string">
+			SVR_FINANCIAL
+		</value>
+	</Action>
+</preActions>
+
+<case id = "0001" tittle = "052666通过流水号账号查询贷款发放信息查询" trancode = "052666" flag = "core full 1400">
+		<step desc="步骤1">
+			<Action type="xml_set" trancode="052666">
+			    <value name="//Body/REFERENCE">
+					CL-DRW-411701-67916
+				</value>
+				<value name="//Body/BASE_ACCT_NO">
+					501011290608019
+				</value>
+				<value name="//Body/TRAN_FLAG">
+					1
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+</case>
+
+<case id = "0002" tittle = "052666通过流水号账号查询贷款回收信息查询" trancode = "052666" flag = "core full 1400">
+		<step desc="步骤1">
+			<Action type="xml_set" trancode="052666">
+			    <value name="//Body/REFERENCE">
+					CL-REC-411006-5111881
+				</value>
+				<value name="//Body/BASE_ACCT_NO">
+					8012011000000080665
+				</value>
+				<value name="//Body/TRAN_FLAG">
+					2
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+</case>
+</root>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Message>
+	<Sys_Head>
+		<TRAN_CODE>02DEJ060</TRAN_CODE>
+		<SERVICE_CODE>SVR_NONFINANCIAL</SERVICE_CODE>
+		<SEQ_NO>CMS28112900000128600</SEQ_NO>
+		<USER_ID>V0003</USER_ID>
+		<CUSTOMER_ID/>
+		<BRANCH_ID>411012</BRANCH_ID>
+		<SOURCE_TYPE>MM</SOURCE_TYPE>
+		<WS_ID>10.100.200.89</WS_ID>
+		<CONSUMER_ID>CMS</CONSUMER_ID>
+		<TRAN_DATE>20281129</TRAN_DATE>
+		<TRAN_TIMESTAMP>112400844</TRAN_TIMESTAMP>
+		<SERVER_ID>10.100.200.89</SERVER_ID>
+		<SOURCE_BRANCH_NO>172501</SOURCE_BRANCH_NO>
+		<DEST_BRANCH_NO/>
+		<TRAN_MODE>ONLINE</TRAN_MODE>
+	</Sys_Head>
+	<Body>
+		<IDNO>540101198001010010</IDNO>
+		<IdType>Ind01</IdType>
+		<FullName>商用车二</FullName>
+		<PhoneNo>13562347896</PhoneNo>
+		<Age>48</Age>
+		<MounthIncome>12500.000000</MounthIncome>
+		<BorMounthExpense>416.67</BorMounthExpense>
+		<HouseholdRegister>1</HouseholdRegister>
+		<LocLiveYear>1</LocLiveYear>
+		<ApplyUserId>100673</ApplyUserId>
+		<PbocAccountReason>02I</PbocAccountReason>
+		<ServiceID>grsycPerson</ServiceID>
+		<ApplyNo>2028110100000010</ApplyNo>
+	</Body>
+</Message>

@@ -1,0 +1,480 @@
+<root>
+	<preActions>
+		<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+			<value type = "date">
+			now.YYYYMMDD
+			</value>
+		</Action>	
+		<Action type="xml_setting" tag = "TRAN_DATE">
+			<value type = "date">
+			now.YYYYMMDD
+			</value>
+		</Action>	
+		<Action type="xml_setting" tag = "SERVICE_CODE">
+			<value type = "string">
+			SVR_FINANCIAL
+			</value>
+		</Action>
+	</preActions>
+
+	<case id = "001" tittle = "担保额度001" trancode = "02DEJ051" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">
+					"ok"
+				</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ051">
+				<value name="AllRuleCheckDecision">LA,LA,LA</value>
+				<value name="AppliedAmout">0</value>
+				<value name="EngageAmount">0</value>
+				<value name="CustomerType">1</value>
+				<value name="ServiceID">xedbModel</value>
+
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step7grjyPSGEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPSGEvent8","AllRuleCheckDecision":"LA","AppliedAmout":0,"EngageAmount":0,"CustomerType":"1"}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "002" tittle = "担保额度002" trancode = "02DEJ051" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">
+					"ok"
+				</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ051">
+				<value name="AllRuleCheckDecision">LR,LA,LA</value>
+				<value name="AppliedAmout">1000.29</value>
+				<value name="EngageAmount">500</value>
+				<value name="CustomerType">1</value>
+				<value name="ServiceID">xedbModel</value>
+
+
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step7grjyPSGEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPSGEvent8","AllRuleCheckDecision":"LR","AppliedAmout":1000.29,"EngageAmount":500,"CustomerType":"1"}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+
+	<case id = "003" tittle = "担保额度003" trancode = "02DEJ051" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ051">
+				<value name="AllRuleCheckDecision">LRD,LA,LA</value>
+				<value name="AppliedAmout">10000.23</value>
+				<value name="EngageAmount">5000</value>
+				<value name="CustomerType">2</value>
+				<value name="ServiceID">xedbModel</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPSGEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPSGEvent8","AllRuleCheckDecision":"LRD","AppliedAmout":10000.23,"EngageAmount":5000,"CustomerType":"2"}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "004" tittle = "担保额度004" trancode = "02DEJ051" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ051">
+				<value name="AllRuleCheckDecision">LD,LA,LA</value>
+				<value name="AppliedAmout">50000</value>
+				<value name="EngageAmount">20000</value>
+				<value name="CustomerType">2</value>
+				<value name="ServiceID">xedbModel</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPSGEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPSGEvent8","AllRuleCheckDecision":"LD","AppliedAmout":50000,"EngageAmount":20000,"CustomerType":"2"}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "005" tittle = "担保额度005" trancode = "02DEJ051" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ051">
+				<value name="AllRuleCheckDecision">LA,LR,LA</value>
+				<value name="AppliedAmout">100</value>
+				<value name="EngageAmount"/>
+				<value name="CustomerType">1</value>
+				<value name="ServiceID">xedbModel</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPSGEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPSGEvent8","AllRuleCheckDecision":"LR","AppliedAmout":100,"EngageAmount":0,"CustomerType":"1"}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "006" tittle = "担保额度006" trancode = "02DEJ051" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ051">
+				<value name="AllRuleCheckDecision">LA,LRD,LA</value>
+				<value name="AppliedAmout">0</value>
+				<value name="EngageAmount">0</value>
+				<value name="CustomerType">1</value>
+				<value name="ServiceID">xedbModel</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPSGEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPSGEvent8","AllRuleCheckDecision":"LRD","AppliedAmout":0,"EngageAmount":0,"CustomerType":"1"}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "007" tittle = "担保额度007" trancode = "02DEJ051" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ051">
+				<value name="AllRuleCheckDecision">LA,LD,LA</value>
+				<value name="AppliedAmout">500000.69</value>
+				<value name="EngageAmount">200000.63</value>
+				<value name="CustomerType">2</value>
+				<value name="ServiceID">xedbModel</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPSGEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPSGEvent8","AllRuleCheckDecision":"LD","AppliedAmout":500000.69,"EngageAmount":200000.63,"CustomerType":"2"}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "008" tittle = "担保额度008" trancode = "02DEJ051" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ051">
+				<value name="AllRuleCheckDecision">LA,LA,LR</value>
+				<value name="AppliedAmout">1000</value>
+				<value name="EngageAmount">500</value>
+				<value name="CustomerType">0</value>
+				<value name="ServiceID">xedbModel</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPSGEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPSGEvent8","AllRuleCheckDecision":"LR","AppliedAmout":1000,"EngageAmount":500,"CustomerType":"0"}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "009" tittle = "担保额度009" trancode = "02DEJ051" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ051">
+				<value name="AllRuleCheckDecision">LA,LA,LRD</value>
+				<value name="AppliedAmout">10000</value>
+				<value name="EngageAmount">50000</value>
+				<value name="CustomerType">2</value>
+				<value name="ServiceID">xedbModel</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPSGEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPSGEvent8","AllRuleCheckDecision":"LRD","AppliedAmout":10000,"EngageAmount":50000,"CustomerType":"2"}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "010" tittle = "担保额度010" trancode = "02DEJ051" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ051">
+				<value name="AllRuleCheckDecision">LA,LA,LD</value>
+				<value name="AppliedAmout">10000.25</value>
+				<value name="EngageAmount">10000.25</value>
+				<value name="CustomerType">1</value>
+				<value name="ServiceID">xedbModel</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPSGEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPSGEvent8","AllRuleCheckDecision":"LD","AppliedAmout":10000.25,"EngageAmount":10000.25,"CustomerType":"1"}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "011" tittle = "担保额度011" trancode = "02DEJ051" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ051">
+				<value name="AllRuleCheckDecision">LR,LR,LR</value>
+				<value name="AppliedAmout">10000</value>
+				<value name="EngageAmount">10000</value>
+				<value name="CustomerType">1</value>
+				<value name="ServiceID">xedbModel</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPSGEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPSGEvent8","AllRuleCheckDecision":"LR","AppliedAmout":10000,"EngageAmount":10000,"CustomerType":"1"}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "012" tittle = "担保额度012" trancode = "02DEJ051" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ051">
+				<value name="AllRuleCheckDecision">LRD,LRD,LRD</value>
+				<value name="AppliedAmout">10000</value>
+				<value name="EngageAmount">10000</value>
+				<value name="CustomerType">5</value>
+				<value name="ServiceID">xedbModel</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPSGEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPSGEvent8","AllRuleCheckDecision":"LRD","AppliedAmout":10000,"EngageAmount":10000,"CustomerType":"5"}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "013" tittle = "担保额度013" trancode = "02DEJ051" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ051">
+				<value name="AllRuleCheckDecision">LD,LD,LD</value>
+				<value name="AppliedAmout">10000</value>
+				<value name="EngageAmount">10000</value>
+				<value name="CustomerType">1</value>
+				<value name="ServiceID">xedbModel</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPSGEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPSGEvent8","AllRuleCheckDecision":"LD","AppliedAmout":10000,"EngageAmount":10000,"CustomerType":"1"}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "014" tittle = "担保额度014" trancode = "02DEJ051" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ051">
+				<value name="AllRuleCheckDecision">LR,LRD,LD</value>
+				<value name="AppliedAmout">10000</value>
+				<value name="EngageAmount">10000</value>
+				<value name="CustomerType">1</value>
+				<value name="ServiceID">xedbModel</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPSGEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPSGEvent8","AllRuleCheckDecision":"LD","AppliedAmout":10000,"EngageAmount":10000,"CustomerType":"1"}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "015" tittle = "担保额度015" trancode = "02DEJ051" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ051">
+				<value name="AllRuleCheckDecision">LD,LRD,LA</value>
+				<value name="AppliedAmout">1000</value>
+				<value name="EngageAmount">500</value>
+				<value name="CustomerType">1</value>
+				<value name="ServiceID">xedbModel</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPSGEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPSGEvent8","AllRuleCheckDecision":"LD","AppliedAmout":1000,"EngageAmount":500,"CustomerType":"1"}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+
+
+</root>

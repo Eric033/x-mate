@@ -1,0 +1,191 @@
+<root>
+<preActions>
+	<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>
+    <Action type="xml_setting" tag = "EFFECT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "TRAN_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "SERVICE_CODE">
+		<value type = "string">
+			SVR_FINANCIAL
+		</value>
+	</Action>
+</preActions>
+
+<case id = "0001" tittle = "020512一户通签约" trancode = "020512" flag = "core full">
+		<step desc="步骤1">
+			<Action type="xml_set" trancode="020512">
+				<value name="//Body/BASE_ACCT_NO">
+					410102010100019001
+				</value>
+				<value name="//Body/ACCT_TYPE">
+					201
+				</value>
+				<value name="//Body/CON_OPTION">
+					O
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+				<key name="//Body/BASE_ACCT_NO">
+				    base_acct_no
+				</key>
+				<key name="//Body/CONTRACT_NO">
+				    contract_no
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2签约是否成功">
+			<Action type="sql_exe" >
+				<value>
+				  select count(*) from ENSEMBLE.RB_SUB_CONTRACT con where con.contract_no='{{contract_no}}'
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+		<step desc="步骤3解约">
+			<Action type="xml_set" trancode="020512">
+				<value name="//Body/BASE_ACCT_NO">
+					410102010100019001
+				</value>
+				<value name="//Body/ACCT_TYPE">
+					201
+				</value>
+				<value name="//Body/CON_OPTION">
+					C
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+		</step>
+		<step desc="步骤4解约是否成功">
+			<Action type="sql_exe" >
+				<value>
+				  select count(*) from ENSEMBLE.RB_SUB_CONTRACT con where con.contract_no='{{contract_no}}' and status='C'
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+</case>
+<case id = "0002" tittle = "020512一户通解约" trancode = "020512" flag = "core full">
+		<step desc="步骤1签约">
+			<Action type="xml_set" trancode="020512">
+				<value name="//Body/BASE_ACCT_NO">
+					410102010100019001
+				</value>
+				<value name="//Body/ACCT_TYPE">
+					201
+				</value>
+				<value name="//Body/CON_OPTION">
+					O
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+				<key name="//Body/BASE_ACCT_NO">
+				    base_acct_no
+				</key>
+				<key name="//Body/CONTRACT_NO">
+				    contract_no
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2签约是否成功">
+			<Action type="sql_exe" >
+				<value>
+				  select count(*) from ENSEMBLE.RB_SUB_CONTRACT con where con.contract_no='{{contract_no}}'
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+		<step desc="步骤3解约">
+			<Action type="xml_set" trancode="020512">
+				<value name="//Body/BASE_ACCT_NO">
+					410102010100019001
+				</value>
+				<value name="//Body/ACCT_TYPE">
+					201
+				</value>
+				<value name="//Body/CON_OPTION">
+					C
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+				<key name="//Body/BASE_ACCT_NO">
+				    base_acct_no
+				</key>
+				
+			</save>
+		</step>
+		<step desc="步骤4解约是否成功">
+			<Action type="sql_exe" >
+				<value>
+				  select count(*) from ENSEMBLE.RB_SUB_CONTRACT con where con.contract_no='{{contract_no}}' and status='C'
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+</case>
+
+
+</root>

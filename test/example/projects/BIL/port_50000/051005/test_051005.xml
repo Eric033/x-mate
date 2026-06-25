@@ -1,0 +1,33 @@
+<root>
+<preActions>
+	<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "TRAN_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "SERVICE_CODE">
+		<value type = "string">
+			SVR_FINANCIAL
+		</value>
+	</Action>
+</preActions>
+<case id = "0001" tittle = "社保卡-异常交易查询" trancode = "051005" flag = "core full">
+		<step desc="验证异常交易交易查询成功">
+			<Action type="xml_set">
+				<value name="CHANNEL_SEQ_NO">
+					BIL18010811038074000
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+		</step>
+</case>
+</root>

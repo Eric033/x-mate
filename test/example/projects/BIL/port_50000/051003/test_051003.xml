@@ -1,0 +1,41 @@
+<root>
+<preActions>
+	<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "TRAN_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "SERVICE_CODE">
+		<value type = "string">
+			SVR_FINANCIAL
+		</value>
+	</Action>
+</preActions>
+<case id = "0001" tittle = "柜面交易查询" trancode = "051003" flag = "core full">
+		<step desc="验证柜面交易查询成功">
+			<Action type="xml_set">
+				<value name="CARD_NO">
+					6236600010080588
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+				</result>
+				<result name = "STATUS">
+					1
+				</result>
+				<result name = "CARD_NO">
+					6236600010080588
+				</result>
+				<result name = "TX_AMT">
+					2000.00
+				</result>
+			</Verify>
+		</step>
+</case>
+</root>

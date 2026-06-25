@@ -1,0 +1,170 @@
+<root>
+<preActions>
+	<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>
+    <Action type="xml_setting" tag = "EFFECT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "TRAN_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "SERVICE_CODE">
+		<value type = "string">
+			SVR_FINANCIAL
+		</value>
+	</Action>
+</preActions>
+
+<case id = "0001" tittle = "021512银承挂失" trancode = "021512" flag = "core full">
+		<step desc="步骤1">
+			<Action type="xml_set" trancode="021512">
+			   <value name="//Body/OPTIONS">
+					01
+				</value>
+				<value name="//Body/SOURCE_REFERENCE">
+					4199992015050800007602
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+				<key name="//Body/SOURCE_REFERENCE">
+					source_reference
+				</key>
+				<key name="//Body/REFERENCE">
+					reference
+				</key>
+				
+			</save>
+		</step>
+		<step desc="步骤2挂失是否成功">
+			<Action type="sql_exe" >
+				<value>
+				   select count(*) from ensemble.ad_lost_msg where reference='{{reference}}' and status='2'
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+		<step desc="步骤3解挂">
+			<Action type="xml_set" trancode="021512">
+			   <value name="//Body/OPTIONS">
+					02
+				</value>
+				<value name="//Body/SOURCE_REFERENCE">
+					4199992015050800007602
+				</value>
+				<value name="//Body/REFERENCE">
+					{{reference}}
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+				<key name="//Body/SOURCE_REFERENCE">
+					source_reference
+				</key>
+				
+			</save>
+		</step>
+</case>
+<case id = "0002" tittle = "021512银承挂失解挂" trancode = "021512" flag = "core full">
+		<step desc="步骤1挂失">
+			<Action type="xml_set" trancode="021512">
+			   <value name="//Body/OPTIONS">
+					01
+				</value>
+				<value name="//Body/SOURCE_REFERENCE">
+					4199992015050800007629
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+				<key name="//Body/SOURCE_REFERENCE">
+					source_reference
+				</key>
+				<key name="//Body/REFERENCE">
+					reference
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2解挂">
+			<Action type="xml_set" trancode="021512">
+			   <value name="//Body/OPTIONS">
+					02
+				</value>
+				<value name="//Body/SOURCE_REFERENCE">
+					4199992015050800007629
+				</value>
+				<value name="//Body/REFERENCE">
+					{{reference}}
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2解挂是否成功">
+			<Action type="sql_exe" >
+				<value>
+				   select count(*) from ensemble.ad_lost_msg where reference='{{reference}}' and status='4'
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+</case>
+
+
+</root>

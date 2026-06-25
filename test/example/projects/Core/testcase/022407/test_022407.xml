@@ -1,0 +1,90 @@
+<root>
+<preActions>
+	<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>
+    <Action type="xml_setting" tag = "EFFECT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "TRAN_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "SERVICE_CODE">
+		<value type = "string">
+			SVR_FINANCIAL
+		</value>
+	</Action>
+</preActions>
+
+<case id = "0001" tittle = "022407还款计划提交" trancode = "022407" flag = "core full">
+		<step desc="步骤1">
+			<Action type="xml_set" trancode="022407">
+				<value name="//Sys_Head/BRANCH_ID">
+					411012
+				</value>
+				<value name="//Body/LOAN_NO">
+					0001259942
+				</value>
+			    <value name="//Body/DD_NO">
+					1
+				</value>
+				<value name="//Body/REPAY_ARRAY/Row[1]/OPTION">
+					01
+				</value>
+				<value name="//Body/REPAY_ARRAY/Row[2]/OPTION">
+					01
+				</value>
+				<value name="//Body/REPAY_ARRAY/Row[3]/OPTION">
+					01
+				</value>
+				<value name="//Body/REPAY_ARRAY/Row[4]/OPTION">
+					01
+				</value>
+				<value name="//Body/REPAY_ARRAY/Row[5]/OPTION">
+					01
+				</value>
+				<value name="//Body/REPAY_ARRAY/Row[6]/OPTION">
+					01
+				</value>
+				<value name="//Body/REPAY_ARRAY/Row[1]/DD_ALLOCATION">
+					1
+				</value>
+				<value name="//Body/REPAY_ARRAY/Row[2]/DD_ALLOCATION">
+					1.00
+				</value>
+				<value name="//Body/REPAY_ARRAY/Row[3]/DD_ALLOCATION">
+					1.00
+				</value>
+				<value name="//Body/REPAY_ARRAY/Row[4]/DD_ALLOCATION">
+					1.00
+				</value>
+				<value name="//Body/REPAY_ARRAY/Row[5]/DD_ALLOCATION">
+					1.00
+				</value>
+				<value name="//Body/REPAY_ARRAY/Row[6]/DD_ALLOCATION">
+					1.00
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+</case>
+
+</root>

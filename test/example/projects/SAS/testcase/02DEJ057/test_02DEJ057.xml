@@ -1,0 +1,1805 @@
+<root>
+	<preActions>
+		<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+			<value type = "date">
+			now.YYYYMMDD
+			</value>
+		</Action>	
+		<Action type="xml_setting" tag = "TRAN_DATE">
+			<value type = "date">
+			now.YYYYMMDD
+			</value>
+		</Action>	
+		<Action type="xml_setting" tag = "SERVICE_CODE">
+			<value type = "string">
+			SVR_FINANCIAL
+			</value>
+		</Action>
+	</preActions>
+
+	<case id = "001" tittle = "续贷宝保证人001" trancode = "02DEJ057" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1设置司法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="050107-01">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step2设置核心黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="059135">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step3设置预警黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05CRW003">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step4设置核心联网核查挡板数据">
+			<Action type="tcp_damper_set" trancode="021801">
+				<value name="//CHECKRESULT">00</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step5设置汇法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05EDM005">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step6发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ057">
+				<value name="IDNO">410116196810281079</value>
+				<value name="FullName">测试1</value>
+				<value name="Age">50</value>
+				<value name="Loanterm">0</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">01I</value>
+				<value name="ApplyNo">2028102100000003</value>
+				<value name="ServiceID">xdbPledgor</value>
+				<value name="BGRelation">null</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step7grjyPCLEvent7">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent7","Age":50,"Loanterm":0,"BGRelation":"null","IdType":"Ind01","HXBlackList101":0,"HXBlackList102":0,"HXBlackList201":0,"HXBlackList301":0,"HXBlackList302":0,"HXBlackList401":0,"HXBlackList501":0,"HXBlackList502":0,"HXBlackList601":0,"HXBlackList801":0,"HXBlackList901":0,"YJBlackList":0,"IDInfoCheckResult":"00","ZyIsJudicialFreeze":"0","PsRiskLevel":10,"GuaranteeLoanState":0,"ComCurDueStatus10":0,"ComGroupCurDueStatus10":0,"ComGuanCurDueStatus10":0,"Com24MMaxDueDays10":0,"ComGuan24MDueDays10":0,"ComGroup24MDueDays10":0,"LoanCurrOveDueNum":0,"CardCurrOverDueMoney":0,"Loan24MMaxOverDueNum":0,"Card24MOverDueOver200MaxNum":0,"Loan24MSumOverDueNum":0,"Card24MOverDueOver200SumNum":0,"DenyByYXD3MTimes":0,"CountBlackList":0,"CountBlackList2":0}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step8grjyPCLEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent8","PbocLoanOverDueNum":0,"PbocCreditOverDueMoney":0,"PbocSemiCreditOver180Debt":0,"PbocLCurrOverDue":0,"PbocAccStatus":0,"PbocLoan24MRepayStatus":"0","PbocCredit24MAbnormal":"0","PbocLoan24MMOverDueNum":0,"PbocLoan24MSOverDueNum":0,"PbocCc24MMOverDueNum":0,"PbocCc24MSOverDueNum":0,"PbocQuotaRateOver80Account":0,"PbocCreditLoan2MQueryRecordNum":0,"PbocBadDebt":0,"PbocAssetsDisposal":0,"PBOCGuaranteeRepay":0,"PbocMinRepayAccountNum":0,"PbocGuaranteeaNum":0,"PbocCreditTotalNum":0,"PbocMaxGuarCategory5":0,"PbocLoanCurrLenderNum":0,"PbocForceRecordNum":0,"PbocAdministrationPunishNum":0,"PbocLoanTradeType":0,"PbocCreditTradeType":0}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "002" tittle = "续贷宝保证人002" trancode = "02DEJ057" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1设置司法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="050107-01">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step2设置核心黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="059135-02">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step3设置预警黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05CRW003-01">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step4设置核心联网核查挡板数据">
+			<Action type="tcp_damper_set" trancode="021801">
+				<value name="//CHECKRESULT">00</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step5设置汇法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05EDM005-02">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step6发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ057">
+				<value name="IDNO">410146196206247550</value>
+				<value name="FullName">测试2</value>
+				<value name="Age">56</value>
+				<value name="Loanterm">1</value>
+				<value name="ApplyUserId">100361</value>
+				<value name="PbocAccountReason">02I</value>
+				<value name="ApplyNo">2028102100000003</value>
+				<value name="ServiceID">xdbPledgor</value>
+				<value name="BGRelation">0</value>
+				<value name="IdType">Ind01</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step7grjyPCLEvent7">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent7","Age":56,"Loanterm":1,"BGRelation":"0","IdType":"Ind01","HXBlackList101":1,"HXBlackList102":1,"HXBlackList201":1,"HXBlackList301":1,"HXBlackList302":1,"HXBlackList401":1,"HXBlackList501":1,"HXBlackList502":1,"HXBlackList601":1,"HXBlackList801":1,"HXBlackList901":1,"YJBlackList":1,"IDInfoCheckResult":"00","ZyIsJudicialFreeze":"0","PsRiskLevel":20,"GuaranteeLoanState":1,"ComCurDueStatus10":1,"ComGroupCurDueStatus10":1,"ComGuanCurDueStatus10":1,"Com24MMaxDueDays10":1,"ComGuan24MDueDays10":1,"ComGroup24MDueDays10":1,"LoanCurrOveDueNum":1,"CardCurrOverDueMoney":1,"Loan24MMaxOverDueNum":2,"Card24MOverDueOver200MaxNum":1,"Loan24MSumOverDueNum":5,"Card24MOverDueOver200SumNum":12,"DenyByYXD3MTimes":1,"CountBlackList":1,"CountBlackList2":1}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step8grjyPCLEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent8","PbocLoanOverDueNum":1,"PbocCreditOverDueMoney":2,"PbocSemiCreditOver180Debt":10,"PbocLCurrOverDue":0,"PbocAccStatus":0,"PbocLoan24MRepayStatus":"0","PbocCredit24MAbnormal":"0","PbocLoan24MMOverDueNum":0,"PbocLoan24MSOverDueNum":0,"PbocCc24MMOverDueNum":0,"PbocCc24MSOverDueNum":0,"PbocQuotaRateOver80Account":0,"PbocCreditLoan2MQueryRecordNum":0,"PbocBadDebt":0,"PbocAssetsDisposal":0,"PBOCGuaranteeRepay":0,"PbocMinRepayAccountNum":0,"PbocGuaranteeaNum":0,"PbocCreditTotalNum":0,"PbocMaxGuarCategory5":0,"PbocLoanCurrLenderNum":0,"PbocForceRecordNum":0,"PbocAdministrationPunishNum":0,"PbocLoanTradeType":0,"PbocCreditTradeType":0}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "003" tittle = "续贷宝保证人003" trancode = "02DEJ057" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1设置司法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="050107-01">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step2设置核心黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="059135-03">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step3设置预警黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05CRW003-02">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step4设置核心联网核查挡板数据">
+			<Action type="tcp_damper_set" trancode="021801">
+				<value name="//CHECKRESULT">01</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step5设置汇法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05EDM005-03">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step6发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ057">
+				<value name="IDNO">412850197507140027</value>
+				<value name="FullName">测试3</value>
+				<value name="Age">43</value>
+				<value name="Loanterm">5</value>
+				<value name="ApplyUserId">100362</value>
+				<value name="PbocAccountReason">03I</value>
+				<value name="ApplyNo">2028102100000003</value>
+				<value name="ServiceID">xdbPledgor</value>
+				<value name="BGRelation">0</value>
+				<value name="IdType">Ind01</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step7grjyPCLEvent7">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent7","Age":43,"Loanterm":5,"BGRelation":"0","IdType":"Ind01","HXBlackList101":1,"HXBlackList102":0,"HXBlackList201":0,"HXBlackList301":0,"HXBlackList302":0,"HXBlackList401":0,"HXBlackList501":0,"HXBlackList502":0,"HXBlackList601":0,"HXBlackList801":0,"HXBlackList901":0,"YJBlackList":0,"IDInfoCheckResult":"01","ZyIsJudicialFreeze":"0","PsRiskLevel":30,"GuaranteeLoanState":10,"ComCurDueStatus10":5,"ComGroupCurDueStatus10":8,"ComGuanCurDueStatus10":6,"Com24MMaxDueDays10":9,"ComGuan24MDueDays10":10,"ComGroup24MDueDays10":5,"LoanCurrOveDueNum":3,"CardCurrOverDueMoney":30000.32,"Loan24MMaxOverDueNum":5,"Card24MOverDueOver200MaxNum":3,"Loan24MSumOverDueNum":3,"Card24MOverDueOver200SumNum":3,"DenyByYXD3MTimes":5,"CountBlackList":0,"CountBlackList2":1}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step8grjyPCLEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent8","PbocLoanOverDueNum":5,"PbocCreditOverDueMoney":5.6,"PbocSemiCreditOver180Debt":6.3,"PbocLCurrOverDue":0,"PbocAccStatus":0,"PbocLoan24MRepayStatus":"0","PbocCredit24MAbnormal":"0","PbocLoan24MMOverDueNum":0,"PbocLoan24MSOverDueNum":0,"PbocCc24MMOverDueNum":0,"PbocCc24MSOverDueNum":0,"PbocQuotaRateOver80Account":0,"PbocCreditLoan2MQueryRecordNum":0,"PbocBadDebt":0,"PbocAssetsDisposal":0,"PBOCGuaranteeRepay":0,"PbocMinRepayAccountNum":0,"PbocGuaranteeaNum":0,"PbocCreditTotalNum":0,"PbocMaxGuarCategory5":0,"PbocLoanCurrLenderNum":0,"PbocForceRecordNum":0,"PbocAdministrationPunishNum":0,"PbocLoanTradeType":0,"PbocCreditTradeType":0}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "004" tittle = "续贷宝保证人004" trancode = "02DEJ057" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1设置司法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="050107">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step2设置核心黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="059135-04">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step3设置预警黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05CRW003-03">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step4设置核心联网核查挡板数据">
+			<Action type="tcp_damper_set" trancode="021801">
+				<value name="//CHECKRESULT">02</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step5设置汇法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05EDM005-04">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step6发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ057">
+				<value name="IDNO">412850196511021464</value>
+				<value name="FullName">测试4</value>
+				<value name="Age">53</value>
+				<value name="Loanterm">8</value>
+				<value name="ApplyUserId">100363</value>
+				<value name="PbocAccountReason">05I</value>
+				<value name="ApplyNo">2028102100000003</value>
+				<value name="ServiceID">xdbPledgor</value>
+				<value name="BGRelation">1</value>
+				<value name="IdType">Ind01</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step7grjyPCLEvent7">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent7","Age":53,"Loanterm":8,"BGRelation":"1","IdType":"Ind01","HXBlackList101":0,"HXBlackList102":1,"HXBlackList201":0,"HXBlackList301":0,"HXBlackList302":0,"HXBlackList401":0,"HXBlackList501":0,"HXBlackList502":0,"HXBlackList601":0,"HXBlackList801":0,"HXBlackList901":0,"YJBlackList":0,"IDInfoCheckResult":"02","ZyIsJudicialFreeze":"0","PsRiskLevel":40,"GuaranteeLoanState":8,"ComCurDueStatus10":15,"ComGroupCurDueStatus10":17,"ComGuanCurDueStatus10":16,"Com24MMaxDueDays10":18,"ComGuan24MDueDays10":19,"ComGroup24MDueDays10":1,"LoanCurrOveDueNum":5,"CardCurrOverDueMoney":30000,"Loan24MMaxOverDueNum":8,"Card24MOverDueOver200MaxNum":6,"Loan24MSumOverDueNum":15,"Card24MOverDueOver200SumNum":2,"DenyByYXD3MTimes":8,"CountBlackList":0,"CountBlackList2":1}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step8grjyPCLEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent8","PbocLoanOverDueNum":10,"PbocCreditOverDueMoney":1000.26,"PbocSemiCreditOver180Debt":2000.32,"PbocLCurrOverDue":0,"PbocAccStatus":0,"PbocLoan24MRepayStatus":"0","PbocCredit24MAbnormal":"0","PbocLoan24MMOverDueNum":0,"PbocLoan24MSOverDueNum":0,"PbocCc24MMOverDueNum":0,"PbocCc24MSOverDueNum":0,"PbocQuotaRateOver80Account":0,"PbocCreditLoan2MQueryRecordNum":0,"PbocBadDebt":0,"PbocAssetsDisposal":0,"PBOCGuaranteeRepay":0,"PbocMinRepayAccountNum":0,"PbocGuaranteeaNum":0,"PbocCreditTotalNum":0,"PbocMaxGuarCategory5":0,"PbocLoanCurrLenderNum":0,"PbocForceRecordNum":0,"PbocAdministrationPunishNum":0,"PbocLoanTradeType":0,"PbocCreditTradeType":0}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "005" tittle = "续贷宝保证人005" trancode = "02DEJ057" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1设置司法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="050107-01">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step2设置核心黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="059135-05">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step3设置预警黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05CRW003-02">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step4设置核心联网核查挡板数据">
+			<Action type="tcp_damper_set" trancode="021801">
+				<value name="//CHECKRESULT">01</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step5设置汇法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05EDM005-05">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step6发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ057">
+				<value name="IDNO">412850196604071487</value>
+				<value name="FullName">测试5</value>
+				<value name="Age">52</value>
+				<value name="Loanterm">10</value>
+				<value name="ApplyUserId">100364</value>
+				<value name="PbocAccountReason">08I</value>
+				<value name="ApplyNo">2028102100000003</value>
+				<value name="ServiceID">xdbPledgor</value>
+				<value name="BGRelation">0</value>
+				<value name="IdType">Ind01</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step7grjyPCLEvent7">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent7","Age":52,"Loanterm":10,"BGRelation":"0","IdType":"Ind01","HXBlackList101":0,"HXBlackList102":0,"HXBlackList201":1,"HXBlackList301":0,"HXBlackList302":0,"HXBlackList401":0,"HXBlackList501":0,"HXBlackList502":0,"HXBlackList601":0,"HXBlackList801":0,"HXBlackList901":0,"YJBlackList":0,"IDInfoCheckResult":"01","ZyIsJudicialFreeze":"0","PsRiskLevel":50,"GuaranteeLoanState":2,"ComCurDueStatus10":8,"ComGroupCurDueStatus10":20,"ComGuanCurDueStatus10":19,"Com24MMaxDueDays10":21,"ComGuan24MDueDays10":22,"ComGroup24MDueDays10":25,"LoanCurrOveDueNum":8,"CardCurrOverDueMoney":150.26,"Loan24MMaxOverDueNum":10,"Card24MOverDueOver200MaxNum":10,"Loan24MSumOverDueNum":25,"Card24MOverDueOver200SumNum":30,"DenyByYXD3MTimes":10,"CountBlackList":1,"CountBlackList2":0}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step8grjyPCLEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent8","PbocLoanOverDueNum":null,"PbocCreditOverDueMoney":null,"PbocSemiCreditOver180Debt":null,"PbocLCurrOverDue":null,"PbocAccStatus":null,"PbocLoan24MRepayStatus":"","PbocCredit24MAbnormal":"","PbocLoan24MMOverDueNum":null,"PbocLoan24MSOverDueNum":null,"PbocCc24MMOverDueNum":null,"PbocCc24MSOverDueNum":null,"PbocQuotaRateOver80Account":null,"PbocCreditLoan2MQueryRecordNum":null,"PbocBadDebt":null,"PbocAssetsDisposal":null,"PBOCGuaranteeRepay":null,"PbocMinRepayAccountNum":null,"PbocGuaranteeaNum":null,"PbocCreditTotalNum":null,"PbocMaxGuarCategory5":null,"PbocLoanCurrLenderNum":null,"PbocForceRecordNum":null,"PbocAdministrationPunishNum":null,"PbocLoanTradeType":0,"PbocCreditTradeType":0}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	
+	<case id = "006" tittle = "续贷宝保证人006" trancode = "02DEJ057" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1设置司法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="050107">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step2设置核心黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="059135-06">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step3设置预警黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05CRW003-03">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step4设置核心联网核查挡板数据">
+			<Action type="tcp_damper_set" trancode="021801">
+				<value name="//CHECKRESULT">02</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step5设置汇法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05EDM005-06">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step6发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ057">
+				<value name="IDNO">412850196500041443</value>
+				<value name="FullName">测试6</value>
+				<value name="Age">53</value>
+				<value name="Loanterm">12</value>
+				<value name="ApplyUserId">100365</value>
+				<value name="PbocAccountReason">19I</value>
+				<value name="ApplyNo">2028102100000003</value>
+				<value name="ServiceID">xdbPledgor</value>
+				<value name="BGRelation">1</value>
+				<value name="IdType">Ind01</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step7grjyPCLEvent7">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent7","Age":53,"Loanterm":12,"BGRelation":"1","IdType":"Ind01","HXBlackList101":0,"HXBlackList102":0,"HXBlackList201":0,"HXBlackList301":1,"HXBlackList302":0,"HXBlackList401":0,"HXBlackList501":0,"HXBlackList502":0,"HXBlackList601":0,"HXBlackList801":0,"HXBlackList901":0,"YJBlackList":0,"IDInfoCheckResult":"02","ZyIsJudicialFreeze":"0","PsRiskLevel":50,"GuaranteeLoanState":3,"ComCurDueStatus10":10,"ComGroupCurDueStatus10":12,"ComGuanCurDueStatus10":11,"Com24MMaxDueDays10":13,"ComGuan24MDueDays10":14,"ComGroup24MDueDays10":16,"LoanCurrOveDueNum":10,"CardCurrOverDueMoney":50,"Loan24MMaxOverDueNum":15,"Card24MOverDueOver200MaxNum":25,"Loan24MSumOverDueNum":30,"Card24MOverDueOver200SumNum":0,"DenyByYXD3MTimes":12,"CountBlackList":0,"CountBlackList2":1}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step8grjyPCLEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent8","PbocLoanOverDueNum":1,"PbocCreditOverDueMoney":1,"PbocSemiCreditOver180Debt":1,"PbocLCurrOverDue":1,"PbocAccStatus":0,"PbocLoan24MRepayStatus":"","PbocCredit24MAbnormal":"","PbocLoan24MMOverDueNum":0,"PbocLoan24MSOverDueNum":0,"PbocCc24MMOverDueNum":0,"PbocCc24MSOverDueNum":0,"PbocQuotaRateOver80Account":0,"PbocCreditLoan2MQueryRecordNum":0,"PbocBadDebt":0,"PbocAssetsDisposal":0,"PBOCGuaranteeRepay":0,"PbocMinRepayAccountNum":0,"PbocGuaranteeaNum":0,"PbocCreditTotalNum":0,"PbocMaxGuarCategory5":0,"PbocLoanCurrLenderNum":0,"PbocForceRecordNum":0,"PbocAdministrationPunishNum":0,"PbocLoanTradeType":0,"PbocCreditTradeType":0}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "007" tittle = "续贷宝保证人007" trancode = "02DEJ057" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1设置司法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="050107">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step2设置核心黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="059135-07">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step3设置预警黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05CRW003">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step4设置核心联网核查挡板数据">
+			<Action type="tcp_damper_set" trancode="021801">
+				<value name="//CHECKRESULT">03</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step5设置汇法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05EDM005-07">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step6发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ057">
+				<value name="IDNO">412838199505010581</value>
+				<value name="FullName">测试7</value>
+				<value name="Age">23</value>
+				<value name="Loanterm">15</value>
+				<value name="ApplyUserId">100366</value>
+				<value name="PbocAccountReason">22I</value>
+				<value name="ApplyNo">2028102100000003</value>
+				<value name="ServiceID">xdbPledgor</value>
+				<value name="BGRelation">0</value>
+				<value name="IdType">Ind01</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step7grjyPCLEvent7">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent7","Age":23,"Loanterm":15,"BGRelation":"0","IdType":"Ind01","HXBlackList101":0,"HXBlackList102":0,"HXBlackList201":0,"HXBlackList301":0,"HXBlackList302":1,"HXBlackList401":0,"HXBlackList501":0,"HXBlackList502":0,"HXBlackList601":0,"HXBlackList801":0,"HXBlackList901":0,"YJBlackList":0,"IDInfoCheckResult":"03","ZyIsJudicialFreeze":"0","PsRiskLevel":null,"GuaranteeLoanState":null,"ComCurDueStatus10":null,"ComGroupCurDueStatus10":null,"ComGuanCurDueStatus10":null,"Com24MMaxDueDays10":null,"ComGuan24MDueDays10":null,"ComGroup24MDueDays10":null,"LoanCurrOveDueNum":null,"CardCurrOverDueMoney":null,"Loan24MMaxOverDueNum":null,"Card24MOverDueOver200MaxNum":null,"Loan24MSumOverDueNum":null,"Card24MOverDueOver200SumNum":null,"DenyByYXD3MTimes":null,"CountBlackList":0,"CountBlackList2":1}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step8grjyPCLEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent8","PbocLoanOverDueNum":0,"PbocCreditOverDueMoney":80,"PbocSemiCreditOver180Debt":60,"PbocLCurrOverDue":8,"PbocAccStatus":1,"PbocLoan24MRepayStatus":"D","PbocCredit24MAbnormal":"G","PbocLoan24MMOverDueNum":1,"PbocLoan24MSOverDueNum":1,"PbocCc24MMOverDueNum":1,"PbocCc24MSOverDueNum":1,"PbocQuotaRateOver80Account":1,"PbocCreditLoan2MQueryRecordNum":1,"PbocBadDebt":1,"PbocAssetsDisposal":1,"PBOCGuaranteeRepay":1,"PbocMinRepayAccountNum":1,"PbocGuaranteeaNum":1,"PbocCreditTotalNum":1,"PbocMaxGuarCategory5":1,"PbocLoanCurrLenderNum":1,"PbocForceRecordNum":1,"PbocAdministrationPunishNum":1,"PbocLoanTradeType":null,"PbocCreditTradeType":null}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "008" tittle = "续贷宝保证人008" trancode = "02DEJ057" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1设置司法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="050107">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step2设置核心黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="059135-08">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step3设置预警黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05CRW003">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step4设置核心联网核查挡板数据">
+			<Action type="tcp_damper_set" trancode="021801">
+				<value name="//CHECKRESULT">04</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step5设置汇法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05EDM005-08">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step6发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ057">
+				<value name="IDNO">411029195502061050</value>
+				<value name="FullName">测试8</value>
+				<value name="Age">63</value>
+				<value name="Loanterm">20</value>
+				<value name="ApplyUserId">100367</value>
+				<value name="PbocAccountReason">23I</value>
+				<value name="ApplyNo">2028102100000003</value>
+				<value name="ServiceID">xdbPledgor</value>
+				<value name="BGRelation">1</value>
+				<value name="IdType">Ind01</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step7grjyPCLEvent7">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent7","Age":63,"Loanterm":20,"BGRelation":"1","IdType":"Ind01","HXBlackList101":0,"HXBlackList102":0,"HXBlackList201":0,"HXBlackList301":0,"HXBlackList302":0,"HXBlackList401":1,"HXBlackList501":0,"HXBlackList502":0,"HXBlackList601":0,"HXBlackList801":0,"HXBlackList901":0,"YJBlackList":0,"IDInfoCheckResult":"04","ZyIsJudicialFreeze":"0","PsRiskLevel":"","GuaranteeLoanState":"","ComCurDueStatus10":"","ComGroupCurDueStatus10":"","ComGuanCurDueStatus10":"","Com24MMaxDueDays10":"","ComGuan24MDueDays10":"","ComGroup24MDueDays10":"","LoanCurrOveDueNum":"","CardCurrOverDueMoney":"","Loan24MMaxOverDueNum":"","Card24MOverDueOver200MaxNum":"","Loan24MSumOverDueNum":"","Card24MOverDueOver200SumNum":"","DenyByYXD3MTimes":"","CountBlackList":0,"CountBlackList2":1}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step8grjyPCLEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent8","PbocLoanOverDueNum":0,"PbocCreditOverDueMoney":25.36,"PbocSemiCreditOver180Debt":32.56,"PbocLCurrOverDue":2,"PbocAccStatus":10,"PbocLoan24MRepayStatus":"Z","PbocCredit24MAbnormal":"G","PbocLoan24MMOverDueNum":15,"PbocLoan24MSOverDueNum":10,"PbocCc24MMOverDueNum":9,"PbocCc24MSOverDueNum":10,"PbocQuotaRateOver80Account":10,"PbocCreditLoan2MQueryRecordNum":12,"PbocBadDebt":2,"PbocAssetsDisposal":3,"PBOCGuaranteeRepay":2,"PbocMinRepayAccountNum":2,"PbocGuaranteeaNum":5,"PbocCreditTotalNum":5,"PbocMaxGuarCategory5":7,"PbocLoanCurrLenderNum":4,"PbocForceRecordNum":4,"PbocAdministrationPunishNum":5,"PbocLoanTradeType":0,"PbocCreditTradeType":0}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "009" tittle = "续贷宝保证人009" trancode = "02DEJ057" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1设置司法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="050107">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step2设置核心黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="059135-09">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step3设置预警黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05CRW003">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step4设置核心联网核查挡板数据">
+			<Action type="tcp_damper_set" trancode="021801">
+				<value name="//CHECKRESULT">05</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step5设置汇法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05EDM005-09">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step6发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ057">
+				<value name="IDNO">411029193409102517</value>
+				<value name="FullName">测试9</value>
+				<value name="Age">84</value>
+				<value name="Loanterm">25</value>
+				<value name="ApplyUserId">100368</value>
+				<value name="PbocAccountReason">01I</value>
+				<value name="ApplyNo">2028102100000003</value>
+				<value name="ServiceID">xdbPledgor</value>
+				<value name="BGRelation">0</value>
+				<value name="IdType">Ind01</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step7grjyPCLEvent7">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent7","Age":84,"Loanterm":25,"BGRelation":"0","IdType":"Ind01","HXBlackList101":0,"HXBlackList102":0,"HXBlackList201":0,"HXBlackList301":0,"HXBlackList302":0,"HXBlackList401":0,"HXBlackList501":1,"HXBlackList502":0,"HXBlackList601":0,"HXBlackList801":0,"HXBlackList901":0,"YJBlackList":0,"IDInfoCheckResult":"05","ZyIsJudicialFreeze":"0","PsRiskLevel":10,"GuaranteeLoanState":4,"ComCurDueStatus10":200,"ComGroupCurDueStatus10":300,"ComGuanCurDueStatus10":200,"Com24MMaxDueDays10":400,"ComGuan24MDueDays10":500,"ComGroup24MDueDays10":600,"LoanCurrOveDueNum":30,"CardCurrOverDueMoney":300000.24,"Loan24MMaxOverDueNum":300,"Card24MOverDueOver200MaxNum":200,"Loan24MSumOverDueNum":300,"Card24MOverDueOver200SumNum":500,"DenyByYXD3MTimes":20,"CountBlackList":0,"CountBlackList2":1}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step8grjyPCLEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent8","PbocLoanOverDueNum":0,"PbocCreditOverDueMoney":0,"PbocSemiCreditOver180Debt":0,"PbocLCurrOverDue":3,"PbocAccStatus":2,"PbocLoan24MRepayStatus":"G","PbocCredit24MAbnormal":"G","PbocLoan24MMOverDueNum":14,"PbocLoan24MSOverDueNum":24,"PbocCc24MMOverDueNum":11,"PbocCc24MSOverDueNum":12,"PbocQuotaRateOver80Account":25,"PbocCreditLoan2MQueryRecordNum":2,"PbocBadDebt":0,"PbocAssetsDisposal":0,"PBOCGuaranteeRepay":5,"PbocMinRepayAccountNum":3,"PbocGuaranteeaNum":10,"PbocCreditTotalNum":1,"PbocMaxGuarCategory5":9,"PbocLoanCurrLenderNum":8,"PbocForceRecordNum":0,"PbocAdministrationPunishNum":6,"PbocLoanTradeType":1,"PbocCreditTradeType":1}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "010" tittle = "续贷宝保证人010" trancode = "02DEJ057" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1设置司法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="050107-01">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step2设置核心黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="059135-10">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step3设置预警黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05CRW003">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step4设置核心联网核查挡板数据">
+			<Action type="tcp_damper_set" trancode="021801">
+				<value name="//CHECKRESULT">00</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step5设置汇法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05EDM005-10">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step6发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ057">
+				<value name="IDNO">411029193009081016</value>
+				<value name="FullName">测试10</value>
+				<value name="Age">88</value>
+				<value name="Loanterm">36</value>
+				<value name="ApplyUserId">100369</value>
+				<value name="PbocAccountReason">02I</value>
+				<value name="ApplyNo">2028102100000003</value>
+				<value name="ServiceID">xdbPledgor</value>
+				<value name="BGRelation">1</value>
+				<value name="IdType">Ind01</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step7grjyPCLEvent7">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent7","Age":88,"Loanterm":36,"BGRelation":"1","IdType":"Ind01","HXBlackList101":0,"HXBlackList102":0,"HXBlackList201":0,"HXBlackList301":0,"HXBlackList302":0,"HXBlackList401":0,"HXBlackList501":0,"HXBlackList502":1,"HXBlackList601":0,"HXBlackList801":0,"HXBlackList901":0,"YJBlackList":0,"IDInfoCheckResult":"00","ZyIsJudicialFreeze":"0","PsRiskLevel":20,"GuaranteeLoanState":1,"ComCurDueStatus10":25,"ComGroupCurDueStatus10":40,"ComGuanCurDueStatus10":30,"Com24MMaxDueDays10":50,"ComGuan24MDueDays10":60,"ComGroup24MDueDays10":50,"LoanCurrOveDueNum":1,"CardCurrOverDueMoney":30000,"Loan24MMaxOverDueNum":25,"Card24MOverDueOver200MaxNum":5,"Loan24MSumOverDueNum":1,"Card24MOverDueOver200SumNum":1,"DenyByYXD3MTimes":0,"CountBlackList":0,"CountBlackList2":1}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step8grjyPCLEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent8","PbocLoanOverDueNum":0,"PbocCreditOverDueMoney":0,"PbocSemiCreditOver180Debt":0,"PbocLCurrOverDue":200,"PbocAccStatus":3,"PbocLoan24MRepayStatus":"G","PbocCredit24MAbnormal":"G","PbocLoan24MMOverDueNum":124,"PbocLoan24MSOverDueNum":10,"PbocCc24MMOverDueNum":123,"PbocCc24MSOverDueNum":100,"PbocQuotaRateOver80Account":21,"PbocCreditLoan2MQueryRecordNum":3,"PbocBadDebt":1,"PbocAssetsDisposal":0,"PBOCGuaranteeRepay":0,"PbocMinRepayAccountNum":5,"PbocGuaranteeaNum":2,"PbocCreditTotalNum":3,"PbocMaxGuarCategory5":234,"PbocLoanCurrLenderNum":156,"PbocForceRecordNum":0,"PbocAdministrationPunishNum":0,"PbocLoanTradeType":2,"PbocCreditTradeType":2}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "011" tittle = "续贷宝保证人011" trancode = "02DEJ057" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1设置司法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="050107">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step2设置核心黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="059135-11">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step3设置预警黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05CRW003">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step4设置核心联网核查挡板数据">
+			<Action type="tcp_damper_set" trancode="021801">
+				<value name="//CHECKRESULT">00</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step5设置汇法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05EDM005-11">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step6发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ057">
+				<value name="IDNO">411029194410151038</value>
+				<value name="FullName">测试11</value>
+				<value name="Age">74</value>
+				<value name="Loanterm">80</value>
+				<value name="ApplyUserId">100370</value>
+				<value name="PbocAccountReason">03I</value>
+				<value name="ApplyNo">2028102100000003</value>
+				<value name="ServiceID">xdbPledgor</value>
+				<value name="BGRelation">0</value>
+				<value name="IdType">Ind01</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step7grjyPCLEvent7">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent7","Age":74,"Loanterm":80,"BGRelation":"0","IdType":"Ind01","HXBlackList101":0,"HXBlackList102":0,"HXBlackList201":0,"HXBlackList301":0,"HXBlackList302":0,"HXBlackList401":0,"HXBlackList501":0,"HXBlackList502":0,"HXBlackList601":1,"HXBlackList801":0,"HXBlackList901":0,"YJBlackList":0,"IDInfoCheckResult":"00","ZyIsJudicialFreeze":"0","PsRiskLevel":30,"GuaranteeLoanState":0,"ComCurDueStatus10":700,"ComGroupCurDueStatus10":1,"ComGuanCurDueStatus10":1,"Com24MMaxDueDays10":1,"ComGuan24MDueDays10":1,"ComGroup24MDueDays10":15,"LoanCurrOveDueNum":1,"CardCurrOverDueMoney":30000.2,"Loan24MMaxOverDueNum":1,"Card24MOverDueOver200MaxNum":1,"Loan24MSumOverDueNum":1,"Card24MOverDueOver200SumNum":1,"DenyByYXD3MTimes":0,"CountBlackList":0,"CountBlackList2":1}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step8grjyPCLEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent8","PbocLoanOverDueNum":1,"PbocCreditOverDueMoney":0,"PbocSemiCreditOver180Debt":0,"PbocLCurrOverDue":3,"PbocAccStatus":4,"PbocLoan24MRepayStatus":"G","PbocCredit24MAbnormal":"G","PbocLoan24MMOverDueNum":66,"PbocLoan24MSOverDueNum":50,"PbocCc24MMOverDueNum":16,"PbocCc24MSOverDueNum":25,"PbocQuotaRateOver80Account":50,"PbocCreditLoan2MQueryRecordNum":4,"PbocBadDebt":10,"PbocAssetsDisposal":10,"PBOCGuaranteeRepay":12,"PbocMinRepayAccountNum":0,"PbocGuaranteeaNum":1,"PbocCreditTotalNum":1,"PbocMaxGuarCategory5":0,"PbocLoanCurrLenderNum":36,"PbocForceRecordNum":4,"PbocAdministrationPunishNum":0,"PbocLoanTradeType":3,"PbocCreditTradeType":3}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "012" tittle = "续贷宝保证人012" trancode = "02DEJ057" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1设置司法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="050107-03">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step2设置核心黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="059135-12">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step3设置预警黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05CRW003">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step4设置核心联网核查挡板数据">
+			<Action type="tcp_damper_set" trancode="021801">
+				<value name="//CHECKRESULT">00</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step5设置汇法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05EDM005-12">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step6发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ057">
+				<value name="IDNO">411029194601012073</value>
+				<value name="FullName">测试12</value>
+				<value name="Age">72</value>
+				<value name="Loanterm">100</value>
+				<value name="ApplyUserId">100371</value>
+				<value name="PbocAccountReason">05I</value>
+				<value name="ApplyNo">2028102100000003</value>
+				<value name="ServiceID">xdbPledgor</value>
+				<value name="BGRelation">1</value>
+				<value name="IdType">Ind01</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step7grjyPCLEvent7">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent7","Age":72,"Loanterm":100,"BGRelation":"1","IdType":"Ind01","HXBlackList101":0,"HXBlackList102":0,"HXBlackList201":0,"HXBlackList301":0,"HXBlackList302":0,"HXBlackList401":0,"HXBlackList501":0,"HXBlackList502":0,"HXBlackList601":0,"HXBlackList801":1,"HXBlackList901":0,"YJBlackList":0,"IDInfoCheckResult":"00","ZyIsJudicialFreeze":"1","PsRiskLevel":40,"GuaranteeLoanState":0,"ComCurDueStatus10":0,"ComGroupCurDueStatus10":1,"ComGuanCurDueStatus10":1,"Com24MMaxDueDays10":1,"ComGuan24MDueDays10":1,"ComGroup24MDueDays10":8,"LoanCurrOveDueNum":1,"CardCurrOverDueMoney":1000,"Loan24MMaxOverDueNum":1,"Card24MOverDueOver200MaxNum":0,"Loan24MSumOverDueNum":1,"Card24MOverDueOver200SumNum":1,"DenyByYXD3MTimes":0,"CountBlackList":0,"CountBlackList2":1}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step8grjyPCLEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent8","PbocLoanOverDueNum":1,"PbocCreditOverDueMoney":0,"PbocSemiCreditOver180Debt":0,"PbocLCurrOverDue":1,"PbocAccStatus":0,"PbocLoan24MRepayStatus":"G","PbocCredit24MAbnormal":"G","PbocLoan24MMOverDueNum":0,"PbocLoan24MSOverDueNum":0,"PbocCc24MMOverDueNum":0,"PbocCc24MSOverDueNum":60,"PbocQuotaRateOver80Account":0,"PbocCreditLoan2MQueryRecordNum":5,"PbocBadDebt":0,"PbocAssetsDisposal":0,"PBOCGuaranteeRepay":0,"PbocMinRepayAccountNum":0,"PbocGuaranteeaNum":1,"PbocCreditTotalNum":1,"PbocMaxGuarCategory5":0,"PbocLoanCurrLenderNum":0,"PbocForceRecordNum":0,"PbocAdministrationPunishNum":0,"PbocLoanTradeType":4,"PbocCreditTradeType":4}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "013" tittle = "续贷宝保证人013" trancode = "02DEJ057" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1设置司法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="050107-02">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step2设置核心黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="059135-13">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step3设置预警黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05CRW003">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step4设置核心联网核查挡板数据">
+			<Action type="tcp_damper_set" trancode="021801">
+				<value name="//CHECKRESULT">00</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step5设置汇法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05EDM005-13">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step6发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ057">
+				<value name="IDNO">411029194606131012</value>
+				<value name="FullName">测试13</value>
+				<value name="Age">72</value>
+				<value name="Loanterm">231</value>
+				<value name="ApplyUserId">100372</value>
+				<value name="PbocAccountReason">08I</value>
+				<value name="ApplyNo">2028102100000003</value>
+				<value name="ServiceID">xdbPledgor</value>
+				<value name="BGRelation">0</value>
+				<value name="IdType">Ind01</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step7grjyPCLEvent7">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent7","Age":72,"Loanterm":231,"BGRelation":"0","IdType":"Ind01","HXBlackList101":0,"HXBlackList102":0,"HXBlackList201":0,"HXBlackList301":0,"HXBlackList302":0,"HXBlackList401":0,"HXBlackList501":0,"HXBlackList502":0,"HXBlackList601":0,"HXBlackList801":0,"HXBlackList901":1,"YJBlackList":0,"IDInfoCheckResult":"00","ZyIsJudicialFreeze":null,"PsRiskLevel":50,"GuaranteeLoanState":0,"ComCurDueStatus10":0,"ComGroupCurDueStatus10":1,"ComGuanCurDueStatus10":1,"Com24MMaxDueDays10":1,"ComGuan24MDueDays10":0,"ComGroup24MDueDays10":1,"LoanCurrOveDueNum":1,"CardCurrOverDueMoney":100.23,"Loan24MMaxOverDueNum":1,"Card24MOverDueOver200MaxNum":0,"Loan24MSumOverDueNum":1,"Card24MOverDueOver200SumNum":1,"DenyByYXD3MTimes":0,"CountBlackList":1,"CountBlackList2":0}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step8grjyPCLEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent8","PbocLoanOverDueNum":1,"PbocCreditOverDueMoney":1,"PbocSemiCreditOver180Debt":1,"PbocLCurrOverDue":1,"PbocAccStatus":1,"PbocLoan24MRepayStatus":"G","PbocCredit24MAbnormal":"G","PbocLoan24MMOverDueNum":0,"PbocLoan24MSOverDueNum":1,"PbocCc24MMOverDueNum":0,"PbocCc24MSOverDueNum":0,"PbocQuotaRateOver80Account":80,"PbocCreditLoan2MQueryRecordNum":3,"PbocBadDebt":0,"PbocAssetsDisposal":0,"PBOCGuaranteeRepay":0,"PbocMinRepayAccountNum":1,"PbocGuaranteeaNum":1,"PbocCreditTotalNum":1,"PbocMaxGuarCategory5":0,"PbocLoanCurrLenderNum":0,"PbocForceRecordNum":1,"PbocAdministrationPunishNum":0,"PbocLoanTradeType":10,"PbocCreditTradeType":10}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "014" tittle = "续贷宝保证人014" trancode = "02DEJ057" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1设置司法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="050107">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step2设置核心黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="059135">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step3设置预警黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05CRW003">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step4设置核心联网核查挡板数据">
+			<Action type="tcp_damper_set" trancode="021801">
+				<value name="//CHECKRESULT">00</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step5设置汇法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05EDM005">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step6发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ057">
+				<value name="IDNO">411029195106171012</value>
+				<value name="FullName">测试14</value>
+				<value name="Age">67</value>
+				<value name="Loanterm">12</value>
+				<value name="ApplyUserId">100373</value>
+				<value name="PbocAccountReason">01I</value>
+				<value name="ApplyNo">2028102100000003</value>
+				<value name="ServiceID">xdbPledgor</value>
+				<value name="BGRelation">1</value>
+				<value name="IdType">Ind01</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step7grjyPCLEvent7">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent7","Age":67,"Loanterm":12,"BGRelation":"1","IdType":"Ind01","HXBlackList101":0,"HXBlackList102":0,"HXBlackList201":0,"HXBlackList301":0,"HXBlackList302":0,"HXBlackList401":0,"HXBlackList501":0,"HXBlackList502":0,"HXBlackList601":0,"HXBlackList801":0,"HXBlackList901":0,"YJBlackList":0,"IDInfoCheckResult":"00","ZyIsJudicialFreeze":"0","PsRiskLevel":10,"GuaranteeLoanState":0,"ComCurDueStatus10":0,"ComGroupCurDueStatus10":1,"ComGuanCurDueStatus10":1,"Com24MMaxDueDays10":1,"ComGuan24MDueDays10":0,"ComGroup24MDueDays10":1,"LoanCurrOveDueNum":1,"CardCurrOverDueMoney":500.21,"Loan24MMaxOverDueNum":1,"Card24MOverDueOver200MaxNum":0,"Loan24MSumOverDueNum":1,"Card24MOverDueOver200SumNum":8,"DenyByYXD3MTimes":0,"CountBlackList":0,"CountBlackList2":0}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step8grjyPCLEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent8","PbocLoanOverDueNum":1,"PbocCreditOverDueMoney":0,"PbocSemiCreditOver180Debt":0,"PbocLCurrOverDue":1,"PbocAccStatus":2,"PbocLoan24MRepayStatus":"G","PbocCredit24MAbnormal":"G","PbocLoan24MMOverDueNum":0,"PbocLoan24MSOverDueNum":0,"PbocCc24MMOverDueNum":0,"PbocCc24MSOverDueNum":0,"PbocQuotaRateOver80Account":1,"PbocCreditLoan2MQueryRecordNum":3,"PbocBadDebt":0,"PbocAssetsDisposal":1,"PBOCGuaranteeRepay":1,"PbocMinRepayAccountNum":1,"PbocGuaranteeaNum":2,"PbocCreditTotalNum":1,"PbocMaxGuarCategory5":1,"PbocLoanCurrLenderNum":0,"PbocForceRecordNum":1,"PbocAdministrationPunishNum":0,"PbocLoanTradeType":2,"PbocCreditTradeType":5}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "015" tittle = "续贷宝保证人015" trancode = "02DEJ057" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1设置司法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="050107">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step2设置核心黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="059135">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step3设置预警黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05CRW003">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step4设置核心联网核查挡板数据">
+			<Action type="tcp_damper_set" trancode="021801">
+				<value name="//CHECKRESULT">00</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step5设置汇法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05EDM005">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step6发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ057">
+				<value name="IDNO">411029193210251013</value>
+				<value name="FullName">测试15</value>
+				<value name="Age">86</value>
+				<value name="Loanterm">10</value>
+				<value name="ApplyUserId">100374</value>
+				<value name="PbocAccountReason">02I</value>
+				<value name="ApplyNo">2028102100000003</value>
+				<value name="ServiceID">xdbPledgor</value>
+				<value name="BGRelation">0</value>
+				<value name="IdType">Ind01</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step7grjyPCLEvent7">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent7","Age":86,"Loanterm":10,"BGRelation":"0","IdType":"Ind01","HXBlackList101":0,"HXBlackList102":0,"HXBlackList201":0,"HXBlackList301":0,"HXBlackList302":0,"HXBlackList401":0,"HXBlackList501":0,"HXBlackList502":0,"HXBlackList601":0,"HXBlackList801":0,"HXBlackList901":0,"YJBlackList":0,"IDInfoCheckResult":"00","ZyIsJudicialFreeze":"0","PsRiskLevel":20,"GuaranteeLoanState":3,"ComCurDueStatus10":0,"ComGroupCurDueStatus10":1,"ComGuanCurDueStatus10":1,"Com24MMaxDueDays10":1,"ComGuan24MDueDays10":0,"ComGroup24MDueDays10":0,"LoanCurrOveDueNum":1,"CardCurrOverDueMoney":1.6,"Loan24MMaxOverDueNum":1,"Card24MOverDueOver200MaxNum":0,"Loan24MSumOverDueNum":1,"Card24MOverDueOver200SumNum":2,"DenyByYXD3MTimes":1,"CountBlackList":0,"CountBlackList2":0}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step8grjyPCLEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent8","PbocLoanOverDueNum":1,"PbocCreditOverDueMoney":0,"PbocSemiCreditOver180Debt":1,"PbocLCurrOverDue":1,"PbocAccStatus":3,"PbocLoan24MRepayStatus":"G","PbocCredit24MAbnormal":"G","PbocLoan24MMOverDueNum":0,"PbocLoan24MSOverDueNum":0,"PbocCc24MMOverDueNum":0,"PbocCc24MSOverDueNum":0,"PbocQuotaRateOver80Account":1,"PbocCreditLoan2MQueryRecordNum":3,"PbocBadDebt":0,"PbocAssetsDisposal":1,"PBOCGuaranteeRepay":1,"PbocMinRepayAccountNum":1,"PbocGuaranteeaNum":1,"PbocCreditTotalNum":1,"PbocMaxGuarCategory5":1,"PbocLoanCurrLenderNum":1,"PbocForceRecordNum":1,"PbocAdministrationPunishNum":0,"PbocLoanTradeType":1,"PbocCreditTradeType":1}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "016" tittle = "续贷宝保证人016" trancode = "02DEJ057" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1设置司法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="050107">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step2设置核心黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="059135">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step3设置预警黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05CRW003">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step4设置核心联网核查挡板数据">
+			<Action type="tcp_damper_set" trancode="021801">
+				<value name="//CHECKRESULT">00</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step5设置汇法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05EDM005">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step6发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ057">
+				<value name="IDNO">411029194706241526</value>
+				<value name="FullName">测试16</value>
+				<value name="Age">71</value>
+				<value name="Loanterm">10</value>
+				<value name="ApplyUserId">100375</value>
+				<value name="PbocAccountReason">03I</value>
+				<value name="ApplyNo">2028102100000003</value>
+				<value name="ServiceID">xdbPledgor</value>
+				<value name="BGRelation">1</value>
+				<value name="IdType">Ind01</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step7grjyPCLEvent7">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent7","Age":71,"Loanterm":10,"BGRelation":"1","IdType":"Ind01","HXBlackList101":0,"HXBlackList102":0,"HXBlackList201":0,"HXBlackList301":0,"HXBlackList302":0,"HXBlackList401":0,"HXBlackList501":0,"HXBlackList502":0,"HXBlackList601":0,"HXBlackList801":0,"HXBlackList901":0,"YJBlackList":0,"IDInfoCheckResult":"00","ZyIsJudicialFreeze":"0","PsRiskLevel":30,"GuaranteeLoanState":0,"ComCurDueStatus10":0,"ComGroupCurDueStatus10":2,"ComGuanCurDueStatus10":0,"Com24MMaxDueDays10":3,"ComGuan24MDueDays10":1,"ComGroup24MDueDays10":10,"LoanCurrOveDueNum":10,"CardCurrOverDueMoney":20.59,"Loan24MMaxOverDueNum":1,"Card24MOverDueOver200MaxNum":0,"Loan24MSumOverDueNum":0,"Card24MOverDueOver200SumNum":1,"DenyByYXD3MTimes":1,"CountBlackList":0,"CountBlackList2":0}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step8grjyPCLEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent8","PbocLoanOverDueNum":1,"PbocCreditOverDueMoney":0,"PbocSemiCreditOver180Debt":1,"PbocLCurrOverDue":1,"PbocAccStatus":4,"PbocLoan24MRepayStatus":"G","PbocCredit24MAbnormal":"G","PbocLoan24MMOverDueNum":1,"PbocLoan24MSOverDueNum":0,"PbocCc24MMOverDueNum":0,"PbocCc24MSOverDueNum":1,"PbocQuotaRateOver80Account":1,"PbocCreditLoan2MQueryRecordNum":3,"PbocBadDebt":1,"PbocAssetsDisposal":1,"PBOCGuaranteeRepay":1,"PbocMinRepayAccountNum":1,"PbocGuaranteeaNum":1,"PbocCreditTotalNum":1,"PbocMaxGuarCategory5":1,"PbocLoanCurrLenderNum":1,"PbocForceRecordNum":1,"PbocAdministrationPunishNum":1,"PbocLoanTradeType":1,"PbocCreditTradeType":1}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "017" tittle = "续贷宝保证人017" trancode = "02DEJ057" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1设置司法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="050107">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step2设置核心黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="059135">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step3设置预警黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05CRW003">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step4设置核心联网核查挡板数据">
+			<Action type="tcp_damper_set" trancode="021801">
+				<value name="//CHECKRESULT">00</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step5设置汇法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05EDM005">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step6发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ057">
+				<value name="IDNO">41102919340921253X</value>
+				<value name="FullName">测试17</value>
+				<value name="Age">84</value>
+				<value name="Loanterm">16</value>
+				<value name="ApplyUserId">100376</value>
+				<value name="PbocAccountReason">05I</value>
+				<value name="ApplyNo">2028102100000003</value>
+				<value name="ServiceID">xdbPledgor</value>
+				<value name="BGRelation">0</value>
+				<value name="IdType">Ind01</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step7grjyPCLEvent7">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent7","Age":84,"Loanterm":16,"BGRelation":"0","IdType":"Ind01","HXBlackList101":0,"HXBlackList102":0,"HXBlackList201":0,"HXBlackList301":0,"HXBlackList302":0,"HXBlackList401":0,"HXBlackList501":0,"HXBlackList502":0,"HXBlackList601":0,"HXBlackList801":0,"HXBlackList901":0,"YJBlackList":0,"IDInfoCheckResult":"00","ZyIsJudicialFreeze":"0","PsRiskLevel":40,"GuaranteeLoanState":0,"ComCurDueStatus10":0,"ComGroupCurDueStatus10":3,"ComGuanCurDueStatus10":0,"Com24MMaxDueDays10":4,"ComGuan24MDueDays10":8,"ComGroup24MDueDays10":5,"LoanCurrOveDueNum":10,"CardCurrOverDueMoney":100,"Loan24MMaxOverDueNum":1,"Card24MOverDueOver200MaxNum":1,"Loan24MSumOverDueNum":0,"Card24MOverDueOver200SumNum":1,"DenyByYXD3MTimes":1,"CountBlackList":0,"CountBlackList2":0}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step8grjyPCLEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent8","PbocLoanOverDueNum":1,"PbocCreditOverDueMoney":1,"PbocSemiCreditOver180Debt":1,"PbocLCurrOverDue":1,"PbocAccStatus":0,"PbocLoan24MRepayStatus":"G","PbocCredit24MAbnormal":"G","PbocLoan24MMOverDueNum":1,"PbocLoan24MSOverDueNum":1,"PbocCc24MMOverDueNum":0,"PbocCc24MSOverDueNum":1,"PbocQuotaRateOver80Account":1,"PbocCreditLoan2MQueryRecordNum":3,"PbocBadDebt":1,"PbocAssetsDisposal":1,"PBOCGuaranteeRepay":1,"PbocMinRepayAccountNum":1,"PbocGuaranteeaNum":1,"PbocCreditTotalNum":1,"PbocMaxGuarCategory5":1,"PbocLoanCurrLenderNum":1,"PbocForceRecordNum":1,"PbocAdministrationPunishNum":1,"PbocLoanTradeType":1,"PbocCreditTradeType":1}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "018" tittle = "续贷宝保证人018" trancode = "02DEJ057" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1设置司法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="050107">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step2设置核心黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="059135">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step3设置预警黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05CRW003">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step4设置核心联网核查挡板数据">
+			<Action type="tcp_damper_set" trancode="021801">
+				<value name="//CHECKRESULT">00</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step5设置汇法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05EDM005">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step6发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ057">
+				<value name="IDNO">41102919450110101X</value>
+				<value name="FullName">测试18</value>
+				<value name="Age">73</value>
+				<value name="Loanterm">17</value>
+				<value name="ApplyUserId">100377</value>
+				<value name="PbocAccountReason">08I</value>
+				<value name="ApplyNo">2028102100000003</value>
+				<value name="ServiceID">xdbPledgor</value>
+				<value name="BGRelation">1</value>
+				<value name="IdType">Ind01</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step7grjyPCLEvent7">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent7","Age":73,"Loanterm":17,"BGRelation":"1","IdType":"Ind01","HXBlackList101":0,"HXBlackList102":0,"HXBlackList201":0,"HXBlackList301":0,"HXBlackList302":0,"HXBlackList401":0,"HXBlackList501":0,"HXBlackList502":0,"HXBlackList601":0,"HXBlackList801":0,"HXBlackList901":0,"YJBlackList":0,"IDInfoCheckResult":"00","ZyIsJudicialFreeze":"0","PsRiskLevel":50,"GuaranteeLoanState":0,"ComCurDueStatus10":0,"ComGroupCurDueStatus10":1,"ComGuanCurDueStatus10":1,"Com24MMaxDueDays10":2,"ComGuan24MDueDays10":5,"ComGroup24MDueDays10":1,"LoanCurrOveDueNum":10,"CardCurrOverDueMoney":100,"Loan24MMaxOverDueNum":1,"Card24MOverDueOver200MaxNum":1,"Loan24MSumOverDueNum":0,"Card24MOverDueOver200SumNum":1,"DenyByYXD3MTimes":1,"CountBlackList":0,"CountBlackList2":0}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step8grjyPCLEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent8","PbocLoanOverDueNum":1,"PbocCreditOverDueMoney":1,"PbocSemiCreditOver180Debt":1,"PbocLCurrOverDue":1,"PbocAccStatus":0,"PbocLoan24MRepayStatus":"G","PbocCredit24MAbnormal":"G","PbocLoan24MMOverDueNum":1,"PbocLoan24MSOverDueNum":1,"PbocCc24MMOverDueNum":1,"PbocCc24MSOverDueNum":1,"PbocQuotaRateOver80Account":1,"PbocCreditLoan2MQueryRecordNum":3,"PbocBadDebt":1,"PbocAssetsDisposal":1,"PBOCGuaranteeRepay":1,"PbocMinRepayAccountNum":1,"PbocGuaranteeaNum":1,"PbocCreditTotalNum":1,"PbocMaxGuarCategory5":1,"PbocLoanCurrLenderNum":1,"PbocForceRecordNum":1,"PbocAdministrationPunishNum":1,"PbocLoanTradeType":1,"PbocCreditTradeType":1}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "019" tittle = "续贷宝保证人019" trancode = "02DEJ057" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1设置司法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="050107">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step2设置核心黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="059135">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step3设置预警黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05CRW003">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step4设置核心联网核查挡板数据">
+			<Action type="tcp_damper_set" trancode="021801">
+				<value name="//CHECKRESULT">00</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step5设置汇法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05EDM005">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step6发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ057">
+				<value name="IDNO">411029192706291014</value>
+				<value name="FullName">测试19</value>
+				<value name="Age">91</value>
+				<value name="Loanterm">19</value>
+				<value name="ApplyUserId">100378</value>
+				<value name="PbocAccountReason">01I</value>
+				<value name="ApplyNo">2028102100000003</value>
+				<value name="ServiceID">xdbPledgor</value>
+				<value name="BGRelation">0</value>
+				<value name="IdType">Ind01</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step7grjyPCLEvent7">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent7","Age":91,"Loanterm":19,"BGRelation":"0","IdType":"Ind01","HXBlackList101":0,"HXBlackList102":0,"HXBlackList201":0,"HXBlackList301":0,"HXBlackList302":0,"HXBlackList401":0,"HXBlackList501":0,"HXBlackList502":0,"HXBlackList601":0,"HXBlackList801":0,"HXBlackList901":0,"YJBlackList":0,"IDInfoCheckResult":"00","ZyIsJudicialFreeze":"0","PsRiskLevel":10,"GuaranteeLoanState":0,"ComCurDueStatus10":0,"ComGroupCurDueStatus10":5,"ComGuanCurDueStatus10":1,"Com24MMaxDueDays10":8,"ComGuan24MDueDays10":0,"ComGroup24MDueDays10":1,"LoanCurrOveDueNum":10,"CardCurrOverDueMoney":100,"Loan24MMaxOverDueNum":5,"Card24MOverDueOver200MaxNum":1,"Loan24MSumOverDueNum":0,"Card24MOverDueOver200SumNum":1,"DenyByYXD3MTimes":1,"CountBlackList":0,"CountBlackList2":0}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step8grjyPCLEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent8","PbocLoanOverDueNum":1,"PbocCreditOverDueMoney":1,"PbocSemiCreditOver180Debt":1,"PbocLCurrOverDue":1,"PbocAccStatus":0,"PbocLoan24MRepayStatus":"G","PbocCredit24MAbnormal":"G","PbocLoan24MMOverDueNum":1,"PbocLoan24MSOverDueNum":1,"PbocCc24MMOverDueNum":1,"PbocCc24MSOverDueNum":1,"PbocQuotaRateOver80Account":1,"PbocCreditLoan2MQueryRecordNum":3,"PbocBadDebt":1,"PbocAssetsDisposal":1,"PBOCGuaranteeRepay":1,"PbocMinRepayAccountNum":1,"PbocGuaranteeaNum":1,"PbocCreditTotalNum":1,"PbocMaxGuarCategory5":1,"PbocLoanCurrLenderNum":1,"PbocForceRecordNum":1,"PbocAdministrationPunishNum":1,"PbocLoanTradeType":1,"PbocCreditTradeType":1}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "020" tittle = "续贷宝保证人020" trancode = "02DEJ057" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1设置司法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="050107">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step2设置核心黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="059135">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step3设置预警黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05CRW003">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step4设置核心联网核查挡板数据">
+			<Action type="tcp_damper_set" trancode="021801">
+				<value name="//CHECKRESULT">00</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step5设置汇法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05EDM005">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step6发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ057">
+				<value name="IDNO">411029192605041032</value>
+				<value name="FullName">测试20</value>
+				<value name="Age">92</value>
+				<value name="Loanterm">21</value>
+				<value name="ApplyUserId">100379</value>
+				<value name="PbocAccountReason">02I</value>
+				<value name="ApplyNo">2028102100000003</value>
+				<value name="ServiceID">xdbPledgor</value>
+				<value name="BGRelation">1</value>
+				<value name="IdType">Ind01</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step7grjyPCLEvent7">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent7","Age":92,"Loanterm":21,"BGRelation":"1","IdType":"Ind01","HXBlackList101":0,"HXBlackList102":0,"HXBlackList201":0,"HXBlackList301":0,"HXBlackList302":0,"HXBlackList401":0,"HXBlackList501":0,"HXBlackList502":0,"HXBlackList601":0,"HXBlackList801":0,"HXBlackList901":0,"YJBlackList":0,"IDInfoCheckResult":"00","ZyIsJudicialFreeze":"0","PsRiskLevel":20,"GuaranteeLoanState":0,"ComCurDueStatus10":0,"ComGroupCurDueStatus10":6,"ComGuanCurDueStatus10":1,"Com24MMaxDueDays10":60,"ComGuan24MDueDays10":25,"ComGroup24MDueDays10":1,"LoanCurrOveDueNum":10,"CardCurrOverDueMoney":100,"Loan24MMaxOverDueNum":5,"Card24MOverDueOver200MaxNum":1,"Loan24MSumOverDueNum":0,"Card24MOverDueOver200SumNum":1,"DenyByYXD3MTimes":1,"CountBlackList":0,"CountBlackList2":0}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step8grjyPCLEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent8","PbocLoanOverDueNum":1,"PbocCreditOverDueMoney":1,"PbocSemiCreditOver180Debt":1,"PbocLCurrOverDue":1,"PbocAccStatus":0,"PbocLoan24MRepayStatus":"G","PbocCredit24MAbnormal":"G","PbocLoan24MMOverDueNum":1,"PbocLoan24MSOverDueNum":1,"PbocCc24MMOverDueNum":1,"PbocCc24MSOverDueNum":1,"PbocQuotaRateOver80Account":1,"PbocCreditLoan2MQueryRecordNum":3,"PbocBadDebt":1,"PbocAssetsDisposal":1,"PBOCGuaranteeRepay":1,"PbocMinRepayAccountNum":1,"PbocGuaranteeaNum":1,"PbocCreditTotalNum":1,"PbocMaxGuarCategory5":1,"PbocLoanCurrLenderNum":1,"PbocForceRecordNum":1,"PbocAdministrationPunishNum":1,"PbocLoanTradeType":1,"PbocCreditTradeType":1}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "021" tittle = "续贷宝保证人021" trancode = "02DEJ057" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1设置司法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="050107">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step2设置核心黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="059135">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step3设置预警黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05CRW003">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step4设置核心联网核查挡板数据">
+			<Action type="tcp_damper_set" trancode="021801">
+				<value name="//CHECKRESULT">00</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step5设置汇法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05EDM005">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step6发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ057">
+				<value name="IDNO">411029192605261019</value>
+				<value name="FullName">测试21</value>
+				<value name="Age">92</value>
+				<value name="Loanterm">23</value>
+				<value name="ApplyUserId">100380</value>
+				<value name="PbocAccountReason">03I</value>
+				<value name="ApplyNo">2028102100000003</value>
+				<value name="ServiceID">xdbPledgor</value>
+				<value name="BGRelation">0</value>
+				<value name="IdType">Ind01</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step7grjyPCLEvent7">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent7","Age":92,"Loanterm":23,"BGRelation":"0","IdType":"Ind01","HXBlackList101":0,"HXBlackList102":0,"HXBlackList201":0,"HXBlackList301":0,"HXBlackList302":0,"HXBlackList401":0,"HXBlackList501":0,"HXBlackList502":0,"HXBlackList601":0,"HXBlackList801":0,"HXBlackList901":0,"YJBlackList":0,"IDInfoCheckResult":"00","ZyIsJudicialFreeze":"0","PsRiskLevel":30,"GuaranteeLoanState":1,"ComCurDueStatus10":0,"ComGroupCurDueStatus10":2,"ComGuanCurDueStatus10":1,"Com24MMaxDueDays10":85,"ComGuan24MDueDays10":36,"ComGroup24MDueDays10":1,"LoanCurrOveDueNum":10,"CardCurrOverDueMoney":100,"Loan24MMaxOverDueNum":5,"Card24MOverDueOver200MaxNum":1,"Loan24MSumOverDueNum":0,"Card24MOverDueOver200SumNum":1,"DenyByYXD3MTimes":1,"CountBlackList":0,"CountBlackList2":0}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step8grjyPCLEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent8","PbocLoanOverDueNum":1,"PbocCreditOverDueMoney":1,"PbocSemiCreditOver180Debt":1,"PbocLCurrOverDue":1,"PbocAccStatus":0,"PbocLoan24MRepayStatus":"G","PbocCredit24MAbnormal":"G","PbocLoan24MMOverDueNum":1,"PbocLoan24MSOverDueNum":1,"PbocCc24MMOverDueNum":1,"PbocCc24MSOverDueNum":1,"PbocQuotaRateOver80Account":1,"PbocCreditLoan2MQueryRecordNum":3,"PbocBadDebt":1,"PbocAssetsDisposal":1,"PBOCGuaranteeRepay":1,"PbocMinRepayAccountNum":1,"PbocGuaranteeaNum":1,"PbocCreditTotalNum":1,"PbocMaxGuarCategory5":1,"PbocLoanCurrLenderNum":1,"PbocForceRecordNum":1,"PbocAdministrationPunishNum":1,"PbocLoanTradeType":1,"PbocCreditTradeType":1}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "022" tittle = "续贷宝保证人022" trancode = "02DEJ057" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1设置司法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="050107">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step2设置核心黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="059135">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step3设置预警黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05CRW003">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step4设置核心联网核查挡板数据">
+			<Action type="tcp_damper_set" trancode="021801">
+				<value name="//CHECKRESULT">00</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step5设置汇法黑名单挡板数据">
+			<Action type="tcp_damper_set" trancode="05EDM005">
+				<value name="//RET_STATUS">S</value>
+			</Action>
+			<Verify>
+				<result name = "controlCode">000000</result>
+			</Verify>
+		</step>
+		<step desc="step6发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ057">
+				<value name="IDNO">411029195303281018</value>
+				<value name="FullName">测试22</value>
+				<value name="Age">65</value>
+				<value name="Loanterm">105</value>
+				<value name="ApplyUserId">100381</value>
+				<value name="PbocAccountReason">05I</value>
+				<value name="ApplyNo">2028102100000003</value>
+				<value name="ServiceID">xdbPledgor</value>
+				<value name="BGRelation">1</value>
+				<value name="IdType">Ind01</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step7grjyPCLEvent7">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent7","Age":65,"Loanterm":105,"BGRelation":"1","IdType":"Ind01","HXBlackList101":0,"HXBlackList102":0,"HXBlackList201":0,"HXBlackList301":0,"HXBlackList302":0,"HXBlackList401":0,"HXBlackList501":0,"HXBlackList502":0,"HXBlackList601":0,"HXBlackList801":0,"HXBlackList901":0,"YJBlackList":0,"IDInfoCheckResult":"00","ZyIsJudicialFreeze":"0","PsRiskLevel":40,"GuaranteeLoanState":1,"ComCurDueStatus10":0,"ComGroupCurDueStatus10":1,"ComGuanCurDueStatus10":1,"Com24MMaxDueDays10":2,"ComGuan24MDueDays10":25,"ComGroup24MDueDays10":1,"LoanCurrOveDueNum":10,"CardCurrOverDueMoney":100,"Loan24MMaxOverDueNum":5,"Card24MOverDueOver200MaxNum":1,"Loan24MSumOverDueNum":0,"Card24MOverDueOver200SumNum":1,"DenyByYXD3MTimes":1,"CountBlackList":0,"CountBlackList2":0}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step8grjyPCLEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent8","PbocLoanOverDueNum":1,"PbocCreditOverDueMoney":1,"PbocSemiCreditOver180Debt":1,"PbocLCurrOverDue":1,"PbocAccStatus":0,"PbocLoan24MRepayStatus":"G","PbocCredit24MAbnormal":"G","PbocLoan24MMOverDueNum":1,"PbocLoan24MSOverDueNum":1,"PbocCc24MMOverDueNum":1,"PbocCc24MSOverDueNum":1,"PbocQuotaRateOver80Account":1,"PbocCreditLoan2MQueryRecordNum":3,"PbocBadDebt":1,"PbocAssetsDisposal":1,"PBOCGuaranteeRepay":1,"PbocMinRepayAccountNum":1,"PbocGuaranteeaNum":1,"PbocCreditTotalNum":1,"PbocMaxGuarCategory5":1,"PbocLoanCurrLenderNum":1,"PbocForceRecordNum":1,"PbocAdministrationPunishNum":1,"PbocLoanTradeType":1,"PbocCreditTradeType":1}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+
+
+
+</root>

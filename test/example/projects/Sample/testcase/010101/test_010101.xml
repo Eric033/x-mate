@@ -1,0 +1,86 @@
+<root>
+<preAction>
+	<case id = "0001" tittle = "活期存入功能测试_成功" trancode = "010101" flag = "core full">
+		<step desc="步骤1我应该成功">	
+			<Action type="xml_set" trancode = "010101">
+				<value name="BASE_ACCT_NO">
+					621753030000048531
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2我应该成功">
+			<Action type="damper_set" ip="192.168.99.100" port="1080" api="/some/path3" method="POST">
+				{
+					"headers":{"Content-Type":"application/json","otherHeader":"otherValue"},
+					"body":{"age":"{{case_seqno}}","name":"geek","result":"ok"}
+				}
+			</Action>
+			<Verify>
+				<result name = "result">
+					"ok"
+				</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "0001" tittle = "活期存入功能测试_失败" trancode = "010101" flag = "core full">
+		<step desc="步骤1我应该成功">	
+			<Action type="xml_set" trancode = "010101">
+				<value name="BASE_ACCT_NO">
+					621753030000048531
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2我应该成功">
+			<Action type="damper_set" ip="192.168.99.100" port="1080" api="/some/path3" method="POST">
+				{
+					"headers":{"Content-Type":"application/json","otherHeader":"otherValue"},
+					"body":{"age":"{{case_seqno}}","name":"geek","result":"ok"},
+					"querystring":{}
+				}
+			</Action>
+			<Verify>
+				<result name = "$.result">
+					"ok2"
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2我应该成功">
+			<Action type="damper_set" ip="192.168.99.100" port="1080" api="/some/path3" method="POST">
+				{
+					"headers":{"Content-Type":"application/json","otherHeader":"otherValue"},
+					"body":{"age":"{{case_seqno}}","name":"geek","result":"ok"}
+				}
+			</Action>
+			<Verify>
+				<result name = "result">
+					"ok2"
+				</result>
+			</Verify>
+		</step>
+	</case>
+</root>

@@ -1,0 +1,11 @@
+<root>
+  <case id="1" title="Sample Pet Store App" trancode="/pets" flag="core full">
+    <step desc="List all pets">
+      <Action type="xml_set" trancode="/pets">
+      </Action>
+      <Verify>
+        <result name="status">200</result>
+      </Verify>
+    </step>
+  </case>
+</root>

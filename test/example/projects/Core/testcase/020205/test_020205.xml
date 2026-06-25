@@ -1,0 +1,73 @@
+<root>
+	<preActions>	
+		<Action type="xml_setting" tag = "TRAN_DATE">
+			<value type = "date">
+			now.YYYYMMDD
+			</value>
+		</Action>	
+		<Action type="xml_setting" tag = "SERVICE_CODE">
+			<value type = "string">
+			SVR_INQUIRY
+			</value>
+		</Action>
+	</preActions>
+	<case id = "0001" tittle = "020205_001" trancode = "020205" flag = "core full">
+		<step desc="步骤1">
+			<Action type="xml_set" trancode = "020205">
+				<value name="CCY">
+					CNY
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2">
+			<Action type="sql_exe">
+				<value>
+					select notice_no from ensemble.RB_TD_CALL_HIST where notice_date=To_Date('02/20/2027','MM/DD/YYYY') and del_flag='N'
+				</value>
+			</Action>
+			<Verify>
+				<value>
+					*
+				</value>
+			</Verify>
+			<save>
+				<key name="">
+				   notice_no1
+				</key>
+			</save>
+		</step>
+		<step desc="步骤3">
+			<Action type="xml_set" trancode = "020205_1">
+				<value name="NOTICE_NO">
+					{{notice_no1}}
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+		</case>
+</root>

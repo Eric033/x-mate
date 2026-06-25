@@ -1,0 +1,291 @@
+<root>
+<preActions>
+	<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>
+    <Action type="xml_setting" tag = "EFFECT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "TRAN_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "SERVICE_CODE">
+		<value type = "string">
+			SVR_FINANCIAL
+		</value>
+	</Action>
+</preActions>
+
+<case id = "0001" tittle = "021319银行承兑汇票他查登记新增" trancode = "021319" flag = "core full">
+		<step desc="步骤1">
+			<Action type="xml_set" trancode="021319">
+			    <value name="//Body/OPTIONS">
+					1
+				</value>
+				<value name="//Body/BILL_TYPE">
+					208
+				</value>
+				<value name="//Body/BILL_NO">
+					3130005133096984
+				</value>
+				<value name="//Body/BILL_MEDIUM_TYPE">
+					P
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+				<key name="//Body/REFERENCE">
+					reference
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2银行承兑汇票他查登记增加是否成功">
+			<Action type="sql_exe" >
+				<value>
+				  select count(*) from ensemble.ad_others_query where branch='{{case_branch_id}}' and reference='{{reference}}'
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+		<step desc="步骤3删除">
+			<Action type="xml_set" trancode="021319">
+			    <value name="//Body/OPTIONS">
+					3
+				</value>
+				<value name="//Body/BILL_TYPE">
+					208
+				</value>
+				<value name="//Body/BILL_NO">
+					3130005133096984
+				</value>
+				<value name="//Body/BILL_MEDIUM_TYPE">
+					P
+				</value>
+				<value name="//Body/REFERENCE">
+					{{reference}}
+				</value>
+				<value name="//Body/QUERY_NUM">
+					111111
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			
+		</step>
+</case>
+<case id = "0002" tittle = "021319银行承兑汇票他查登记修改" trancode = "021319" flag = "core full">
+		<step desc="步骤1新增">
+			<Action type="xml_set" trancode="021319">
+			    <value name="//Body/OPTIONS">
+					1
+				</value>
+				<value name="//Body/BILL_TYPE">
+					208
+				</value>
+				<value name="//Body/BILL_NO">
+					3130005133096984
+				</value>
+				<value name="//Body/BILL_MEDIUM_TYPE">
+					P
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+				<key name="//Body/REFERENCE">
+					reference
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2修改">
+			<Action type="xml_set" trancode="021319">
+			    <value name="//Body/OPTIONS">
+					2
+				</value>
+				<value name="//Body/BILL_TYPE">
+					208
+				</value>
+				<value name="//Body/BILL_NO">
+					3130005133096984
+				</value>
+				<value name="//Body/BILL_MEDIUM_TYPE">
+					P
+				</value>
+				<value name="//Body/REFERENCE">
+					{{reference}}
+				</value>
+				<value name="//Body/QUERY_NUM">
+					111111
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+		<step desc="步骤3银行承兑汇票他查登记修改是否成功">
+			<Action type="sql_exe" >
+				<value>
+				  select count(*) from ensemble.ad_others_query where branch='{{case_branch_id}}' and reference='{{reference}}' and query_num='111111'
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+		<step desc="步骤4删除">
+			<Action type="xml_set" trancode="021319">
+			    <value name="//Body/OPTIONS">
+					3
+				</value>
+				<value name="//Body/BILL_TYPE">
+					208
+				</value>
+				<value name="//Body/BILL_NO">
+					3130005133096984
+				</value>
+				<value name="//Body/BILL_MEDIUM_TYPE">
+					P
+				</value>
+				<value name="//Body/REFERENCE">
+					${reference}
+				</value>
+				<value name="//Body/QUERY_NUM">
+					111111
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			
+		</step>
+</case>
+<case id = "0003" tittle = "021319银行承兑汇票他查登记删除" trancode = "021319" flag = "core full">
+		<step desc="步骤1新增">
+			<Action type="xml_set" trancode="021319">
+			    <value name="//Body/OPTIONS">
+					1
+				</value>
+				<value name="//Body/BILL_TYPE">
+					208
+				</value>
+				<value name="//Body/BILL_NO">
+					3130005133096984
+				</value>
+				<value name="//Body/BILL_MEDIUM_TYPE">
+					P
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+				<key name="//Body/REFERENCE">
+					reference
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2删除">
+			<Action type="xml_set" trancode="021319">
+			    <value name="//Body/OPTIONS">
+					3
+				</value>
+				<value name="//Body/BILL_TYPE">
+					208
+				</value>
+				<value name="//Body/BILL_NO">
+					3130005133096984
+				</value>
+				<value name="//Body/BILL_MEDIUM_TYPE">
+					P
+				</value>
+				<value name="//Body/REFERENCE">
+					{{reference}}
+				</value>
+				<value name="//Body/QUERY_NUM">
+					111111
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2银行承兑汇票他查登记删除是否成功">
+			<Action type="sql_exe" >
+				<value>
+				  select count(*) from ensemble.ad_others_query where branch='{{case_branch_id}}' and reference='{{reference}}' and query_num='111111'
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  0
+				</value>
+			</Verify>
+		</step>
+</case>
+
+
+</root>

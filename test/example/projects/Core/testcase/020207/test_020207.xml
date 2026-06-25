@@ -1,0 +1,94 @@
+<root>
+	<preActions>	
+		<Action type="xml_setting" tag = "TRAN_DATE">
+			<value type = "date">
+			now.YYYYMMDD
+			</value>
+		</Action>	
+		<Action type="xml_setting" tag = "SERVICE_CODE">
+			<value type = "string">
+			SVR_INQUIRY
+			</value>
+		</Action>
+	</preActions>
+	<case id = "0001" tittle = "020207_001" trancode = "020207" flag = "core full">
+		<step desc="步骤2">
+			<Action type="sql_exe">
+				<value>
+SELECT b.CERTIFICATE_NO FROM ENSEMBLE.rb_base_acct a,ensemble.rb_acct b where a.acct_status='A' and a.base_acct_no=b.base_acct_no AND b.acct_status='A' AND B.ACCT_TYPE='151' and a.CLIENT_NO='1000675622'
+				</value>
+			</Action>
+			<Verify>
+				<value>
+					*
+				</value>
+			</Verify>
+			<save>
+				<key name="">
+				   certificate_no1
+				</key>
+			</save>
+		</step>
+		<step desc="步骤1">
+			<Action type="xml_set" trancode = "020207">
+				<value name="BASE_ACCT_NO">
+					010033496200010  
+				</value>
+				<value name="CLIENT_NO">
+					1000675622 
+				</value>
+				<value name="IN_BASE_ACCT_NO">
+					010033569100010  
+				</value>
+				<value name="CERTIFICATE_NO">
+					{{certificate_no1}}  
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+				<key name="/Reply_Msg/Body/IN_CERTIFICATE_NO">
+				   in_certificate_no1
+				</key>
+			</save>
+		</step>	
+		<step desc="步骤2">
+			<Action type="xml_set" trancode = "020207">
+				<value name="BASE_ACCT_NO">
+					010033569100010  
+				</value>
+				<value name="CLIENT_NO">
+					1000730312 
+				</value>
+				<value name="IN_BASE_ACCT_NO">
+					010033496200010  
+				</value>
+				<value name="CERTIFICATE_NO">
+					{{in_certificate_no1}}  
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>	
+	</case>
+</root>

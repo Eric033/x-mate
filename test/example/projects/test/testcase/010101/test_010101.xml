@@ -1,0 +1,38 @@
+<root>
+	<case id = "0001" tittle = "010101_001" trancode = "010101" flag = "core full">
+		<step desc="步骤1">
+			<Action type="test" key = "hello" value="">
+			</Action>
+		</step>
+		<step desc="if分支开始">
+			<Action type="if" startOrEnd= "start">
+				<expression>1==1</expression>
+			</Action>
+		</step>
+		<step desc="场景a分支步骤" >	
+			<Action type="test" key = "iseeu" value="" > 
+			</Action>
+		</step>
+		<step desc="if分支结束">
+			<Action type="if" startOrEnd= "end" >
+			</Action>
+		</step>
+		<step desc="if分支开始">
+			<Action type="if" startOrEnd= "start" >
+				<expression>1==3</expression>
+			</Action>
+		</step>
+		<step desc="场景b分支步骤">	
+			<Action type="test" key = "icannotseeu" value="">
+			</Action>
+		</step>
+		<step desc="if分支结束">
+			<Action type="if" startOrEnd= "end" >
+			</Action>
+		</step>
+		<step desc="步骤3">
+			<Action type="test" key = "hula" value="">
+			</Action>
+		</step>
+	</case>
+</root>

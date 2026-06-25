@@ -1,0 +1,78 @@
+<root>
+<preActions>
+	<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>
+    <Action type="xml_setting" tag = "EFFECT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "TRAN_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "SERVICE_CODE">
+		<value type = "string">
+			SVR_FINANCIAL
+		</value>
+	</Action>
+</preActions>
+
+<case id = "0001" tittle = "020507呼叫中心短信维护" trancode = "020507" flag = "core full">
+		<step desc="步骤1">
+			<Action type="xml_set" trancode="020504_22">
+				<value name="//Body/BASE_ACCT_NO">
+					6210355030500019861
+				</value>
+				<value name="//Body/BIZ_TYPE">
+					0
+				</value>
+				<value name="//Body/ACCT_NO">
+					6210355030500019861
+				</value>
+				<value name="//Body/OPER_TYPE">
+					1
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2">
+			<Action type="xml_set" trancode="020507_22">
+				<value name="//Body/BASE_ACCT_NO">
+					6210355030500019861
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+				
+			</save>
+		</step>
+</case>
+
+</root>

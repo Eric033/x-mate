@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Message>
+	<Sys_Head>
+		<TRAN_CODE>02DEJ038</TRAN_CODE>
+		<SERVICE_CODE>SVR_NONFINANCIAL</SERVICE_CODE>
+		<SEQ_NO>CMS18092100000002200</SEQ_NO>
+		<USER_ID>V0003</USER_ID>
+		<CUSTOMER_ID/>
+		<BRANCH_ID>411712</BRANCH_ID>
+		<SOURCE_TYPE>MM</SOURCE_TYPE>
+		<WS_ID>10.100.200.89</WS_ID>
+		<CONSUMER_ID>CMS</CONSUMER_ID>
+		<TRAN_DATE>20280831</TRAN_DATE>
+		<TRAN_TIMESTAMP>181842999</TRAN_TIMESTAMP>
+		<SERVER_ID>10.100.200.89</SERVER_ID>
+		<SOURCE_BRANCH_NO>172501</SOURCE_BRANCH_NO>
+		<DEST_BRANCH_NO/>
+		<TRAN_MODE>ONLINE</TRAN_MODE>
+	</Sys_Head>
+	<Body>
+		<AllRuleCheckDecision>LR,LA,LA</AllRuleCheckDecision>
+		<IDNO>320321196308161821</IDNO>
+		<FullName>张爱华</FullName>
+		<Gender>F</Gender>
+		<HighestEducation>30</HighestEducation>
+		<MarryStatus>20</MarryStatus>
+		<AppliedAmout>70000.0</AppliedAmout>
+		<VerMonthIncome>166.666667</VerMonthIncome>
+		<HsPrice>200000</HsPrice>
+		<PbocAccountType>01</PbocAccountType>
+		<PbocAccountReason>02I</PbocAccountReason>
+		<ServiceID>yxygdHypothecation</ServiceID>
+		<ApplyNo>2017032800000006</ApplyNo>
+		<ApplyUserId>100882</ApplyUserId>
+		<PbocQueryFlag>0</PbocQueryFlag>
+	</Body>
+</Message>

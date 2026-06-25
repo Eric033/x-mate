@@ -1,0 +1,39 @@
+<root>
+<preActions>
+	<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "TRAN_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "SERVICE_CODE">
+		<value type = "string">
+			SVR_FINANCIAL
+		</value>
+	</Action>
+</preActions>
+<case id = "0001" tittle = "ATM本代本存款" trancode = "012001" flag = "core full">
+		<step desc="验证ATM本代本存款交易成功">
+			<Action type="xml_set">
+				<value name="CARD_NO">
+					6236600010125326
+				</value>
+				<value name="PROCESSING_CODE">
+					210000
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+				<result name = "TX_AMT">
+					000000010000
+				</result>
+			</Verify>
+		</step>
+</case>
+</root>

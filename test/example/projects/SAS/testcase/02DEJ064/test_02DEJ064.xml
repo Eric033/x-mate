@@ -1,0 +1,902 @@
+<root>
+	<preActions>
+		<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+			<value type = "date">
+			now.YYYYMMDD
+			</value>
+		</Action>	
+		<Action type="xml_setting" tag = "TRAN_DATE">
+			<value type = "date">
+			now.YYYYMMDD
+			</value>
+		</Action>	
+		<Action type="xml_setting" tag = "SERVICE_CODE">
+			<value type = "string">
+			SVR_FINANCIAL
+			</value>
+		</Action>
+	</preActions>
+
+	<case id = "001" tittle = "商用车抵质押001" trancode = "02DEJ064" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ064">
+				<value name="AllRuleCheckDecision">LA,LA,LA,LA,</value>
+				<value name="IDNO">411057195401200379</value>
+				<value name="FullName">抵质押1</value>
+				<value name="CompanyYear">1</value>
+				<value name="OperPlaceType">010</value>
+				<value name="MarryStatus">10</value>
+				<value name="AppliedAmout">100000</value>
+				<value name="NationalStandardIndustry">A</value>
+				<value name="DownpayMentrate">0.1</value>
+				<value name="CommercialCarType">1</value>
+				<value name="CarPrice">1000</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">01I</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">grsycHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCVEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCVEvent8","AllRuleCheckDecision":"LA","CompanyYear":1,"OperPlaceType":"010","MarryStatus":"10","AppliedAmout":100000,"NationalStandardIndustry":"A","CommercialCarType":"1","CarPrice":1000,"DownpayMentrate":0.1,"PbocDifQueryOrg12PLA":0,"PbocMaxDelq24MNum":0,"PbocNoDeLq12MNum":0,"PbocNoNonmortUncld":0,"PbocCcRateOver80Account":0}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "002" tittle = "商用车抵质押002" trancode = "02DEJ064" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ064">
+				<value name="AllRuleCheckDecision">LR,LR,LR,LR,</value>
+				<value name="IDNO">411057196207040169</value>
+				<value name="FullName">抵质押2</value>
+				<value name="CompanyYear">3</value>
+				<value name="OperPlaceType">020</value>
+				<value name="MarryStatus">23</value>
+				<value name="AppliedAmout">120000.36</value>
+				<value name="NationalStandardIndustry">B</value>
+				<value name="DownpayMentrate">0.156</value>
+				<value name="CommercialCarType">2</value>
+				<value name="CarPrice">1200.36</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">02I</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">grsycHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCVEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCVEvent8","AllRuleCheckDecision":"LR","CompanyYear":3,"OperPlaceType":"020","MarryStatus":"23","AppliedAmout":120000.36,"NationalStandardIndustry":"B","CommercialCarType":"2","CarPrice":1200.36,"DownpayMentrate":0.156,"PbocDifQueryOrg12PLA":1,"PbocMaxDelq24MNum":1,"PbocNoDeLq12MNum":1,"PbocNoNonmortUncld":1,"PbocCcRateOver80Account":1}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "003" tittle = "商用车抵质押003" trancode = "02DEJ064" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ064">
+				<value name="AllRuleCheckDecision">LRD,LRD,LRD,LRD,</value>
+				<value name="IDNO">411057196310280363</value>
+				<value name="FullName">抵质押3</value>
+				<value name="CompanyYear">5</value>
+				<value name="OperPlaceType">030</value>
+				<value name="MarryStatus">24</value>
+				<value name="AppliedAmout">1500000.69</value>
+				<value name="NationalStandardIndustry">C</value>
+				<value name="DownpayMentrate">0.2</value>
+				<value name="CommercialCarType">1</value>
+				<value name="CarPrice">1500.3</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">03I</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">grsycHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCVEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCVEvent8","AllRuleCheckDecision":"LRD","CompanyYear":5,"OperPlaceType":"030","MarryStatus":"24","AppliedAmout":1500000.69,"NationalStandardIndustry":"C","CommercialCarType":"1","CarPrice":1500.3,"DownpayMentrate":0.2,"PbocDifQueryOrg12PLA":5,"PbocMaxDelq24MNum":3,"PbocNoDeLq12MNum":20,"PbocNoNonmortUncld":13,"PbocCcRateOver80Account":14}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "004" tittle = "商用车抵质押004" trancode = "02DEJ064" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ064">
+				<value name="AllRuleCheckDecision">LD,LD,LD,LD,</value>
+				<value name="IDNO">411057196007176862</value>
+				<value name="FullName">抵质押4</value>
+				<value name="CompanyYear">15</value>
+				<value name="OperPlaceType">040</value>
+				<value name="MarryStatus">25</value>
+				<value name="AppliedAmout">1600000.3</value>
+				<value name="NationalStandardIndustry">D</value>
+				<value name="DownpayMentrate">0.25</value>
+				<value name="CommercialCarType">2</value>
+				<value name="CarPrice">2000.23</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">05I</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">grsycHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCVEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCVEvent8","AllRuleCheckDecision":"LD","CompanyYear":15,"OperPlaceType":"040","MarryStatus":"25","AppliedAmout":1600000.3,"NationalStandardIndustry":"D","CommercialCarType":"2","CarPrice":2000.23,"DownpayMentrate":0.25,"PbocDifQueryOrg12PLA":10,"PbocMaxDelq24MNum":12,"PbocNoDeLq12MNum":15,"PbocNoNonmortUncld":11,"PbocCcRateOver80Account":17}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "005" tittle = "商用车抵质押005" trancode = "02DEJ064" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ064">
+				<value name="AllRuleCheckDecision">LA,LR,LRD,LD,</value>
+				<value name="IDNO">411057195107194975</value>
+				<value name="FullName">抵质押5</value>
+				<value name="CompanyYear">20</value>
+				<value name="OperPlaceType">050</value>
+				<value name="MarryStatus">30</value>
+				<value name="AppliedAmout">1700000.45</value>
+				<value name="NationalStandardIndustry">E</value>
+				<value name="DownpayMentrate">0.3</value>
+				<value name="CommercialCarType">1</value>
+				<value name="CarPrice">10222.23</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">08I</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">grsycHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCVEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCVEvent8","AllRuleCheckDecision":"LD","CompanyYear":20,"OperPlaceType":"050","MarryStatus":"30","AppliedAmout":1700000.45,"NationalStandardIndustry":"E","CommercialCarType":"1","CarPrice":10222.23,"DownpayMentrate":0.3,"PbocDifQueryOrg12PLA":15,"PbocMaxDelq24MNum":25,"PbocNoDeLq12MNum":32,"PbocNoNonmortUncld":26,"PbocCcRateOver80Account":27}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "006" tittle = "商用车抵质押006" trancode = "02DEJ064" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ064">
+				<value name="AllRuleCheckDecision">LA,LA,LRD,LRD,</value>
+				<value name="IDNO">411057196804056543</value>
+				<value name="FullName">抵质押6</value>
+				<value name="CompanyYear">2</value>
+				<value name="OperPlaceType">060</value>
+				<value name="MarryStatus">40</value>
+				<value name="AppliedAmout">1000</value>
+				<value name="NationalStandardIndustry">F</value>
+				<value name="DownpayMentrate">0.35</value>
+				<value name="CommercialCarType">1</value>
+				<value name="CarPrice">15000</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">19I</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">grsycHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCVEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCVEvent8","AllRuleCheckDecision":"LRD","CompanyYear":2,"OperPlaceType":"060","MarryStatus":"40","AppliedAmout":1000,"NationalStandardIndustry":"F","CommercialCarType":"1","CarPrice":15000,"DownpayMentrate":0.35,"PbocDifQueryOrg12PLA":25,"PbocMaxDelq24MNum":85,"PbocNoDeLq12MNum":12,"PbocNoNonmortUncld":13,"PbocCcRateOver80Account":16}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "007" tittle = "商用车抵质押007" trancode = "02DEJ064" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ064">
+				<value name="AllRuleCheckDecision">LA,LA,LD,LR,</value>
+				<value name="IDNO">41105719690315038X</value>
+				<value name="FullName">抵质押7</value>
+				<value name="CompanyYear">4</value>
+				<value name="OperPlaceType">070</value>
+				<value name="MarryStatus">90</value>
+				<value name="AppliedAmout">2000000</value>
+				<value name="NationalStandardIndustry">G</value>
+				<value name="DownpayMentrate">1</value>
+				<value name="CommercialCarType">1</value>
+				<value name="CarPrice">15000.36</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">22I</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">grsycHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCVEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCVEvent8","AllRuleCheckDecision":"LD","CompanyYear":4,"OperPlaceType":"070","MarryStatus":"90","AppliedAmout":2000000,"NationalStandardIndustry":"G","CommercialCarType":"1","CarPrice":15000.36,"DownpayMentrate":1,"PbocDifQueryOrg12PLA":100,"PbocMaxDelq24MNum":200,"PbocNoDeLq12MNum":15,"PbocNoNonmortUncld":16,"PbocCcRateOver80Account":19}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "008" tittle = "商用车抵质押008" trancode = "02DEJ064" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ064">
+				<value name="AllRuleCheckDecision">LR,LA,LRD,LD,</value>
+				<value name="IDNO">411057198204180199</value>
+				<value name="FullName">抵质押8</value>
+				<value name="CompanyYear">6</value>
+				<value name="OperPlaceType">080</value>
+				<value name="MarryStatus">10</value>
+				<value name="AppliedAmout">300000</value>
+				<value name="NationalStandardIndustry">H</value>
+				<value name="DownpayMentrate">1.2</value>
+				<value name="CommercialCarType">2</value>
+				<value name="CarPrice">1623.29</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">23I</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">grsycHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCVEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCVEvent8","AllRuleCheckDecision":"LD","CompanyYear":6,"OperPlaceType":"080","MarryStatus":"10","AppliedAmout":300000,"NationalStandardIndustry":"H","CommercialCarType":"2","CarPrice":1623.29,"DownpayMentrate":1.2,"PbocDifQueryOrg12PLA":50,"PbocMaxDelq24MNum":32,"PbocNoDeLq12MNum":45,"PbocNoNonmortUncld":46,"PbocCcRateOver80Account":47}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "009" tittle = "商用车抵质押009" trancode = "02DEJ064" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ064">
+				<value name="AllRuleCheckDecision">LRD,LA,LRD,LA,</value>
+				<value name="IDNO">411057199201280380</value>
+				<value name="FullName">抵质押9</value>
+				<value name="CompanyYear">8</value>
+				<value name="OperPlaceType">040</value>
+				<value name="MarryStatus">10</value>
+				<value name="AppliedAmout">500000</value>
+				<value name="NationalStandardIndustry">I</value>
+				<value name="DownpayMentrate">0.5</value>
+				<value name="CommercialCarType">2</value>
+				<value name="CarPrice">100</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">01I</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">grsycHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCVEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCVEvent8","AllRuleCheckDecision":"LRD","CompanyYear":8,"OperPlaceType":"040","MarryStatus":"10","AppliedAmout":500000,"NationalStandardIndustry":"I","CommercialCarType":"2","CarPrice":100,"DownpayMentrate":0.5,"PbocDifQueryOrg12PLA":"","PbocMaxDelq24MNum":"","PbocNoDeLq12MNum":"","PbocNoNonmortUncld":"","PbocCcRateOver80Account":""}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "010" tittle = "商用车抵质押010" trancode = "02DEJ064" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ064">
+				<value name="AllRuleCheckDecision">LR,LRD,LA,LR,</value>
+				<value name="IDNO">411057198310190355</value>
+				<value name="FullName">抵质押10</value>
+				<value name="CompanyYear">9</value>
+				<value name="OperPlaceType">050</value>
+				<value name="MarryStatus">10</value>
+				<value name="AppliedAmout">600000</value>
+				<value name="NationalStandardIndustry">J</value>
+				<value name="DownpayMentrate">0.56</value>
+				<value name="CommercialCarType">1</value>
+				<value name="CarPrice">1000.26</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">01I</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">grsycHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCVEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCVEvent8","AllRuleCheckDecision":"LRD","CompanyYear":9,"OperPlaceType":"050","MarryStatus":"10","AppliedAmout":600000,"NationalStandardIndustry":"J","CommercialCarType":"1","CarPrice":1000.26,"DownpayMentrate":0.56,"PbocDifQueryOrg12PLA":null,"PbocMaxDelq24MNum":null,"PbocNoDeLq12MNum":null,"PbocNoNonmortUncld":null,"PbocCcRateOver80Account":null}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "011" tittle = "商用车抵质押011" trancode = "02DEJ064" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ064">
+				<value name="AllRuleCheckDecision">LD,LRD,LR,LA</value>
+				<value name="IDNO">412830198900174033</value>
+				<value name="FullName">抵质押11</value>
+				<value name="CompanyYear">11</value>
+				<value name="OperPlaceType">010</value>
+				<value name="MarryStatus">90</value>
+				<value name="AppliedAmout">1000000</value>
+				<value name="NationalStandardIndustry">K</value>
+				<value name="DownpayMentrate">0.893</value>
+				<value name="CommercialCarType">2</value>
+				<value name="CarPrice">1000</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">01I</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">grsycHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCVEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCVEvent8","AllRuleCheckDecision":"LD","CompanyYear":11,"OperPlaceType":"010","MarryStatus":"90","AppliedAmout":1000000,"NationalStandardIndustry":"K","CommercialCarType":"2","CarPrice":1000,"DownpayMentrate":0.893,"PbocDifQueryOrg12PLA":1,"PbocMaxDelq24MNum":2,"PbocNoDeLq12MNum":1,"PbocNoNonmortUncld":1,"PbocCcRateOver80Account":2}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "012" tittle = "商用车抵质押012" trancode = "02DEJ064" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ064">
+				<value name="AllRuleCheckDecision">LD,LA,LRD,LR,</value>
+				<value name="IDNO">412830198011114426</value>
+				<value name="FullName">抵质押12</value>
+				<value name="CompanyYear">13</value>
+				<value name="OperPlaceType">020</value>
+				<value name="MarryStatus">90</value>
+				<value name="AppliedAmout">1786000.89</value>
+				<value name="NationalStandardIndustry">L</value>
+				<value name="DownpayMentrate">0.9</value>
+				<value name="CommercialCarType">1</value>
+				<value name="CarPrice">1000</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">01I</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">grsycHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCVEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCVEvent8","AllRuleCheckDecision":"LD","CompanyYear":13,"OperPlaceType":"020","MarryStatus":"90","AppliedAmout":1786000.89,"NationalStandardIndustry":"L","CommercialCarType":"1","CarPrice":1000,"DownpayMentrate":0.9,"PbocDifQueryOrg12PLA":1,"PbocMaxDelq24MNum":2,"PbocNoDeLq12MNum":1,"PbocNoNonmortUncld":2,"PbocCcRateOver80Account":3}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "013" tittle = "商用车抵质押013" trancode = "02DEJ064" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ064">
+				<value name="AllRuleCheckDecision">LA,LR,LRD,LRD,</value>
+				<value name="IDNO">412834199210211220</value>
+				<value name="FullName">抵质押13</value>
+				<value name="CompanyYear">12</value>
+				<value name="OperPlaceType">030</value>
+				<value name="MarryStatus">10</value>
+				<value name="AppliedAmout">10000</value>
+				<value name="NationalStandardIndustry">M</value>
+				<value name="DownpayMentrate">0.93</value>
+				<value name="CommercialCarType">2</value>
+				<value name="CarPrice">1000000</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">01I</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">grsycHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCVEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCVEvent8","AllRuleCheckDecision":"LRD","CompanyYear":12,"OperPlaceType":"030","MarryStatus":"10","AppliedAmout":10000,"NationalStandardIndustry":"M","CommercialCarType":"2","CarPrice":1000000,"DownpayMentrate":0.93,"PbocDifQueryOrg12PLA":1,"PbocMaxDelq24MNum":2,"PbocNoDeLq12MNum":1,"PbocNoNonmortUncld":2,"PbocCcRateOver80Account":3}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "014" tittle = "商用车抵质押014" trancode = "02DEJ064" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ064">
+				<value name="AllRuleCheckDecision">LA,LR,LD,LA,</value>
+				<value name="IDNO">412831196901022062</value>
+				<value name="FullName">抵质押14</value>
+				<value name="CompanyYear">14</value>
+				<value name="OperPlaceType">040</value>
+				<value name="MarryStatus">10</value>
+				<value name="AppliedAmout">10000</value>
+				<value name="NationalStandardIndustry">N</value>
+				<value name="DownpayMentrate">0.99</value>
+				<value name="CommercialCarType">1</value>
+				<value name="CarPrice">1000000</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">01I</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">grsycHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCVEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCVEvent8","AllRuleCheckDecision":"LD","CompanyYear":14,"OperPlaceType":"040","MarryStatus":"10","AppliedAmout":10000,"NationalStandardIndustry":"N","CommercialCarType":"1","CarPrice":1000000,"DownpayMentrate":0.99,"PbocDifQueryOrg12PLA":1,"PbocMaxDelq24MNum":2,"PbocNoDeLq12MNum":1,"PbocNoNonmortUncld":2,"PbocCcRateOver80Account":3}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "015" tittle = "商用车抵质押015" trancode = "02DEJ064" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ064">
+				<value name="AllRuleCheckDecision">LR,LA,LD,LRD,</value>
+				<value name="IDNO">520102197605294235</value>
+				<value name="FullName">抵质押15</value>
+				<value name="CompanyYear">17</value>
+				<value name="OperPlaceType">050</value>
+				<value name="MarryStatus">10</value>
+				<value name="AppliedAmout">100000</value>
+				<value name="NationalStandardIndustry">O</value>
+				<value name="DownpayMentrate">2.23</value>
+				<value name="CommercialCarType">1</value>
+				<value name="CarPrice">12000</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">01I</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">grsycHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCVEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCVEvent8","AllRuleCheckDecision":"LD","CompanyYear":17,"OperPlaceType":"050","MarryStatus":"10","AppliedAmout":100000,"NationalStandardIndustry":"O","CommercialCarType":"1","CarPrice":12000,"DownpayMentrate":2.23,"PbocDifQueryOrg12PLA":1,"PbocMaxDelq24MNum":2,"PbocNoDeLq12MNum":1,"PbocNoNonmortUncld":2,"PbocCcRateOver80Account":3}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "016" tittle = "商用车抵质押016" trancode = "02DEJ064" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ064">
+				<value name="AllRuleCheckDecision">LR,LRD,LRD,LA,</value>
+				<value name="IDNO">412837199800100029</value>
+				<value name="FullName">抵质押16</value>
+				<value name="CompanyYear">50</value>
+				<value name="OperPlaceType">010</value>
+				<value name="MarryStatus">10</value>
+				<value name="AppliedAmout">10000</value>
+				<value name="NationalStandardIndustry">P</value>
+				<value name="DownpayMentrate">0.3</value>
+				<value name="CommercialCarType">1</value>
+				<value name="CarPrice">16000000</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">01I</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">grsycHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCVEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCVEvent8","AllRuleCheckDecision":"LRD","CompanyYear":50,"OperPlaceType":"010","MarryStatus":"10","AppliedAmout":10000,"NationalStandardIndustry":"P","CommercialCarType":"1","CarPrice":16000000,"DownpayMentrate":0.3,"PbocDifQueryOrg12PLA":1,"PbocMaxDelq24MNum":2,"PbocNoDeLq12MNum":1,"PbocNoNonmortUncld":2,"PbocCcRateOver80Account":3}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "017" tittle = "商用车抵质押017" trancode = "02DEJ064" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ064">
+				<value name="AllRuleCheckDecision">LA,LD,LD,LRD,</value>
+				<value name="IDNO">412850198510170867</value>
+				<value name="FullName">抵质押17</value>
+				<value name="CompanyYear">18</value>
+				<value name="OperPlaceType">020</value>
+				<value name="MarryStatus">90</value>
+				<value name="AppliedAmout">100000</value>
+				<value name="NationalStandardIndustry">Q</value>
+				<value name="DownpayMentrate">0.3</value>
+				<value name="CommercialCarType">1</value>
+				<value name="CarPrice">16000000</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">01I</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">grsycHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCVEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCVEvent8","AllRuleCheckDecision":"LD","CompanyYear":18,"OperPlaceType":"020","MarryStatus":"90","AppliedAmout":100000,"NationalStandardIndustry":"Q","CommercialCarType":"1","CarPrice":16000000,"DownpayMentrate":0.3,"PbocDifQueryOrg12PLA":1,"PbocMaxDelq24MNum":2,"PbocNoDeLq12MNum":1,"PbocNoNonmortUncld":2,"PbocCcRateOver80Account":3}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "018" tittle = "商用车抵质押018" trancode = "02DEJ064" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ064">
+				<value name="AllRuleCheckDecision">LD,LR,LR,LR,</value>
+				<value name="IDNO">41283719880011492X</value>
+				<value name="FullName">抵质押18</value>
+				<value name="CompanyYear">23</value>
+				<value name="OperPlaceType">030</value>
+				<value name="MarryStatus">90</value>
+				<value name="AppliedAmout">200000</value>
+				<value name="NationalStandardIndustry">R</value>
+				<value name="DownpayMentrate">0.33</value>
+				<value name="CommercialCarType">2</value>
+				<value name="CarPrice">16000000</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">02I</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">grsycHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCVEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCVEvent8","AllRuleCheckDecision":"LD","CompanyYear":23,"OperPlaceType":"030","MarryStatus":"90","AppliedAmout":200000,"NationalStandardIndustry":"R","CommercialCarType":"2","CarPrice":16000000,"DownpayMentrate":0.33,"PbocDifQueryOrg12PLA":1,"PbocMaxDelq24MNum":2,"PbocNoDeLq12MNum":1,"PbocNoNonmortUncld":2,"PbocCcRateOver80Account":3}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "019" tittle = "商用车抵质押019" trancode = "02DEJ064" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ064">
+				<value name="AllRuleCheckDecision">LRD,LD,LD,LA,</value>
+				<value name="IDNO">411029198205100542</value>
+				<value name="FullName">抵质押19</value>
+				<value name="CompanyYear">21</value>
+				<value name="OperPlaceType">040</value>
+				<value name="MarryStatus">90</value>
+				<value name="AppliedAmout">300000</value>
+				<value name="NationalStandardIndustry">S</value>
+				<value name="DownpayMentrate">0.3</value>
+				<value name="CommercialCarType">1</value>
+				<value name="CarPrice">16000000</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">01I</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">grsycHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCVEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCVEvent8","AllRuleCheckDecision":"LD","CompanyYear":21,"OperPlaceType":"040","MarryStatus":"90","AppliedAmout":300000,"NationalStandardIndustry":"S","CommercialCarType":"1","CarPrice":16000000,"DownpayMentrate":0.3,"PbocDifQueryOrg12PLA":1,"PbocMaxDelq24MNum":2,"PbocNoDeLq12MNum":1,"PbocNoNonmortUncld":2,"PbocCcRateOver80Account":3}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "020" tittle = "商用车抵质押020" trancode = "02DEJ064" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ064">
+				<value name="AllRuleCheckDecision">LR,LA,LA,LA,</value>
+				<value name="IDNO">412839199608076041</value>
+				<value name="FullName">抵质押20</value>
+				<value name="CompanyYear">22</value>
+				<value name="OperPlaceType">010</value>
+				<value name="MarryStatus">90</value>
+				<value name="AppliedAmout">500000</value>
+				<value name="NationalStandardIndustry">T</value>
+				<value name="DownpayMentrate">0.3</value>
+				<value name="CommercialCarType">1</value>
+				<value name="CarPrice">16000000</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">01I</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">grsycHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCVEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCVEvent8","AllRuleCheckDecision":"LR","CompanyYear":22,"OperPlaceType":"010","MarryStatus":"90","AppliedAmout":500000,"NationalStandardIndustry":"T","CommercialCarType":"1","CarPrice":16000000,"DownpayMentrate":0.3,"PbocDifQueryOrg12PLA":1,"PbocMaxDelq24MNum":2,"PbocNoDeLq12MNum":1,"PbocNoNonmortUncld":2,"PbocCcRateOver80Account":3}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "021" tittle = "商用车抵质押021" trancode = "02DEJ064" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ064">
+				<value name="AllRuleCheckDecision">LR,LR,LA,LR,</value>
+				<value name="IDNO">41283919860829142X</value>
+				<value name="FullName">抵质押21</value>
+				<value name="CompanyYear">25</value>
+				<value name="OperPlaceType">010</value>
+				<value name="MarryStatus">90</value>
+				<value name="AppliedAmout">230000</value>
+				<value name="NationalStandardIndustry">S</value>
+				<value name="DownpayMentrate">0.36</value>
+				<value name="CommercialCarType">1</value>
+				<value name="CarPrice">16000000</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">02I</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">grsycHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCVEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCVEvent8","AllRuleCheckDecision":"LR","CompanyYear":25,"OperPlaceType":"010","MarryStatus":"90","AppliedAmout":230000,"NationalStandardIndustry":"S","CommercialCarType":"1","CarPrice":16000000,"DownpayMentrate":0.36,"PbocDifQueryOrg12PLA":1,"PbocMaxDelq24MNum":2,"PbocNoDeLq12MNum":1,"PbocNoNonmortUncld":2,"PbocCcRateOver80Account":3}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "022" tittle = "商用车抵质押022" trancode = "02DEJ064" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ064">
+				<value name="AllRuleCheckDecision">LD,LR,LA,LA,</value>
+				<value name="IDNO">412839197911146864</value>
+				<value name="FullName">抵质押22</value>
+				<value name="CompanyYear">30</value>
+				<value name="OperPlaceType">010</value>
+				<value name="MarryStatus">90</value>
+				<value name="AppliedAmout">1500000</value>
+				<value name="NationalStandardIndustry">J</value>
+				<value name="DownpayMentrate">0.35</value>
+				<value name="CommercialCarType">1</value>
+				<value name="CarPrice">16000000</value>
+				<value name="ApplyUserId">100360</value>
+				<value name="PbocAccountReason">01I</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">grsycHypothecation</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCVEvent8">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCVEvent8","AllRuleCheckDecision":"LD","CompanyYear":30,"OperPlaceType":"010","MarryStatus":"90","AppliedAmout":1500000,"NationalStandardIndustry":"J","CommercialCarType":"1","CarPrice":16000000,"DownpayMentrate":0.35,"PbocDifQueryOrg12PLA":1,"PbocMaxDelq24MNum":2,"PbocNoDeLq12MNum":1,"PbocNoNonmortUncld":2,"PbocCcRateOver80Account":3}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+
+
+</root>

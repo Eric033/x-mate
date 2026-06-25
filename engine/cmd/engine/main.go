@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -43,6 +44,9 @@ func main() {
 	var startMock bool
 	fs.BoolVar(&startMock, "start-mock", false, "Start built-in mock HTTP server before running tests")
 
+	var reportFile string
+	fs.StringVar(&reportFile, "report-file", "", "Save test report to file")
+
 	if err := fs.Parse(os.Args[1:]); err != nil {
 		os.Exit(1)
 	}
@@ -67,6 +71,21 @@ func main() {
 		os.Exit(1)
 	}
 
+	// If --report-file is set, tee all output to file as well
+	var reportWriter io.Writer = os.Stdout
+	if reportFile != "" {
+		f, err := os.Create(reportFile)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: cannot create report file %s: %v\n", reportFile, err)
+			os.Exit(1)
+		}
+		defer f.Close()
+		// Tee log output (stderr) to file
+		log.SetOutput(io.MultiWriter(os.Stderr, f))
+		// Tee report output (stdout) to file
+		reportWriter = io.MultiWriter(os.Stdout, f)
+	}
+
 	// Initialize context
 	ctx := context.New()
 	cfg.InitContext(ctx)
@@ -86,7 +105,7 @@ func main() {
 	result := r.Run(ctx)
 
 	// Print report
-	report.PrintReport(os.Stdout, result)
+	report.PrintReport(reportWriter, result)
 
 	if result.FailedCases > 0 {
 		os.Exit(1)

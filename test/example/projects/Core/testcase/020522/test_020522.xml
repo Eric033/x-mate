@@ -1,0 +1,297 @@
+<root>
+<preActions>
+	<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>
+    <Action type="xml_setting" tag = "EFFECT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "TRAN_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "SERVICE_CODE">
+		<value type = "string">
+			SVR_FINANCIAL
+		</value>
+	</Action>
+</preActions>
+
+<case id = "0001" tittle = "020522下拨规则信息维护新增" trancode = "020522" flag = "core full">
+		<step desc="步骤1">
+			<Action type="xml_set" trancode="020522">
+			   <value name="//Body/OPTION_KW">
+					01
+				</value>
+				<value name="//Body/GROUP_AGREEMENT_NO">
+					0006019
+				</value>
+				<value name="//Body/LEND_METHOD">
+					RA
+				</value>
+				<value name="//Body/LEND_MODE">
+					01
+				</value>
+				<value name="//Body/START_DATE">
+					20280101
+				</value>
+				<value name="//Body/END_DATE">
+					20500101
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2验证新增是否成功">
+			<Action type="sql_exe" >
+				<value>
+				   SELECT count(*) FROM ensemble.cp_lend_rule_info WHERE group_agreement_no = '0006019' AND lend_method = 'RA' AND status = 'A'
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+		<step desc="步骤3取消">
+			<Action type="xml_set" trancode="020522">
+			    <value name="//Body/OPTION_KW">
+					03
+				</value>
+				<value name="//Body/GROUP_AGREEMENT_NO">
+					0006019
+				</value>
+				<value name="//Body/LEND_METHOD">
+					RA
+				</value>
+				<value name="//Body/LEND_MODE">
+					01
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+</case>
+
+<case id = "0002" tittle = "020522下拨规则信息维护修改为日终下拨" trancode = "020522" flag = "core full">
+		<step desc="步骤1新增">
+			<Action type="xml_set" trancode="020522">
+			   <value name="//Body/OPTION_KW">
+					01
+				</value>
+				<value name="//Body/GROUP_AGREEMENT_NO">
+					0006022
+				</value>
+				<value name="//Body/LEND_METHOD">
+					RA
+				</value>
+				<value name="//Body/LEND_MODE">
+					01
+				</value>
+				<value name="//Body/START_DATE">
+					20280101
+				</value>
+				<value name="//Body/END_DATE">
+					20500101
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2修改">
+			<Action type="xml_set" trancode="020522">
+				<value name="//Body/OPTION_KW">
+					02
+				</value>
+				<value name="//Body/GROUP_AGREEMENT_NO">
+					0006022
+				</value>
+				<value name="//Body/LEND_METHOD">
+					RA
+				</value>
+				<value name="//Body/LEND_MODE">
+					01
+				</value>
+				<value name="//Body/START_DATE">
+					20300101
+				</value>
+				<value name="//Body/END_DATE">
+					20500101
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+		<step desc="步骤3验证修改是否成功">
+			<Action type="sql_exe" >
+				<value>
+				   SELECT count(*) FROM ensemble.cp_lend_rule_info WHERE group_agreement_no = '0006022' AND lend_method = 'RA' AND status = 'A' and LEND_START_DATE=to_date('20300101','YYYYMMDD')
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+		<step desc="步骤4取消">
+			<Action type="xml_set" trancode="020522">
+			    <value name="//Body/OPTION_KW">
+					03
+				</value>
+				<value name="//Body/GROUP_AGREEMENT_NO">
+					0006022
+				</value>
+				<value name="//Body/LEND_METHOD">
+					RA
+				</value>
+				<value name="//Body/LEND_MODE">
+					01
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+</case>
+<case id = "0003" tittle = "020522下拨规则信息维护取消" trancode = "020522" flag = "core full">
+		<step desc="步骤1新增">
+			<Action type="xml_set" trancode="020522">
+			   <value name="//Body/OPTION_KW">
+					01
+				</value>
+				<value name="//Body/GROUP_AGREEMENT_NO">
+					0006020
+				</value>
+				<value name="//Body/LEND_METHOD">
+					RA
+				</value>
+				<value name="//Body/LEND_MODE">
+					01
+				</value>
+				<value name="//Body/START_DATE">
+					20280101
+				</value>
+				<value name="//Body/END_DATE">
+					20500101
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2取消">
+			<Action type="xml_set" trancode="020522">
+			    <value name="//Body/OPTION_KW">
+					03
+				</value>
+				<value name="//Body/GROUP_AGREEMENT_NO">
+					0006020
+				</value>
+				<value name="//Body/LEND_METHOD">
+					RA
+				</value>
+				<value name="//Body/LEND_MODE">
+					01
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+		<step desc="步骤3验证取消是否成功">
+			<Action type="sql_exe" >
+				<value>
+				    SELECT count(*) FROM ensemble.cp_lend_rule_info WHERE group_agreement_no = '0006020' AND lend_method = 'RA' AND status = 'A'
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  0
+				</value>
+			</Verify>
+		</step>
+</case>
+
+
+</root>

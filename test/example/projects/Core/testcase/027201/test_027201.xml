@@ -1,0 +1,37 @@
+<root>
+<preActions>
+	<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "TRAN_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "SERVICE_CODE">
+		<value type = "string">
+			SVR_FINANCIAL
+		</value>
+	</Action>
+</preActions>
+<case id = "0001" tittle = "027201_001" trancode = "027201" flag = "core full">
+		<step desc="步骤2">
+			<Action type="xml_set" trancode = "027201">
+			    <value name="//GOVE_IDEN_NUM">
+					512584196703176138
+				</value>
+				<value name="//CLIENT_NO">
+					1015627685
+				</value>
+			</Action>
+			
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+		</step>
+</case>
+</root>

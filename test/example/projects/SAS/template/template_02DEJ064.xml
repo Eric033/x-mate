@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Message>
+	<Sys_Head>
+		<TRAN_CODE>02DEJ064</TRAN_CODE>
+		<SERVICE_CODE>SVR_NONFINANCIAL</SERVICE_CODE>
+		<SEQ_NO>CMS28112900000129000</SEQ_NO>
+		<USER_ID>V0003</USER_ID>
+		<CUSTOMER_ID/>
+		<BRANCH_ID>411012</BRANCH_ID>
+		<SOURCE_TYPE>MM</SOURCE_TYPE>
+		<WS_ID>10.100.200.89</WS_ID>
+		<CONSUMER_ID>CMS</CONSUMER_ID>
+		<TRAN_DATE>20281129</TRAN_DATE>
+		<TRAN_TIMESTAMP>112408928</TRAN_TIMESTAMP>
+		<SERVER_ID>10.100.200.89</SERVER_ID>
+		<SOURCE_BRANCH_NO>172501</SOURCE_BRANCH_NO>
+		<DEST_BRANCH_NO/>
+		<TRAN_MODE>ONLINE</TRAN_MODE>
+	</Sys_Head>
+	<Body>
+		<AllRuleCheckDecision>LA,LA,LRD,LA,</AllRuleCheckDecision>
+		<IDNO>540101198001010010</IDNO>
+		<FullName>商用车二</FullName>
+		<CompanyYear>0</CompanyYear>
+		<OperPlaceType/>
+		<MarryStatus>24</MarryStatus>
+		<AppliedAmout>10000.0</AppliedAmout>
+		<NationalStandardIndustry>Z</NationalStandardIndustry>
+		<DownpayMentrate>50</DownpayMentrate>
+		<CommercialCarType>2</CommercialCarType>
+		<CarPrice>20000.0</CarPrice>
+		<ApplyUserId>100673</ApplyUserId>
+		<PbocAccountReason>02I</PbocAccountReason>
+		<ServiceID>grsycHypothecation</ServiceID>
+		<ApplyNo>2028110100000010</ApplyNo>
+	</Body>
+</Message>

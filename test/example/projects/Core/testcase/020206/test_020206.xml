@@ -1,0 +1,39 @@
+   <root>
+<preActions>	
+	<Action type="xml_setting" tag = "TRAN_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "SERVICE_CODE">
+		<value type = "string">
+			SVR_FINANCIAL
+		</value>
+	</Action>
+</preActions>
+<case id = "0001" tittle = "020206" trancode = "020206" flag = "core full">
+		<step desc="步骤2">
+			<Action type="xml_set" trancode = "020206">
+				<value name="CR_DR_BASE_ACCT_NO">
+					8020011020000083457
+				</value>
+				<value name="ACCT_OPEN_DATE">
+					{{CurrentDate_1}}
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+</case>
+</root>

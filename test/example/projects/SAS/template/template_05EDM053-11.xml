@@ -1,0 +1,71 @@
+<Reply_Msg>
+	<Sys_Head>
+		<TRAN_CODE>05EDM053</TRAN_CODE>
+		<SERVICE_CODE/>
+		<SEQ_NO>${SEQ_NO}</SEQ_NO>
+		<USER_ID>ADMIN</USER_ID>
+		<CUSTOMER_ID/>
+		<BRANCH_ID/>
+		<SOURCE_TYPE>MM</SOURCE_TYPE>
+		<WS_ID>CMS08012</WS_ID>
+		<CONSUMER_ID>DEJ</CONSUMER_ID>
+		<TRAN_DATE>${TRAN_DATE}</TRAN_DATE>
+		<TRAN_TIMESTAMP>${TRAN_TIMESTAMP}</TRAN_TIMESTAMP>
+		<SERVER_ID>10.101.3.196</SERVER_ID>
+		<SOURCE_BRANCH_NO/>
+		<DEST_BRANCH_NO>172501</DEST_BRANCH_NO>
+		<TRAN_MODE>ONLINE</TRAN_MODE>
+		<RET_STATUS>S</RET_STATUS>
+		<RET_ARRAY>
+			<Row>
+				<RET_MSG>成功</RET_MSG>
+				<RET_CODE>000000</RET_CODE>
+			</Row>
+		</RET_ARRAY>
+	</Sys_Head>
+	<Body>
+		<DECISIONINFO>
+			<success>true</success>
+			<reason_code />
+			<seq_id>1515575368664837T0B556C077481533</seq_id>
+			<spend_time>193</spend_time>
+			<final_decision>Accept</final_decision>
+			<final_score>100</final_score>
+			<hit_rules>
+				<Row>
+					<decision>Accept</decision>
+					<score>24</score>
+					<name>手机号命中诈骗骚扰库</name>
+					<uuid>31fa3c422068452d94840ce9b564293a</uuid>
+					<parentUuid />
+					<id>11576053</id>
+				</Row>
+			</hit_rules>
+		</DECISIONINFO>
+		<RULESINFO>
+			<success>true</success>
+			<reason_code>200</reason_code>
+			<reason_desc>获取成功</reason_desc>
+			<rules>
+				<Row>
+					<rule_id>11576853</rule_id>
+					<decision />
+					<score>8</score>
+					<conditions>
+						<Row>
+							<type>cross_partner</type>
+							<dim_type />
+							<hits_for_dim>
+								<Row>
+									<dim_type>id_number</dim_type>
+									<industry_display_name>大型消费公司</industry_display_name>
+									<count>1</count>
+								</Row>
+							</hits_for_dim>
+						</Row>
+					</conditions>
+				</Row>
+			</rules>
+		</RULESINFO>
+</Body>
+</Reply_Msg>

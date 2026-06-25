@@ -1,0 +1,62 @@
+<root>
+	<preActions>	
+		<Action type="xml_setting" tag = "TRAN_DATE">
+			<value type = "date">
+			now.YYYYMMDD
+			</value>
+		</Action>	
+		<Action type="xml_setting" tag = "SERVICE_CODE">
+			<value type = "string">
+			SVR_INQUIRY
+			</value>
+		</Action>
+	</preActions>
+	<case id = "0001" tittle = "020535" trancode = "020535" flag = "core full">
+		<step desc="步骤1">
+			<Action type="xml_set" trancode = "020535">
+				<value name="OPTION_FLAG">
+					01 
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+				<key name="/Reply_Msg/Body/GREY_GROUP_NO">
+				   GREY_GROUP_NO1
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2">
+			<Action type="xml_set" trancode = "020535_1">
+				<value name="OPTION_FLAG">
+					03 
+				</value>
+				<value name="GREY_GROUP_NO">
+					{{GREY_GROUP_NO1}} 
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+	</case>
+</root>

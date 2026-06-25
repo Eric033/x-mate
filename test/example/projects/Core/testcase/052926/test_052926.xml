@@ -1,0 +1,100 @@
+<root>
+<preActions>
+	<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>
+    <Action type="xml_setting" tag = "EFFECT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "TRAN_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "SERVICE_CODE">
+		<value type = "string">
+			SVR_FINANCIAL
+		</value>
+	</Action>
+</preActions>
+
+<case id = "0001" tittle = "052926还款计划查询支持合同级以及借据级查询" trancode = "052926" flag = "core full 1400">
+		<step desc="步骤1">
+			<Action type="xml_set" trancode="052926">
+			    <value name="//Body/LOAN_NO">
+					0001256790
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+</case>
+<case id = "0002" tittle = "052926还款计划查询支持合同级以及借据级查询当天之后的还款计划" trancode = "052926" flag = "core full 1400">
+		<step desc="步骤1">
+			<Action type="xml_set" trancode="052926">
+			    <value name="//Body/LOAN_NO">
+					0001252551
+				</value>
+				<value name="//Body/FLAG">
+					02
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+</case>
+<case id = "0003" tittle = "052926还款计划查询支持合同级以及借据级查询回收计划" trancode = "052926" flag = "core full 1400">
+		<step desc="步骤1">
+			<Action type="xml_set" trancode="052926">
+			    <value name="//Body/LOAN_NO">
+					0001252789
+				</value>
+				<value name="//Body/FLAG">
+					03
+				</value>
+				<value name="//Body/DD_NO">
+					3
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+</case>
+</root>

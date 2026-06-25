@@ -1,0 +1,65 @@
+<root>
+	<preActions>	
+		<Action type="xml_setting" tag = "TRAN_DATE">
+			<value type = "date">
+			now.YYYYMMDD
+			</value>
+		</Action>	
+		<Action type="xml_setting" tag = "SERVICE_CODE">
+			<value type = "string">
+			SVR_INQUIRY
+			</value>
+		</Action>
+	</preActions>
+	<case id = "0001" tittle = "029180_001" trancode = "029180" flag = "core full">
+		<step desc="步骤1">
+			<Action type="xml_set" trancode = "029180_2">
+				<value name="OPTION">
+					2
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+				<key name="//Reply_Msg/Body/OFF_SEQ_NO">
+				    off_seq_no
+				</key>
+			</save>
+		</step>
+		<step desc="步骤1">
+			<Action type="xml_set" trancode = "029180_2">
+				<value name="OPTION">
+					3
+				</value>
+				<value name="OFF_SEQ_NO">
+				    {{off_seq_no}}
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+				<key name="//Reply_Msg/Body/OFF_SEQ_NO">
+				    off_seq_no
+				</key>
+			</save>
+		</step>
+	</case>
+</root>

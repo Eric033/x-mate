@@ -1,0 +1,76 @@
+<root>
+	<preActions>	
+		<Action type="xml_setting" tag = "TRAN_DATE">
+			<value type = "date">
+			now.YYYYMMDD
+			</value>
+		</Action>	
+		<Action type="xml_setting" tag = "SERVICE_CODE">
+			<value type = "string">
+			SVR_INQUIRY
+			</value>
+		</Action>
+	</preActions>
+	<case id = "0001" tittle = "020524" trancode = "020524" flag = "core full">
+		<step desc="步骤1">
+			<Action type="xml_set" trancode = "020524">
+				<value name="OPTION_FLAG">
+					01 
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2">
+			<Action type="sql_exe">
+				<value>
+					SELECT SUB_GROUP_NO FROM ENSEMBLE.CP_ACCT_GROUP_SUB WHERE status='A' AND group_no = '3837'
+				</value>
+			</Action>
+			<Verify>
+				<value>
+					*
+				</value>
+			</Verify>
+			<save>
+				<key name="">
+				   SUB_GROUP_NO
+				</key>
+			</save>
+		</step>
+		<step desc="步骤1">
+			<Action type="xml_set" trancode = "020524_1">
+				<value name="OPTION_FLAG">
+					03 
+				</value>
+				<value name="SUB_GROUP_NO">
+					{{SUB_GROUP_NO}}
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+	</case>
+</root>

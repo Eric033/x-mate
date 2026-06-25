@@ -1,0 +1,113 @@
+<root>
+<preActions>
+	<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "TRAN_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>		
+	<Action type="xml_setting" tag = "SERVICE_CODE">
+		<value type = "string">
+			SVR_FINANCIAL
+		</value>
+	</Action>
+</preActions>
+<case id = "0001" tittle = "012219_001" trancode = "012219" flag = "core full">
+		<step desc="步骤2">
+			<Action type="xml_set" trancode = "012219">
+				<value name="DRAFT_NO">
+					{{seq_no}}
+				</value>
+				<value name="//DISCOUNT_DATE">
+					{{CurrentDate_1}}
+				</value>
+				<value name="//NOTE_STRAIGHT_DATE">
+					{{CurrentDate_1}}
+				</value>
+				<value name="//DRAFT_MATURE_DATE">
+					{{CurrentDate_1}}
+				</value>
+				<value name="//ISSUE_DATE">
+					{{CurrentDate_1}}
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+		<step desc="步骤3交易行账务">
+			<Action type="sql_exe" >
+				<value>
+				  select count(*) from ensemble.gl_post_today gl where  gl.reference='{{case_seqno}}'and gl.amount=-10.45 and gl.branch='{{case_branch_id}}'  and gl.gl_code='111104' 
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+		<step desc="步骤4交易行账务">
+			<Action type="sql_exe" >
+				<value>
+				  select count(*) from ensemble.gl_post_today gl where  gl.reference='{{case_seqno}}'and gl.amount=-9889.55 and gl.branch='{{case_branch_id}}'  and gl.gl_code='300111' 
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+		<step desc="步骤5交易行账务">
+			<Action type="sql_exe" >
+				<value>
+				  select count(*) from ensemble.gl_post_today gl where  gl.reference='{{case_seqno}}'and gl.amount=9900 and gl.branch='{{case_branch_id}}'  and gl.gl_code='111103' 
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+		<step desc="步骤6交易行账务">
+			<Action type="sql_exe" >
+				<value>
+				  select count(*) from ensemble.gl_post_today gl where  gl.reference='{{case_seqno}}'and gl.amount=9900 and gl.branch='{{case_branch_id}}'  and gl.gl_code='8888' 
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+		<step desc="步骤7交易行账务">
+			<Action type="sql_exe" >
+				<value>
+				  select count(*) from ensemble.gl_post_today gl where  gl.reference='{{case_seqno}}'and gl.amount=-9900 and gl.branch='{{case_branch_id}}'  and gl.gl_code='811702' 
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+</case>
+</root>

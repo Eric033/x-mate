@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Message>
+	<Sys_Head>
+		<TRAN_CODE>02DEJ058</TRAN_CODE>
+		<SERVICE_CODE>SVR_NONFINANCIAL</SERVICE_CODE>
+		<SEQ_NO>CMS28112200000051800</SEQ_NO>
+		<USER_ID>V0003</USER_ID>
+		<CUSTOMER_ID/>
+		<BRANCH_ID>411012</BRANCH_ID>
+		<SOURCE_TYPE>MM</SOURCE_TYPE>
+		<WS_ID>10.100.200.89</WS_ID>
+		<CONSUMER_ID>CMS</CONSUMER_ID>
+		<TRAN_DATE>20281122</TRAN_DATE>
+		<TRAN_TIMESTAMP>140436404</TRAN_TIMESTAMP>
+		<SERVER_ID>10.100.200.89</SERVER_ID>
+		<SOURCE_BRANCH_NO>172501</SOURCE_BRANCH_NO>
+		<DEST_BRANCH_NO/>
+		<TRAN_MODE>ONLINE</TRAN_MODE>
+	</Sys_Head>
+	<Body>
+		<AllRuleCheckDecision>LRD,LA,LRD,LA,LA,</AllRuleCheckDecision>
+		<IDNO>410101199802010016</IDNO>
+		<FullName>抵质押经营三</FullName>
+		<CompanyYear>6</CompanyYear>
+		<OperPlaceType>040</OperPlaceType>
+		<MarryStatus>24</MarryStatus>
+		<AppliedAmout>140000.0</AppliedAmout>
+		<NationalStandardIndustry>J</NationalStandardIndustry>
+		<HsAge/>
+		<Region/>
+		<PledgeType/>
+		<PledgeValue/>
+		<CollateralType>2</CollateralType>
+		<CollateralValue>5555</CollateralValue>
+		<AnnualSales>23333333</AnnualSales>
+		<ApplyUserId>100360</ApplyUserId>
+		<PbocAccountReason>02I</PbocAccountReason>
+		<PbbcPrincipalBalance>0.00</PbbcPrincipalBalance>
+		<ApplyNo>2028102100000013</ApplyNo>
+		<ServiceID>xdbHypothecation</ServiceID>
+	</Body>
+</Message>

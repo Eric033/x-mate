@@ -1,0 +1,64 @@
+<root>
+	<preActions>
+		<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+			<value type = "date">
+			now.YYYYMMDD
+			</value>
+		</Action>	
+		<Action type="xml_setting" tag = "TRAN_DATE">
+			<value type = "date">
+			now.YYYYMMDD
+			</value>
+		</Action>	
+		<Action type="xml_setting" tag = "SERVICE_CODE">
+			<value type = "string">
+			SVR_FINANCIAL
+			</value>
+		</Action>
+	</preActions>
+	<case id = "0001" tittle = "040002" trancode = "040002" flag = "core full">
+		<step desc="步骤2">
+			<Action type="xml_set" trancode = "010105_1">
+				<value name="BASE_ACCT_NO">
+					0160017806500000010
+				</value>
+				<value name="//TRAN_AMT">
+                       1
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2">
+			<Action type="xml_set" trancode = "040002" >
+				<value name="REF_NO">
+				   {{case_seqno}}
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno1
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id1
+				</key>
+			</save>
+		</step>
+	</case>
+</root>

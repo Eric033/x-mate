@@ -93,7 +93,7 @@ func setNodeText(n *html.Node, tags []string, value string) bool {
 		return false
 	}
 
-	if n.Type == html.ElementNode && n.Data == tags[0] {
+	if n.Type == html.ElementNode && strings.EqualFold(n.Data, tags[0]) {
 		if len(tags) == 1 {
 			// Found the target node, set its text content
 			setTextContent(n, value)
@@ -125,7 +125,7 @@ func getNodeText(n *html.Node, tags []string) string {
 		return ""
 	}
 
-	if n.Type == html.ElementNode && n.Data == tags[0] {
+	if n.Type == html.ElementNode && strings.EqualFold(n.Data, tags[0]) {
 		if len(tags) == 1 {
 			return getTextContent(n)
 		}

@@ -1,0 +1,90 @@
+<root>
+<preActions>
+	<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "TRAN_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "SERVICE_CODE">
+		<value type = "string">
+			SVR_FINANCIAL
+		</value>
+	</Action>
+</preActions>
+<case id = "0001" tittle = "010024_001" trancode = "010024" flag = "core full fortest fortest3">
+		<step desc="步骤2">
+			<Action type="xml_set" trancode = "010024">
+				<value name="BUY_CCY">
+					CNY
+				</value>
+			</Action>
+			
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+		<step desc="步骤3交易行开户行同一个账务记账1">
+			<Action type="sql_exe" >
+				<value>
+				  select count(*) from ensemble.gl_post_today gl where  gl.reference='{{case_seqno}}' and gl.amount=-3 and gl.branch='{{case_branch_id}}' and gl.client_no=gl.branch and gl.gl_code='302007' 
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+         <step desc="步骤4交易行开户行同一个账务记账2">
+			<Action type="sql_exe" >
+				<value>
+				  select count(*) from ensemble.gl_post_today gl where  gl.reference='{{case_seqno}}' and gl.amount=1 and gl.branch='{{case_branch_id}}' and gl.client_no=gl.branch and gl.gl_code='642107'
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+		 <step desc="步骤5交易行开户行同一个账务记账3">
+			<Action type="sql_exe" >
+				<value>
+				  select count(*) from ensemble.gl_post_today gl where  gl.reference='{{case_seqno}}' and gl.amount=-1.4 and gl.branch='{{case_branch_id}}' and gl.client_no=gl.branch and gl.gl_code='611107'
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+		 <step desc="步骤6交易行开户行同一个账务记账4">
+			<Action type="sql_exe" >
+				<value>
+				  select count(*) from ensemble.gl_post_today gl where  gl.reference='{{case_seqno}}' and gl.amount=3.4 and gl.branch='{{case_branch_id}}' and gl.client_no=gl.branch and gl.gl_code='101102'
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+</case>
+</root>

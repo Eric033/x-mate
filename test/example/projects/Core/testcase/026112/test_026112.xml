@@ -1,0 +1,77 @@
+<root>
+<preActions>
+	<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "TRAN_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "SERVICE_CODE">
+		<value type = "string">
+			SVR_FINANCIAL
+		</value>
+	</Action>
+</preActions>
+<case id = "0001" tittle = "026112_001" trancode = "026112" flag = "core full">
+		<step desc="步骤1">
+			<Action type="xml_set" trancode = "026112">
+			    <value name="//ACCT_NAME">
+					可可
+				</value>
+				<value name="//BASE_ACCT_NO">
+					419901019510015740
+				</value>
+				<value name="//AIO_ACCT_TYPE">
+					618
+				</value>
+				<value name="//CLIENT_NO">
+					1000824494
+				</value>
+				<value name="//GLOBAL_ID">
+					412838196304188291
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="/Reply_Msg/Body/LOST_NO">
+				   lost_no1
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2">
+			<Action type="xml_set" trancode = "026112_1">
+			    <value name="//ACCT_NAME">
+					可可
+				</value>
+				<value name="//BASE_ACCT_NO">
+					419901019510015740
+				</value>
+				<value name="//AIO_ACCT_TYPE">
+					618
+				</value>
+				<value name="//CLIENT_NO">
+					1000824494
+				</value>
+				<value name="//GLOBAL_ID">
+					412838196304188291
+				</value>
+				<value name="//LOST_NO">
+					{{lost_no1}}
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+		</step>
+</case>
+</root>

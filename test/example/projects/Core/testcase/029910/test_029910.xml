@@ -1,0 +1,59 @@
+<root>
+	<preActions>	
+		<Action type="xml_setting" tag = "TRAN_DATE">
+			<value type = "date">
+			now.YYYYMMDD
+			</value>
+		</Action>	
+		<Action type="xml_setting" tag = "SERVICE_CODE">
+			<value type = "string">
+			SVR_INQUIRY
+			</value>
+		</Action>
+	</preActions>
+	<case id = "0001" tittle = "029910" trancode = "029910" flag = "core full">
+		<step desc="步骤1">
+			<Action type="sql_exe">
+				<value>
+					SELECT START_NO_C FROM ENSEMBLE.TB_VOUCHER_TRAILBOX_INFO WHERE branch='411229' and doc_type='202' and trailbox_id='411229000'
+				</value>
+			</Action>
+			<Verify>
+				<value>
+					*
+				</value>
+			</Verify>
+			<save>
+				<key name="">
+				   START_NO_C1
+				</key>
+			</save>
+		</step>
+		<step desc="步骤1">
+			<Action type="xml_set" trancode = "029910">
+				<value name="START_NO">
+					{{START_NO_C1}}
+				</value>
+				<value name="END_NO">
+					{{START_NO_C1}}
+				</value>
+				<value name="OPTION_KW">
+					D
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+	</case>
+</root>

@@ -1,0 +1,274 @@
+<root>
+	<preActions>
+		<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+			<value type = "date">
+			now.YYYYMMDD
+			</value>
+		</Action>	
+		<Action type="xml_setting" tag = "TRAN_DATE">
+			<value type = "date">
+			now.YYYYMMDD
+			</value>
+		</Action>	
+		<Action type="xml_setting" tag = "SERVICE_CODE">
+			<value type = "string">
+			SVR_FINANCIAL
+			</value>
+		</Action>
+	</preActions>
+
+	<case id = "001" tittle = "经营实体001" trancode = "02DEJ056" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ056">
+				<value name="LoanAccount">5217130642130887</value>
+				<value name="ComName">经营实体1</value>
+				<value name="ApplyUserId">101103</value>
+				<value name="PbocAccountReason">01E</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">xdbCompany</value>
+			</Action>
+		<Verify>
+			<result name = "RET_CODE">000000</result>
+		</Verify>
+		<save>
+			<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+		</save>
+		</step>
+		<step desc="step2grjyPCLEvent6">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent6","EnUnsettleInDebt":0,"ManEntityIncome":0,"NetProfit":0,"ManEntityNetAsset":0,"AssetLiabilityRatio":0.3,"PbbcAMCOutstandDebtBalance":0,"PbbcAMCOutstandDebtNum":0,"PbbcOutstandDebtSumBal":0,"PbbcOutstandDebtSumNum":0,"PbbcOutstandAdvanceBal":0,"PbbcOutstandAdvanceNum":0,"PbbcOutstandGIBalance":0,"PbbcOutstandGINum":0,"PbbcOutstandFocusBal":0,"PbbcOutstandFocusNum":0,"PbbcOutstandBadBal":0,"PbbcOutstandBadNum":0,"PbbcAMCLiquidatedDebtBla":0,"PbbcAMCLiquidatedDebtNum":0,"PbbcLiquidatedDebtSumBal":0,"PbbcLiquidatedDebtSumNum":0,"PbbcLiquidatedAdvanceBal":0,"PbbcLiquidatedAdvanceNum":0,"PbbcLiquidatedGIBalance":0,"PbbcLiquidatedGINum":0,"PbbcLiquidatedFocusBal":0,"PbbcLiquidatedFocusNum":0,"PbbcLiquidatedBadBal":0,"PbbcLiquidatedBadNum":0,"PbbcGuaranteeAmount" :0,"PbbcGuaranteeBalanceNum":null,"PbbcGuarBadDebtBal":0,"PbbcComNoSettleLawsuitNum":0,"PbbcComNoSettleEnforcedNum":0}}</Action>
+				<Verify>
+					<result name = "result">"ok"</result>
+				</Verify>
+		</step>
+
+	</case>
+	<case id = "002" tittle = "经营实体002" trancode = "02DEJ056" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ056">
+				<value name="LoanAccount">F1147523715757668C</value>
+				<value name="ComName">经营实体2</value>
+				<value name="ApplyUserId"/>
+				<value name="PbocAccountReason">02E</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">xdbCompany</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCLEvent6">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent6","EnUnsettleInDebt":null,"ManEntityIncome":null,"NetProfit":null,"ManEntityNetAsset":null,"AssetLiabilityRatio":null,"PbbcAMCOutstandDebtBalance":100,"PbbcAMCOutstandDebtNum":1,"PbbcOutstandDebtSumBal":200,"PbbcOutstandDebtSumNum":2,"PbbcOutstandAdvanceBal":300,"PbbcOutstandAdvanceNum":1,"PbbcOutstandGIBalance":400,"PbbcOutstandGINum":5,"PbbcOutstandFocusBal":500,"PbbcOutstandFocusNum":1,"PbbcOutstandBadBal":600,"PbbcOutstandBadNum":2,"PbbcAMCLiquidatedDebtBla":700,"PbbcAMCLiquidatedDebtNum":1,"PbbcLiquidatedDebtSumBal":800,"PbbcLiquidatedDebtSumNum":8,"PbbcLiquidatedAdvanceBal":3579,"PbbcLiquidatedAdvanceNum":13,"PbbcLiquidatedGIBalance":23.01,"PbbcLiquidatedGINum":1,"PbbcLiquidatedFocusBal":1000,"PbbcLiquidatedFocusNum":2,"PbbcLiquidatedBadBal":100000,"PbbcLiquidatedBadNum":10,"PbbcGuaranteeAmount" :15600,"PbbcGuaranteeBalanceNum":null,"PbbcGuarBadDebtBal":10000,"PbbcComNoSettleLawsuitNum":1,"PbbcComNoSettleEnforcedNum":1}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "003" tittle = "经营实体003" trancode = "02DEJ056" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ056">
+				<value name="LoanAccount">5217130642130889</value>
+				<value name="ComName">经营实体3</value>
+				<value name="ApplyUserId"/>
+				<value name="PbocAccountReason">03E</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">xdbCompany</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCLEvent6">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent6","EnUnsettleInDebt":1000000,"ManEntityIncome":100000,"NetProfit":99999,"ManEntityNetAsset":1000000,"AssetLiabilityRatio":0.86,"PbbcAMCOutstandDebtBalance":800.23,"PbbcAMCOutstandDebtNum":5,"PbbcOutstandDebtSumBal":900.56,"PbbcOutstandDebtSumNum":3,"PbbcOutstandAdvanceBal":1000.56,"PbbcOutstandAdvanceNum":8,"PbbcOutstandGIBalance":2000.24,"PbbcOutstandGINum":10,"PbbcOutstandFocusBal":3000.56,"PbbcOutstandFocusNum":6,"PbbcOutstandBadBal":4000.12,"PbbcOutstandBadNum":7,"PbbcAMCLiquidatedDebtBla":5000.46,"PbbcAMCLiquidatedDebtNum":4,"PbbcLiquidatedDebtSumBal":412.3,"PbbcLiquidatedDebtSumNum":9,"PbbcLiquidatedAdvanceBal":4562.1,"PbbcLiquidatedAdvanceNum":20,"PbbcLiquidatedGIBalance":569.36,"PbbcLiquidatedGINum":12,"PbbcLiquidatedFocusBal":3000,"PbbcLiquidatedFocusNum":1,"PbbcLiquidatedBadBal":120000.01,"PbbcLiquidatedBadNum":16,"PbbcGuaranteeAmount" :18956.2,"PbbcGuaranteeBalanceNum":null,"PbbcGuarBadDebtBal":20000.3,"PbbcComNoSettleLawsuitNum":5,"PbbcComNoSettleEnforcedNum":5}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "004" tittle = "经营实体004" trancode = "02DEJ056" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ056">
+				<value name="LoanAccount">5217130642130890</value>
+				<value name="ComName">经营实体4</value>
+				<value name="ApplyUserId"/>
+				<value name="PbocAccountReason">04E</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">xdbCompany</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCLEvent6">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent6","EnUnsettleInDebt":null,"ManEntityIncome":null,"NetProfit":null,"ManEntityNetAsset":null,"AssetLiabilityRatio":null,"PbbcAMCOutstandDebtBalance":10000.56,"PbbcAMCOutstandDebtNum":10,"PbbcOutstandDebtSumBal":200000.6,"PbbcOutstandDebtSumNum":15,"PbbcOutstandAdvanceBal":100000.3,"PbbcOutstandAdvanceNum":15,"PbbcOutstandGIBalance":20000.6,"PbbcOutstandGINum":15,"PbbcOutstandFocusBal":35698.3,"PbbcOutstandFocusNum":25,"PbbcOutstandBadBal":9856.56,"PbbcOutstandBadNum":6,"PbbcAMCLiquidatedDebtBla":6542.1,"PbbcAMCLiquidatedDebtNum":15,"PbbcLiquidatedDebtSumBal":6000.32,"PbbcLiquidatedDebtSumNum":15,"PbbcLiquidatedAdvanceBal":2345.26,"PbbcLiquidatedAdvanceNum":10,"PbbcLiquidatedGIBalance":255556.32,"PbbcLiquidatedGINum":23,"PbbcLiquidatedFocusBal":5632.89,"PbbcLiquidatedFocusNum":5,"PbbcLiquidatedBadBal":5000.1,"PbbcLiquidatedBadNum":26,"PbbcGuaranteeAmount" :2653400.89,"PbbcGuaranteeBalanceNum":null,"PbbcGuarBadDebtBal":30000.24,"PbbcComNoSettleLawsuitNum":8,"PbbcComNoSettleEnforcedNum":9}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "005" tittle = "经营实体005" trancode = "02DEJ056" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ056">
+				<value name="LoanAccount">5217130642130891</value>
+				<value name="ComName">经营实体5</value>
+				<value name="ApplyUserId"/>
+				<value name="PbocAccountReason">05E</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">xdbCompany</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCLEvent6">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent6","EnUnsettleInDebt":10000.2,"ManEntityIncome":110000.21,"NetProfit":100000.22,"ManEntityNetAsset":100000.23,"AssetLiabilityRatio":1.2,"PbbcAMCOutstandDebtBalance":9999999.99,"PbbcAMCOutstandDebtNum":23,"PbbcOutstandDebtSumBal":99999.36,"PbbcOutstandDebtSumNum":25,"PbbcOutstandAdvanceBal":9999.52,"PbbcOutstandAdvanceNum":23,"PbbcOutstandGIBalance":999999.89,"PbbcOutstandGINum":20,"PbbcOutstandFocusBal":1000.25,"PbbcOutstandFocusNum":20,"PbbcOutstandBadBal":4587.56,"PbbcOutstandBadNum":18,"PbbcAMCLiquidatedDebtBla":2300,"PbbcAMCLiquidatedDebtNum":11,"PbbcLiquidatedDebtSumBal":50000,"PbbcLiquidatedDebtSumNum":11,"PbbcLiquidatedAdvanceBal":100000000,"PbbcLiquidatedAdvanceNum":88,"PbbcLiquidatedGIBalance":200,"PbbcLiquidatedGINum":1,"PbbcLiquidatedFocusBal":12005.3,"PbbcLiquidatedFocusNum":10,"PbbcLiquidatedBadBal":2000.36,"PbbcLiquidatedBadNum":113,"PbbcGuaranteeAmount" :2000,"PbbcGuaranteeBalanceNum":null,"PbbcGuarBadDebtBal":1500,"PbbcComNoSettleLawsuitNum":12,"PbbcComNoSettleEnforcedNum":12}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "006" tittle = "经营实体006" trancode = "02DEJ056" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ056">
+				<value name="LoanAccount">5217130642130892</value>
+				<value name="ComName">经营实体6</value>
+				<value name="ApplyUserId"/>
+				<value name="PbocAccountReason">01E</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">xdbCompany</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCLEvent6">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent6","EnUnsettleInDebt":500000.36,"ManEntityIncome":1100000.1,"NetProfit":300000.8,"ManEntityNetAsset":200000.9,"AssetLiabilityRatio":100,"PbbcAMCOutstandDebtBalance":2356.12,"PbbcAMCOutstandDebtNum":40,"PbbcOutstandDebtSumBal":56230,"PbbcOutstandDebtSumNum":10,"PbbcOutstandAdvanceBal":23458,"PbbcOutstandAdvanceNum":10,"PbbcOutstandGIBalance":25623.14,"PbbcOutstandGINum":25,"PbbcOutstandFocusBal":254.69,"PbbcOutstandFocusNum":3,"PbbcOutstandBadBal":265300,"PbbcOutstandBadNum":21,"PbbcAMCLiquidatedDebtBla":100.23,"PbbcAMCLiquidatedDebtNum":23,"PbbcLiquidatedDebtSumBal":456.23,"PbbcLiquidatedDebtSumNum":13,"PbbcLiquidatedAdvanceBal":120000.59,"PbbcLiquidatedAdvanceNum":50,"PbbcLiquidatedGIBalance":3330.58,"PbbcLiquidatedGINum":20,"PbbcLiquidatedFocusBal":5252.14,"PbbcLiquidatedFocusNum":12,"PbbcLiquidatedBadBal":6824,"PbbcLiquidatedBadNum":26,"PbbcGuaranteeAmount" :1000,"PbbcGuaranteeBalanceNum":null,"PbbcGuarBadDebtBal":100,"PbbcComNoSettleLawsuitNum":25,"PbbcComNoSettleEnforcedNum":21}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "007" tittle = "经营实体007" trancode = "02DEJ056" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ056">
+				<value name="LoanAccount">5217130642130893</value>
+				<value name="ComName">经营实体7</value>
+				<value name="ApplyUserId"/>
+				<value name="PbocAccountReason">01E</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">xdbCompany</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCLEvent6">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent6","EnUnsettleInDebt":600000,"ManEntityIncome":3000,"NetProfit":20000,"ManEntityNetAsset":13000,"AssetLiabilityRatio":80.23,"PbbcAMCOutstandDebtBalance":5600.8,"PbbcAMCOutstandDebtNum":100,"PbbcOutstandDebtSumBal":2568.4,"PbbcOutstandDebtSumNum":100,"PbbcOutstandAdvanceBal":3568.5,"PbbcOutstandAdvanceNum":112,"PbbcOutstandGIBalance":336,"PbbcOutstandGINum":1,"PbbcOutstandFocusBal":23.05,"PbbcOutstandFocusNum":1,"PbbcOutstandBadBal":4562.2,"PbbcOutstandBadNum":12,"PbbcAMCLiquidatedDebtBla":15,"PbbcAMCLiquidatedDebtNum":25,"PbbcLiquidatedDebtSumBal":1234,"PbbcLiquidatedDebtSumNum":56,"PbbcLiquidatedAdvanceBal":1000000,"PbbcLiquidatedAdvanceNum":32,"PbbcLiquidatedGIBalance":5000000000,"PbbcLiquidatedGINum":100,"PbbcLiquidatedFocusBal":25800000,"PbbcLiquidatedFocusNum":23,"PbbcLiquidatedBadBal":6953000.09,"PbbcLiquidatedBadNum":200,"PbbcGuaranteeAmount" :32.15,"PbbcGuaranteeBalanceNum":null,"PbbcGuarBadDebtBal":8900,"PbbcComNoSettleLawsuitNum":35,"PbbcComNoSettleEnforcedNum":29}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+	<case id = "008" tittle = "经营实体008" trancode = "02DEJ056" flag = "core full">
+		<step desc="重置挡板">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/reset" method="get">
+			</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+		<step desc="step1发送信贷报文">
+			<Action type="xml_set" trancode = "02DEJ056">
+				<value name="LoanAccount">5217130642130894</value>
+				<value name="ComName">经营实体8</value>
+				<value name="ApplyUserId"/>
+				<value name="PbocAccountReason">01E</value>
+				<value name="ApplyNo">2028102100000013</value>
+				<value name="ServiceID">xdbCompany</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">000000</result>
+			</Verify>
+			<save>
+				<key name = "/Reply_Msg/Sys_Head/SEQ_NO">seqno</key>
+			</save>
+		</step>
+		<step desc="step2grjyPCLEvent6">
+			<Action type="damper_set" ip="10.102.22.93" port="8383" api="/damper/verify" method="post">{"verify":{"TRAN_CODE":"grjyPCLEvent6","EnUnsettleInDebt":0,"ManEntityIncome":0,"NetProfit":0,"ManEntityNetAsset":0,"AssetLiabilityRatio":0,"PbbcAMCOutstandDebtBalance":null,"PbbcAMCOutstandDebtNum":null,"PbbcOutstandDebtSumBal":null,"PbbcOutstandDebtSumNum":null,"PbbcOutstandAdvanceBal":null,"PbbcOutstandAdvanceNum":null,"PbbcOutstandGIBalance":null,"PbbcOutstandGINum":null,"PbbcOutstandFocusBal":null,"PbbcOutstandFocusNum":null,"PbbcOutstandBadBal":null,"PbbcOutstandBadNum":null,"PbbcAMCLiquidatedDebtBla":null,"PbbcAMCLiquidatedDebtNum":null,"PbbcLiquidatedDebtSumBal":null,"PbbcLiquidatedDebtSumNum":null,"PbbcLiquidatedAdvanceBal":null,"PbbcLiquidatedAdvanceNum":null,"PbbcLiquidatedGIBalance":null,"PbbcLiquidatedGINum":null,"PbbcLiquidatedFocusBal":null,"PbbcLiquidatedFocusNum":null,"PbbcLiquidatedBadBal":null,"PbbcLiquidatedBadNum":null,"PbbcGuaranteeAmount" :null,"PbbcGuaranteeBalanceNum":null,"PbbcGuarBadDebtBal":null,"PbbcComNoSettleLawsuitNum":null,"PbbcComNoSettleEnforcedNum":null}}</Action>
+			<Verify>
+				<result name = "result">"ok"</result>
+			</Verify>
+		</step>
+	</case>
+
+
+
+
+
+</root>

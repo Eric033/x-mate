@@ -1,0 +1,84 @@
+<root>
+	<preActions>
+		<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+			<value type = "date">
+			now.YYYYMMDD
+			</value>
+		</Action>	
+		<Action type="xml_setting" tag = "TRAN_DATE">
+			<value type = "date">
+			now.YYYYMMDD
+			</value>
+		</Action>	
+		<Action type="xml_setting" tag = "SERVICE_CODE">
+			<value type = "string">
+			SVR_FINANCIAL
+			</value>
+		</Action>
+	</preActions>
+	<case id = "0001" tittle = "040511" trancode = "040511" flag = "core full">
+		<step desc="步骤1">
+			<Action type="xml_set" trancode = "010511_1">
+				<value name="BASE_ACCT_NO">
+					526010054912011
+				</value>
+				<value name="BUDGET_DEPARTMENT">
+					0002
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno1
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2">
+			<Action type="sql_exe">
+				<value>
+					select SEQ_NO from  ensemble.rb_sub_tran_hist_pt where sub_acct_no='0002' and status='N'
+				</value>
+			</Action>
+			<Verify>
+				<value>
+					*
+				</value>
+			</Verify>
+			<save>
+				<key name="">
+				   SEQ_NO1
+				</key>
+			</save>
+		</step>
+		<step desc="步骤3">
+			<Action type="xml_set" trancode = "040511_1" >
+				<value name="//Body/TRAN_DATE">
+				   20270220
+				</value>
+				<value name="//Body/SEQ">
+				   {{SEQ_NO1}}
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno3
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id1
+				</key>
+			</save>
+		</step>
+	</case>
+</root>

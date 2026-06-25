@@ -1,0 +1,113 @@
+<root>
+<preActions>
+	<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>
+    <Action type="xml_setting" tag = "EFFECT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "TRAN_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "SERVICE_CODE">
+		<value type = "string">
+			SVR_FINANCIAL
+		</value>
+	</Action>
+</preActions>
+
+<case id = "0001" tittle = "020504短信签约" trancode = "020504" flag = "core full">
+		<step desc="步骤1">
+			<Action type="xml_set" trancode="020504">
+				<value name="//Body/BASE_ACCT_NO">
+					6210355030500019861
+				</value>
+				<value name="//Body/BIZ_TYPE">
+					0
+				</value>
+				<value name="//Body/ACCT_NO">
+					6210355030500019861
+				</value>
+				<value name="//Body/OPER_TYPE">
+					1
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+				<key name="//Body/BASE_ACCT_NO">
+				    base_acct_no
+				</key>
+				<key name="//Body/MSG_INFO_ARRAY/Row/AGREEMENT_KEY">
+					agreement_key
+				</key>
+				<key name="//Body/MSG_INFO_ARRAY/Row/DR_ACCT_NO">
+					dr_acct_no
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2验证签约成功">
+			<Action type="sql_exe" >
+				<value>
+				  select count(*) from ENSEMBLE.CC_MSG_AGREEMENT agr where agr.dr_acct_no='{{dr_acct_no}}' and sign_status=0
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+		<step desc="步骤3短信解约">
+			<Action type="xml_set" trancode="020504">
+				<value name="//Body/BASE_ACCT_NO">
+					6210355030500019861
+				</value>
+				<value name="//Body/BIZ_TYPE">
+					1
+				</value>
+				<value name="//Body/ACCT_NO">
+					6210355030500019861
+				</value>
+				<value name="//Body/OPER_TYPE">
+					3
+				</value>
+				<value name="//Body/AGREEMENT_KEY">
+					{{agreement_key}}
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+		</step>
+		<step desc="步骤4验证解约成功">
+			<Action type="sql_exe" >
+				<value>
+				  select agr.sign_status from ENSEMBLE.CC_MSG_AGREEMENT agr where agr.agreement_key='{{agreement_key}}'
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+</case>
+</root>

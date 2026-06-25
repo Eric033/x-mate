@@ -1,0 +1,72 @@
+<root>
+<preActions>
+	<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>
+    <Action type="xml_setting" tag = "EFFECT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "TRAN_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "SERVICE_CODE">
+		<value type = "string">
+			SVR_FINANCIAL
+		</value>
+	</Action>
+</preActions>
+
+<case id = "0001" tittle = "020510一户通子账户开立" trancode = "020510" flag = "core full">
+		<step desc="步骤1">
+			<Action type="xml_set" trancode="020510">
+				<value name="//Body/BASE_ACCT_NO">
+					8020014000000000354
+				</value>
+				<value name="//Body/ACCT_TYPE">
+					201
+				</value>
+				<value name="//Body/GEN_SUB_ACCT_AUTO">
+					Y
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+				<key name="//Body/BASE_ACCT_NO">
+				    base_acct_no
+				</key>
+				<key name="//Body/SUB_ACCT_NO">
+				    sub_acct_no
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2子账户是否开立成功">
+			<Action type="sql_exe" >
+				<value>
+				  select count(*) from ENSEMBLE.RB_SUB_ACCT sub, ENSEMBLE.RB_ACCT a where sub.main_internal_key=a.internal_key and a.base_acct_no='8020014000000000354' and sub_acct_no='{{sub_acct_no}}'
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+</case>
+
+</root>

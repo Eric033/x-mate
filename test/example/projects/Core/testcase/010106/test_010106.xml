@@ -1,0 +1,63 @@
+   <root>
+<preActions>	
+	<Action type="xml_setting" tag = "TRAN_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "SERVICE_CODE">
+		<value type = "string">
+			SVR_FINANCIAL
+		</value>
+	</Action>
+</preActions>
+<case id = "0001" tittle = "结售汇交易提交010106_本行卡_001" trancode = "010106" flag = "core full">
+		<step desc="步骤2">
+			<Action type="xml_set" trancode = "010106">
+				<value name="CLIENT_NO">
+					1000821629
+				</value>
+				<value name="//EFFECT_DATE">
+					{{CurrentDate_1}}
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+		<step desc="步骤3交易行开户行同一个账务记账1">
+			<Action type="sql_exe" >
+				<value>
+				  select count(*) from ensemble.gl_post_today gl where  gl.reference='{{case_seqno}}' and gl.amount=-1.6 and gl.branch='{{case_branch_id}}' and gl.ccy='CNY' and gl.gl_code='300101' 
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+         <step desc="步骤4交易行开户行同一个账务记账2">
+			<Action type="sql_exe" >
+				<value>
+				  select count(*) from ensemble.gl_post_today gl where  gl.reference='{{case_seqno}}' and gl.amount=1.6 and gl.branch='{{case_branch_id}}' and gl.ccy='CNY' and gl.gl_code='300301'
+				</value>
+			</Action>
+			<Verify>
+				<value>
+                  1
+				</value>
+			</Verify>
+		</step>
+</case>
+</root>

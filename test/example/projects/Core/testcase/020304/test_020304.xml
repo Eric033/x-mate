@@ -1,0 +1,79 @@
+   <root>
+<preActions>	
+	<Action type="xml_setting" tag = "TRAN_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "SERVICE_CODE">
+		<value type = "string">
+			SVR_FINANCIAL
+		</value>
+	</Action>
+</preActions>
+<case id = "0001" tittle = "020304" trancode = "020304" flag = "core full">
+		<step desc="步骤1">
+			<Action type="sql_exe">
+				<value>
+					select start_no_c from ensemble.TB_VOUCHER_TRAILBOX_INFO where branch='411006' and doc_type='203' and TRAILBOX_ID='411006007'
+				</value>
+			</Action>
+			<Verify>
+				<value>
+					*
+				</value>
+			</Verify>
+			<save>
+				<key name="">
+				   start_no_c1
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2">
+			<Action type="xml_set" trancode = "010301_1">
+				<value name="BASE_ACCT_NO">
+					0154010679900008019
+				</value>
+				<value name="START_NO">
+					{{start_no_c1}}
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+		<step desc="步骤3">
+			<Action type="xml_set" trancode = "020304">
+				<value name="BASE_ACCT_NO">
+					0154010679900008019
+				</value>
+				<value name="START_NO">
+					{{start_no_c1}}
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id
+				</key>
+			</save>
+		</step>
+</case>
+</root>

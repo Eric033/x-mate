@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Message>
+	<Sys_Head>
+		<TRAN_CODE>02DEJ048</TRAN_CODE>
+		<SERVICE_CODE>SVR_NONFINANCIAL</SERVICE_CODE>
+		<SEQ_NO>CMS28100200000001500</SEQ_NO>
+		<USER_ID>V0003</USER_ID>
+		<CUSTOMER_ID/>
+		<BRANCH_ID>411012</BRANCH_ID>
+		<SOURCE_TYPE>MM</SOURCE_TYPE>
+		<WS_ID>10.100.200.89</WS_ID>
+		<CONSUMER_ID>CMS</CONSUMER_ID>
+		<TRAN_DATE>20281002</TRAN_DATE>
+		<TRAN_TIMESTAMP>090047205</TRAN_TIMESTAMP>
+		<SERVER_ID>10.100.200.89</SERVER_ID>
+		<SOURCE_BRANCH_NO>172501</SOURCE_BRANCH_NO>
+		<DEST_BRANCH_NO/>
+		<TRAN_MODE>ONLINE</TRAN_MODE>
+	</Sys_Head>
+	<Body>
+		<IDNO>411302199012010845</IDNO>
+		<IdType>Ind01</IdType>
+		<FullName>张萌</FullName>
+		<PhoneNo>13200000000</PhoneNo>
+		<Age>37</Age>
+		<BorrowIsPledgor/>
+		<HouseholdRegister>1</HouseholdRegister>
+		<LocLiveYear>3</LocLiveYear>
+		<ApplyUserId>100360</ApplyUserId>
+		<PbocAccountReason>02I</PbocAccountReason>
+		<ServiceID>xedbPerson</ServiceID>
+		<ApplyNo>2028092200000013</ApplyNo>
+		<PbocAccountType/>
+		<PbocQueryFlag>0</PbocQueryFlag>
+	</Body>
+</Message>

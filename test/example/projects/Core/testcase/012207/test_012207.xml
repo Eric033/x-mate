@@ -1,0 +1,85 @@
+<root>
+	<preActions>
+		<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+			<value type = "date">
+			now.YYYYMMDD
+			</value>
+		</Action>	
+		<Action type="xml_setting" tag = "TRAN_DATE">
+			<value type = "date">
+			now.YYYYMMDD
+			</value>
+		</Action>	
+		<Action type="xml_setting" tag = "SERVICE_CODE">
+			<value type = "string">
+			SVR_FINANCIAL
+			</value>
+		</Action>
+	</preActions>
+	<case id = "0001" tittle = "012207" trancode = "012207" flag = "core full">
+		<step desc="步骤1">
+			<Action type="xml_set" trancode = "022901" >
+			<value name="//Body/TRAN_FLAG">
+				   03
+				</value>
+				<value name="//Body/DUE_DATE">
+				   20301219
+				</value>
+				<value name="//Body/CMISLOAN_NO">
+				   {{seq_no}}
+				</value>
+				<value name="//Body/DD_DATE">
+				   {{CurrentDate_1}}
+				</value>
+				<value name="//Body/TRUSTED_PAY/Row/TRUSTED_PAY_NO">
+				   {{seq_no}}
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Body/LOAN_NO">
+				   case_loanno1
+				   </key>
+				   <key name="//Sys_Head/SEQ_NO">
+				   case_seqno1
+				   </key>
+			</save>
+		</step>
+		<step desc="步骤2">
+			<Action type="xml_set" trancode = "012207" >
+				<value name="//Body/LOAN_NO">
+				   {{case_loanno1}}
+				</value>
+				<value name="//Body/EFFECT_DATE">
+				   {{CurrentDate_1}}
+				</value>
+				<value name="//Body/DD_DATE">
+				   {{CurrentDate_1}}
+				</value>
+				<value name="//Body/DUE_DATE">
+				   20301219
+				</value>
+				<value name="//Body/OPTION">
+				   01
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+				<key name="//Sys_Head/SEQ_NO">
+				   case_seqno2
+				</key>
+				<key name="//Sys_Head/BRANCH_ID">
+				   case_branch_id2
+				</key>
+			</save>
+		</step>
+	</case>
+</root>

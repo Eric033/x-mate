@@ -1,0 +1,87 @@
+<root>
+<preActions>
+	<Action type="xml_setting" tag = "BU_SETTLEMENT_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>	
+	<Action type="xml_setting" tag = "TRAN_DATE">
+		<value type = "date">
+			now.YYYYMMDD
+		</value>
+	</Action>		
+	<Action type="xml_setting" tag = "SERVICE_CODE">
+		<value type = "string">
+			SVR_FINANCIAL
+		</value>
+	</Action>
+</preActions>
+<case id = "0001" tittle = "010512_001" trancode = "010512" flag = "core full">
+		<step desc="步骤2">
+			<Action type="xml_set" trancode = "050512">
+				<value name="BASE_ACCT_NO">
+					526010054912011
+				</value>
+				<value name="SUB_ACCT_NO">
+					0008
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+			<key name="/Reply_Msg/Body/TRAN_ARRAY/Row/SUB_ACCT_BAL">
+				   SUB_ACCT_BAL1
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2">
+			<Action type="xml_set" trancode = "010512">
+				<value name="BASE_ACCT_NO">
+					5260100549120110008
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+			<key name="/Reply_Msg/Body/P5/INT_AMOUNT">
+				   INT_AMOUNT1
+				</key>
+			</save>
+		</step>
+		<step desc="步骤2">
+			<Action type="xml_set" trancode = "050512">
+				<value name="BASE_ACCT_NO">
+					526010054912011
+				</value>
+				<value name="SUB_ACCT_NO">
+					0008
+				</value>
+			</Action>
+			<Verify>
+				<result name = "RET_CODE">
+					000000
+				</result>
+			</Verify>
+			<save>
+			<key name="/Reply_Msg/Body/TRAN_ARRAY/Row/SUB_ACCT_BAL">
+				   SUB_ACCT_BAL2
+				</key>
+			</save>
+		</step>
+		<step desc="动态验证">
+			<Action type="runtime_verify">
+			</Action>
+			<Verify>
+				<result name = "result">
+					{{SUB_ACCT_BAL1}}=={{SUB_ACCT_BAL2}}
+				</result>
+			</Verify>
+		</step>
+</case>
+</root>
