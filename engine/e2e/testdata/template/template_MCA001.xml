@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Message>
+  <Header>
+    <TransactionId></TransactionId>
+    <ServiceId>MCA001</ServiceId>
+  </Header>
+  <Body>
+    <FIELD1></FIELD1>
+  </Body>
+</Message>

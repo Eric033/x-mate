@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<case title="Dry-Run: 只验证不执行">
+  <action>
+    <step desc="这个步骤不会真正执行">
+      <Action type="http" server="MOCK" method="GET" api="/api/order/query" />
+      <queryString name="order_id">NONEXISTENT</queryString>
+      <Verify>
+        <result name="$.ret_code">000000</result>
+      </Verify>
+    </step>
+  </action>
+</case>

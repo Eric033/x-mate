@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<case title="HTTP-Errors: 异常响应处理">
+  <action>
+    <step desc="500错误">
+      <Action type="http" server="MOCK" method="GET" api="/api/error/500" />
+      <Verify>
+        <result name="$.error">internal server error</result>
+        <result name="$.code">ERR500</result>
+      </Verify>
+    </step>
+
+    <step desc="格式错误的JSON">
+      <Action type="http" server="MOCK" method="GET" api="/api/error/malformed" />
+      <Verify>
+        <result name="$.code"></result>
+      </Verify>
+    </step>
+  </action>
+</case>

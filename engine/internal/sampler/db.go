@@ -67,6 +67,14 @@ func (m *DBPoolManager) Get(serviceName string) (*sql.DB, error) {
 	return db, nil
 }
 
+// RegisterPool adds a pre-opened *sql.DB to the pool manager for the given name.
+// This is useful for tests that want to inject a SQLite in-memory database.
+func (m *DBPoolManager) RegisterPool(name string, db *sql.DB) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.pools[name] = db
+}
+
 // Close closes all pools.
 func (m *DBPoolManager) Close() {
 	for _, db := range m.pools {
@@ -94,6 +102,9 @@ func buildDSN(cfg DBConfig, driver string) string {
 	case "postgres":
 		return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 			cfg.IP, cfg.Port, cfg.User, cfg.Passwd, cfg.Name)
+	case "sqlite3":
+		// SQLite: address is file path or ":memory:"
+		return cfg.IP
 	default:
 		return fmt.Sprintf("%s:%s@%s:%s/%s", cfg.User, cfg.Passwd, cfg.IP, cfg.Port, cfg.Name)
 	}

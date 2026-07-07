@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<case title="HTTP-Vars: 变量提取与跨步骤传递">
+  <action>
+    <step desc="创建并提取order_id和amount">
+      <Action type="http" server="MOCK" method="POST" api="/api/order/create" />
+      <header name="Content-Type">application/json</header>
+      <body>{"tran_code":"VAR001","amount":"9999","user_id":"var_test"}</body>
+      <Verify>
+        <result name="$.ret_code">000000</result>
+      </Verify>
+      <save>
+        <key name="created_order_id">$.order_id</key>
+        <key name="created_amount">$.amount</key>
+        <key name="created_status">$.status</key>
+      </save>
+    </step>
+
+    <step desc="用变量查订单">
+      <Action type="http" server="MOCK" method="GET" api="/api/order/query" />
+      <queryString name="order_id">{{created_order_id}}</queryString>
+      <Verify>
+        <result name="$.order_id">{{created_order_id}}</result>
+        <result name="$.status">{{created_status}}</result>
+      </Verify>
+    </step>
+  </action>
+</case>

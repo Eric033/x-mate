@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Request>
+  <Header>
+    <TRAN_CODE></TRAN_CODE>
+    <SEQ_NO></SEQ_NO>
+    <TRANS_DATE></TRANS_DATE>
+  </Header>
+  <Body>
+    <AMOUNT></AMOUNT>
+  </Body>
+</Request>

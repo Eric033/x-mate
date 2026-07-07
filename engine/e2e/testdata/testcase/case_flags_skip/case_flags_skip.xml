@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<case title="Flags-Skip: 被flags过滤跳过的用例(flags=extended)">
+  <action>
+    <step desc="不执行步骤">
+      <Action type="http" server="MOCK" method="GET" api="/api/order/query" />
+    </step>
+  </action>
+</case>

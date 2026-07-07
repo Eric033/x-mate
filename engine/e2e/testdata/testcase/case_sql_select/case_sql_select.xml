@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<case title="SQL-Select: 数据库查询验证">
+  <setup>
+    <step desc="查询活跃用户">
+      <Action type="sql_select" server="TESTDB">SELECT name, email, status FROM users WHERE status = 'ACTIVE' ORDER BY id</Action>
+      <!-- Expected: COLUMN[row]@@@value format -->
+      <result name="name[0]">Alice</result>
+      <result name="name[1]">Bob</result>
+      <save>
+        <key name="first_user">name[0]</key>
+        <key name="second_user">name[1]</key>
+      </save>
+    </step>
+  </setup>
+  <action>
+    <step desc="验证提取的第一个用户名">
+      <Action type="runtime_verify" />
+      <Verify>
+        <result name="">{{first_user}} == Alice</result>
+      </Verify>
+    </step>
+  </action>
+</case>

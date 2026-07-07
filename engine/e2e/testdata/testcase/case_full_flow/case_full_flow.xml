@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<case title="Full-Flow: 完整生命周期(setup→action→teardown)">
+  <setup>
+    <step desc="SETUP: 健康检查">
+      <Action type="http" server="MOCK" method="GET" api="/health" />
+      <Verify>
+        <result name="$.status">ok</result>
+      </Verify>
+      <save>
+        <key name="health_status">$.status</key>
+      </save>
+    </step>
+  </setup>
+  <action>
+    <step desc="ACTION: 创建订单">
+      <Action type="http" server="MOCK" method="POST" api="/api/order/create" />
+      <header name="Content-Type">application/json</header>
+      <body>{"tran_code":"FULL01","amount":"8888","user_id":"full_flow"}</body>
+      <Verify>
+        <result name="$.ret_code">000000</result>
+      </Verify>
+      <save>
+        <key name="full_order_id">$.order_id</key>
+      </save>
+    </step>
+
+    <step desc="验证SETUP变量">
+      <Action type="runtime_verify" />
+      <Verify>
+        <result name="">{{health_status}} == ok</result>
+      </Verify>
+    </step>
+
+    <step desc="验证order_id非空">
+      <Action type="runtime_verify" />
+      <Verify>
+        <result name="">{{full_order_id}} == {{full_order_id}}</result>
+      </Verify>
+    </step>
+  </action>
+  <teardown>
+    <step desc="TEARDOWN: 取消订单">
+      <Action type="http" server="MOCK" method="POST" api="/api/order/cancel" />
+      <header name="Content-Type">application/json</header>
+      <body>{"order_id":"{{full_order_id}}"}</body>
+      <Verify>
+        <result name="$.ret_code">000000</result>
+        <result name="$.status">CANCELLED</result>
+      </Verify>
+    </step>
+  </teardown>
+</case>

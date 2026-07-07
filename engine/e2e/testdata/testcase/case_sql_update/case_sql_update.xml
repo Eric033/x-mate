@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<case title="SQL-Update: 数据库更新操作验证">
+  <action>
+    <!-- 步骤1: 插入新用户 -->
+    <step desc="插入用户">
+      <Action type="sql_update" server="TESTDB">INSERT INTO users (name, email, status) VALUES ('Dave', 'dave@test.com', 'ACTIVE')</Action>
+      <Verify>
+        <value>*</value>
+      </Verify>
+    </step>
+
+    <!-- 步骤2: 更新用户状态 -->
+    <step desc="更新用户状态">
+      <Action type="sql_update" server="TESTDB">UPDATE users SET status = 'INACTIVE' WHERE name = 'Dave'</Action>
+      <Verify>
+        <value>*</value>
+      </Verify>
+    </step>
+
+    <!-- 步骤3: 删除用户 -->
+    <step desc="删除用户">
+      <Action type="sql_update" server="TESTDB">DELETE FROM users WHERE name = 'Dave'</Action>
+      <Verify>
+        <value>*</value>
+      </Verify>
+    </step>
+  </action>
+</case>

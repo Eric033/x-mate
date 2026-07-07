@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<case title="TCP-xml_set_8: 8字节BCD前缀XML交互">
+  <action>
+    <step desc="TCP xml_set_8 请求">
+      <Action type="xml_set_8" server="TCMOCK" trancode="TRAN001" />
+      <value name="/Request/Header/TRAN_CODE">TRAN001</value>
+      <value name="/Request/Body/AMOUNT">20000</value>
+      <Verify>
+        <result name="//RESP_CODE">000000</result>
+        <result name="//RESP_MSG">SUCCESS</result>
+      </Verify>
+    </step>
+  </action>
+</case>

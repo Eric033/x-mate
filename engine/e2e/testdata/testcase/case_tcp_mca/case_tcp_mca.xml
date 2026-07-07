@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<case title="TCP-MCA: 换行结尾的XML交互">
+  <action>
+    <step desc="TCP MCA 请求">
+      <Action type="mca" server="TCMOCK" trancode="MCA001" />
+      <value name="//TransactionId">MCA001</value>
+      <value name="//FIELD1">TESTDATA</value>
+      <Verify>
+        <result name="//RESP_CODE">000000</result>
+        <result name="//RESP_MSG">SUCCESS</result>
+      </Verify>
+    </step>
+  </action>
+</case>

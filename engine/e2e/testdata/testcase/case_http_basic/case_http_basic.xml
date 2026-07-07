@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<case title="HTTP-Basic: 创建订单并查询">
+  <action>
+    <step desc="创建订单">
+      <Action type="http" server="MOCK" method="POST" api="/api/order/create" />
+      <header name="Content-Type">application/json</header>
+      <body>{"tran_code":"TRAN001","amount":"5000","user_id":"e2e_test"}</body>
+      <Verify>
+        <result name="$.ret_code">000000</result>
+        <result name="$.ret_msg">success</result>
+        <result name="$.status">ACTIVE</result>
+      </Verify>
+      <save>
+        <key name="order_id">$.order_id</key>
+      </save>
+    </step>
+
+    <step desc="查询订单">
+      <Action type="http" server="MOCK" method="GET" api="/api/order/query" />
+      <queryString name="order_id">{{order_id}}</queryString>
+      <Verify>
+        <result name="$.ret_code">000000</result>
+        <result name="$.order_id">{{order_id}}</result>
+        <result name="$.status">ACTIVE</result>
+      </Verify>
+    </step>
+
+    <step desc="健康检查">
+      <Action type="http" server="MOCK" method="GET" api="/health" />
+      <Verify>
+        <result name="$.status">ok</result>
+      </Verify>
+    </step>
+  </action>
+</case>

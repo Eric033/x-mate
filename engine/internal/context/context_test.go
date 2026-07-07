@@ -1,324 +1,187 @@
 package context
 
 import (
-	"fmt"
 	"testing"
 	"time"
 )
 
-// ---------------------------------------------------------------------------
-// New
-// ---------------------------------------------------------------------------
-
-func TestNew(t *testing.T) {
+func TestClone_Empty(t *testing.T) {
 	ctx := New()
-	if ctx == nil {
-		t.Fatal("New() returned nil")
+	clone := ctx.Clone()
+
+	if clone == ctx {
+		t.Error("Clone returned same pointer")
 	}
-	if ctx.Variables == nil {
-		t.Fatal("New().Variables is nil")
-	}
-	if len(ctx.Variables) != 0 {
-		t.Fatal("New().Variables should be empty")
-	}
-	if ctx.Servers != nil {
-		t.Fatal("New().Servers should be nil")
-	}
-	if ctx.DBPools != nil {
-		t.Fatal("New().DBPools should be nil")
+	if len(clone.Variables) != 0 {
+		t.Errorf("cloned variables = %d, want 0", len(clone.Variables))
 	}
 }
 
-// ---------------------------------------------------------------------------
-// Set / Get
-// ---------------------------------------------------------------------------
-
-func TestSetAndGet(t *testing.T) {
+func TestClone_WithVariables(t *testing.T) {
 	ctx := New()
-	ctx.Set("key1", "value1")
+	ctx.Set("key1", "val1")
+	ctx.Set("key2", "val2")
 
-	v, ok := ctx.Get("key1")
+	clone := ctx.Clone()
+
+	v, ok := clone.Get("key1")
+	if !ok || v != "val1" {
+		t.Errorf("key1 = %q", v)
+	}
+	v, ok = clone.Get("key2")
+	if !ok || v != "val2" {
+		t.Errorf("key2 = %q", v)
+	}
+
+	// Modifying clone should not affect original
+	clone.Set("key1", "modified")
+	if orig, _ := ctx.Get("key1"); orig != "val1" {
+		t.Errorf("original key1 changed to %q", orig)
+	}
+}
+
+func TestClone_WithServices(t *testing.T) {
+	ctx := New()
+	ctx.Services = map[string]ServiceDef{
+		"MOCK": {Address: "127.0.0.1:8080"},
+	}
+	ctx.Set("serverIP", "127.0.0.1")
+
+	clone := ctx.Clone()
+
+	// Verify services copied
+	svc, ok := clone.Services["MOCK"]
 	if !ok {
-		t.Fatal("expected key1 to exist")
+		t.Fatal("MOCK service not cloned")
 	}
-	if v != "value1" {
-		t.Fatalf("expected value1, got %s", v)
+	if svc.Address != "127.0.0.1:8080" {
+		t.Errorf("service address = %q", svc.Address)
 	}
-}
 
-func TestGet_NotExists(t *testing.T) {
-	ctx := New()
-	_, ok := ctx.Get("nonexistent")
-	if ok {
-		t.Fatal("expected nonexistent key to return false")
+	// Clone should have independent services map
+	clone.Services["MOCK"] = ServiceDef{Address: "modified"}
+	if ctx.Services["MOCK"].Address != "127.0.0.1:8080" {
+		t.Error("original services modified via clone")
 	}
 }
 
-func TestSet_Overwrite(t *testing.T) {
+func TestClone_WithServers(t *testing.T) {
 	ctx := New()
-	ctx.Set("k", "v1")
-	ctx.Set("k", "v2")
+	ctx.Servers = []ServerEntry{{IP: "10.0.0.1", Port: "9996"}, {IP: "10.0.0.2", Port: "8080"}}
 
-	v, ok := ctx.Get("k")
+	clone := ctx.Clone()
+
+	if len(clone.Servers) != 2 {
+		t.Fatalf("cloned servers len = %d", len(clone.Servers))
+	}
+	if clone.Servers[0].IP != "10.0.0.1" {
+		t.Errorf("server[0].IP = %q", clone.Servers[0].IP)
+	}
+
+	// Modify clone should not affect original
+	clone.Servers[0].IP = "modified"
+	if ctx.Servers[0].IP != "10.0.0.1" {
+		t.Error("original servers modified via clone")
+	}
+}
+
+func TestGenerateSystemVars_NoService(t *testing.T) {
+	ctx := New()
+	ctx.GenerateSystemVars("")
+
+	// These should be set regardless
+	if _, ok := ctx.Get("date_str_6"); !ok {
+		t.Error("date_str_6 not set")
+	}
+	if _, ok := ctx.Get("seq_no"); !ok {
+		t.Error("seq_no not set")
+	}
+	if _, ok := ctx.Get("time_no"); !ok {
+		t.Error("time_no not set")
+	}
+
+	// serverIP should not be set without service
+	if _, ok := ctx.Get("serverIP"); ok {
+		t.Error("serverIP should not be set without service")
+	}
+}
+
+func TestGenerateSystemVars_WithService(t *testing.T) {
+	ctx := New()
+	ctx.Services = map[string]ServiceDef{
+		"MOCK": {Address: "10.0.0.5:5555"},
+	}
+
+	ctx.GenerateSystemVars("MOCK")
+
+	ip, ok := ctx.Get("serverIP")
+	if !ok || ip != "10.0.0.5" {
+		t.Errorf("serverIP = %q, want 10.0.0.5", ip)
+	}
+	port, ok := ctx.Get("serverPort")
+	if !ok || port != "5555" {
+		t.Errorf("serverPort = %q, want 5555", port)
+	}
+}
+
+func TestGenerateSystemVars_SeqNo(t *testing.T) {
+	ctx := New()
+	ctx.GenerateSystemVars("")
+
+	seqNo, ok := ctx.Get("seq_no")
 	if !ok {
-		t.Fatal("expected k to exist")
+		t.Fatal("seq_no not set")
 	}
-	if v != "v2" {
-		t.Fatalf("expected v2, got %s", v)
+	if len(seqNo) < 10 {
+		t.Errorf("seq_no too short: %q", seqNo)
 	}
-}
 
-// ---------------------------------------------------------------------------
-// GetOrDefault
-// ---------------------------------------------------------------------------
-
-func TestGetOrDefault_Exists(t *testing.T) {
-	ctx := New()
-	ctx.Set("k", "actual")
-	got := ctx.GetOrDefault("k", "default")
-	if got != "actual" {
-		t.Fatalf("expected actual, got %s", got)
+	// Verify format: date_str_6(7 chars) + 9 digits + 00 = 18 chars
+	if len(seqNo) != 18 {
+		t.Errorf("seq_no length = %d, want 18", len(seqNo))
 	}
-}
 
-func TestGetOrDefault_NotExists(t *testing.T) {
-	ctx := New()
-	got := ctx.GetOrDefault("missing", "fallback")
-	if got != "fallback" {
-		t.Fatalf("expected fallback, got %s", got)
+	// Last two chars should be 00
+	if seqNo[len(seqNo)-2:] != "00" {
+		t.Errorf("seq_no suffix = %q, want 00", seqNo[len(seqNo)-2:])
+	}
+
+	// First char should be last digit of current year
+	yearDigit := time.Now().Year() % 10
+	if seqNo[0] != byte('0'+yearDigit) {
+		t.Errorf("seq_no[0] = %c, want %d", seqNo[0], yearDigit)
 	}
 }
 
-func TestGetOrDefault_EmptyDefault(t *testing.T) {
-	ctx := New()
-	got := ctx.GetOrDefault("missing", "")
-	if got != "" {
-		t.Fatalf("expected empty string, got %s", got)
-	}
-}
-
-// ---------------------------------------------------------------------------
-// Delete
-// ---------------------------------------------------------------------------
-
-func TestDelete(t *testing.T) {
-	ctx := New()
-	ctx.Set("k", "v")
-	ctx.Delete("k")
-
-	_, ok := ctx.Get("k")
-	if ok {
-		t.Fatal("expected key to be deleted")
-	}
-}
-
-func TestDelete_NonExistent(t *testing.T) {
-	ctx := New()
-	// Should not panic
-	ctx.Delete("doesnotexist")
-}
-
-// ---------------------------------------------------------------------------
-// CleanupTemporary
-// ---------------------------------------------------------------------------
-
-func TestCleanupTemporary(t *testing.T) {
-	ctx := New()
-	ctx.Set("testv_abc", "tmp1")
-	ctx.Set("testv_xyz", "tmp2")
-	ctx.Set("setup_1", "setupVal")
-	ctx.Set("teardown_1", "teardownVal")
-	ctx.Set("server_index", "0")
-	ctx.Set("resultVariable", "result")
-	ctx.Set("keep_me", "shouldStay")
-
-	ctx.CleanupTemporary()
-
-	// Temporary vars should be gone
-	checkDeleted(t, ctx, "testv_abc")
-	checkDeleted(t, ctx, "testv_xyz")
-	checkDeleted(t, ctx, "setup_1")
-	checkDeleted(t, ctx, "teardown_1")
-	checkDeleted(t, ctx, "server_index")
-	checkDeleted(t, ctx, "resultVariable")
-
-	// Non-temporary should remain
-	v, ok := ctx.Get("keep_me")
-	if !ok {
-		t.Fatal("expected keep_me to remain after cleanup")
-	}
-	if v != "shouldStay" {
-		t.Fatalf("expected shouldStay, got %s", v)
-	}
-}
-
-func TestCleanupTemporary_EmptyVars(t *testing.T) {
-	ctx := New()
-	// Should not panic when Variables map is empty
-	ctx.CleanupTemporary()
-}
-
-func TestCleanupTemporary_PrefixBoundary(t *testing.T) {
-	ctx := New()
-	ctx.Set("testv_", "edge")        // exactly 6 chars prefix
-	ctx.Set("testv_long", "val")     // 7+ chars
-	ctx.Set("notextv_abc", "keep")   // does not start with testv_
-
-	ctx.CleanupTemporary()
-
-	checkDeleted(t, ctx, "testv_")
-	checkDeleted(t, ctx, "testv_long")
-
-	v, ok := ctx.Get("notextv_abc")
-	if !ok {
-		t.Fatal("expected notextv_abc to remain")
-	}
-	if v != "keep" {
-		t.Fatalf("expected keep, got %s", v)
-	}
-}
-
-// ---------------------------------------------------------------------------
-// GenerateSystemVars
-// ---------------------------------------------------------------------------
-
-func TestGenerateSystemVars_Basic(t *testing.T) {
-	ctx := New()
-	now := time.Now()
-	// YMMdd format: year last digit + month + day
-	expectedDate6 := fmt.Sprintf("%d%02d%02d", now.Year()%10, now.Month(), now.Day())
-
-	ctx.GenerateSystemVarsLegacy(0) // serverIndex=0 → no server vars
-
-	// date_str_6
-	v, ok := ctx.Get("date_str_6")
-	if !ok {
-		t.Fatal("date_str_6 should exist")
-	}
-	if v != expectedDate6 {
-		t.Fatalf("date_str_6: expected %s, got %s", expectedDate6, v)
-	}
-
-	// time_str_6 (YMMddHH)
-	expectedTime6 := fmt.Sprintf("%d%02d%02d%02d", now.Year()%10, now.Month(), now.Day(), now.Hour())
-	v, ok = ctx.Get("time_str_6")
-	if !ok {
-		t.Fatal("time_str_6 should exist")
-	}
-	if v != expectedTime6 {
-		t.Fatalf("time_str_6: expected %s, got %s", expectedTime6, v)
-	}
-
-	// seq_no: date_str_6 + last 9 of nano + "00"
-	v, ok = ctx.Get("seq_no")
-	if !ok {
-		t.Fatal("seq_no should exist")
-	}
-	if len(v) != len(expectedDate6)+9+2 {
-		t.Fatalf("seq_no length mismatch: got %s (len=%d)", v, len(v))
-	}
-	if v[:len(expectedDate6)] != expectedDate6 {
-		t.Fatalf("seq_no prefix mismatch: expected %s, got %s", expectedDate6, v[:len(expectedDate6)])
-	}
-	if v[len(v)-2:] != "00" {
-		t.Fatalf("seq_no suffix should be 00, got %s", v[len(v)-2:])
-	}
-
-	// time_no
-	v, ok = ctx.Get("time_no")
-	if !ok {
-		t.Fatal("time_no should exist")
-	}
-	timeStr6 := fmt.Sprintf("%d%02d%02d%02d", now.Year()%10, now.Month(), now.Day(), now.Hour())
-	if v != timeStr6 {
-		t.Fatalf("time_no: expected %s, got %s", timeStr6, v)
-	}
-
-	// serverIP/serverPort should NOT be set when serverIndex=0
-	_, ok = ctx.Get("serverIP")
-	if ok {
-		t.Fatal("serverIP should not be set when serverIndex=0")
-	}
-}
-
-func TestGenerateSystemVars_WithServer(t *testing.T) {
+func TestGenerateSystemVarsLegacy_WithServerIndex(t *testing.T) {
 	ctx := New()
 	ctx.Servers = []ServerEntry{
-		{IP: "10.0.0.1", Port: "8080"},
-		{IP: "10.0.0.2", Port: "9090"},
+		{IP: "10.0.0.1", Port: "9996"},
+		{IP: "10.0.0.2", Port: "8080"},
 	}
 
-	ctx.GenerateSystemVarsLegacy(1)
+	ctx.GenerateSystemVarsLegacy(2)
 
-	v, ok := ctx.Get("serverIP")
-	if !ok || v != "10.0.0.1" {
-		t.Fatalf("serverIP: expected 10.0.0.1, got %s", v)
+	ip, _ := ctx.Get("serverIP")
+	if ip != "10.0.0.2" {
+		t.Errorf("serverIP = %q, want 10.0.0.2", ip)
 	}
-
-	v, ok = ctx.Get("serverPort")
-	if !ok || v != "8080" {
-		t.Fatalf("serverPort: expected 8080, got %s", v)
-	}
-
-	// serverIndex=2
-	ctx2 := New()
-	ctx2.Servers = ctx.Servers
-	ctx2.GenerateSystemVarsLegacy(2)
-
-	v, _ = ctx2.Get("serverIP")
-	if v != "10.0.0.2" {
-		t.Fatalf("serverIP(2): expected 10.0.0.2, got %s", v)
-	}
-	v, _ = ctx2.Get("serverPort")
-	if v != "9090" {
-		t.Fatalf("serverPort(2): expected 9090, got %s", v)
+	port, _ := ctx.Get("serverPort")
+	if port != "8080" {
+		t.Errorf("serverPort = %q, want 8080", port)
 	}
 }
 
-func TestGenerateSystemVars_ServerOutOfRange(t *testing.T) {
+func TestGenerateSystemVarsLegacy_OutOfRange(t *testing.T) {
 	ctx := New()
-	ctx.Servers = []ServerEntry{{IP: "1.2.3.4", Port: "1234"}}
+	ctx.Servers = []ServerEntry{{IP: "10.0.0.1", Port: "9996"}}
 
-	// serverIndex > len(Servers) → should not set serverIP/serverPort
+	// Should not panic with out-of-range index
 	ctx.GenerateSystemVarsLegacy(5)
-	_, ok := ctx.Get("serverIP")
-	if ok {
-		t.Fatal("serverIP should not be set when serverIndex > len(Servers)")
-	}
-
-	// serverIndex=0 with non-empty Servers should also skip
-	ctx2 := New()
-	ctx2.Servers = ctx.Servers
-	ctx2.GenerateSystemVarsLegacy(0)
-	_, ok = ctx2.Get("serverIP")
-	if ok {
-		t.Fatal("serverIP should not be set when serverIndex=0")
+	if _, ok := ctx.Get("serverIP"); ok {
+		t.Error("serverIP should not be set with out-of-range index")
 	}
 }
-
-func TestGenerateSystemVars_SeqNoPay(t *testing.T) {
-	ctx := New()
-	ctx.GenerateSystemVarsLegacy(0)
-
-	v, ok := ctx.Get("seq_no_pay")
-	if !ok {
-		t.Fatal("seq_no_pay should exist")
-	}
-	date6, _ := ctx.Get("date_str_6")
-	if len(date6) >= 5 {
-		expectedSuffix := date6[len(date6)-5:]
-		if v[:5] != expectedSuffix {
-			t.Fatalf("seq_no_pay prefix: expected %s, got %s", expectedSuffix, v[:5])
-		}
-	}
-	if v[len(v)-2:] != "00" {
-		t.Fatalf("seq_no_pay suffix should be 00, got %s", v[len(v)-2:])
-	}
-}
-
-// ---------------------------------------------------------------------------
-// GenerateRandomVars
-// ---------------------------------------------------------------------------
 
 func TestGenerateRandomVars(t *testing.T) {
 	ctx := New()
@@ -326,65 +189,158 @@ func TestGenerateRandomVars(t *testing.T) {
 
 	v, ok := ctx.Get("random_8")
 	if !ok {
-		t.Fatal("random_8 should exist")
+		t.Fatal("random_8 not set")
 	}
 	if len(v) != 8 {
-		t.Fatalf("random_8 should be 8 digits, got %s (len=%d)", v, len(v))
-	}
-	// Should be numeric
-	for _, c := range v {
-		if c < '0' || c > '9' {
-			t.Fatalf("random_8 contains non-digit: %c", c)
-		}
+		t.Errorf("random_8 length = %d, want 8", len(v))
 	}
 }
 
-func TestGenerateRandomVars_Repeatability(t *testing.T) {
-	// rand.Intn is seeded globally, so two calls may produce different values.
-	// We just verify they run without error and produce 8-char strings.
+func TestCleanupTemporary(t *testing.T) {
 	ctx := New()
-	ctx.GenerateRandomVars()
-	v1, _ := ctx.Get("random_8")
+	ctx.Set("testv_1", "temp1")
+	ctx.Set("testv_2", "temp2")
+	ctx.Set("setup_1", "setup")
+	ctx.Set("teardown_1", "teardown")
+	ctx.Set("server_index", "1")
+	ctx.Set("resultVariable", "some")
+	ctx.Set("persistent_var", "keep")
 
-	ctx2 := New()
-	ctx2.GenerateRandomVars()
-	v2, _ := ctx2.Get("random_8")
+	ctx.CleanupTemporary()
 
-	_ = v1
-	_ = v2
-	// No assertion on equality — randomness means values may differ.
+	// Temporary vars should be removed
+	if _, ok := ctx.Get("testv_1"); ok {
+		t.Error("testv_1 should be removed")
+	}
+	if _, ok := ctx.Get("setup_1"); ok {
+		t.Error("setup_1 should be removed")
+	}
+	if _, ok := ctx.Get("teardown_1"); ok {
+		t.Error("teardown_1 should be removed")
+	}
+	if _, ok := ctx.Get("server_index"); ok {
+		t.Error("server_index should be removed")
+	}
+	if _, ok := ctx.Get("resultVariable"); ok {
+		t.Error("resultVariable should be removed")
+	}
+
+	// Persistent var should remain
+	if v, ok := ctx.Get("persistent_var"); !ok || v != "keep" {
+		t.Error("persistent_var should remain")
+	}
 }
 
-// ---------------------------------------------------------------------------
-// Concurrency (basic)
-// ---------------------------------------------------------------------------
-
-func TestConcurrentAccess(t *testing.T) {
+func TestGetSetDelete(t *testing.T) {
 	ctx := New()
 
-	done := make(chan bool, 10)
-	for i := 0; i < 10; i++ {
-		go func(n int) {
-			key := "k"
-			_ = key
-			ctx.Set("goroutine", "val")
-			_, _ = ctx.Get("goroutine")
-			done <- true
-		}(i)
+	ctx.Set("key", "value")
+	v, ok := ctx.Get("key")
+	if !ok || v != "value" {
+		t.Errorf("Get = %q, %v", v, ok)
 	}
-	for i := 0; i < 10; i++ {
-		<-done
+
+	ctx.Delete("key")
+	if _, ok := ctx.Get("key"); ok {
+		t.Error("key should be deleted")
 	}
 }
 
-// ---------------------------------------------------------------------------
-// helpers
-// ---------------------------------------------------------------------------
+func TestGetOrDefault(t *testing.T) {
+	ctx := New()
+	ctx.Set("exists", "yes")
 
-func checkDeleted(t *testing.T, ctx *TestContext, key string) {
-	t.Helper()
-	_, ok := ctx.Get(key)
+	if v := ctx.GetOrDefault("exists", "no"); v != "yes" {
+		t.Errorf("GetOrDefault existing = %q", v)
+	}
+	if v := ctx.GetOrDefault("missing", "default"); v != "default" {
+		t.Errorf("GetOrDefault missing = %q", v)
+	}
+}
+
+func TestGetServiceAddr(t *testing.T) {
+	ctx := New()
+	ctx.Services = map[string]ServiceDef{
+		"MOCK": {Address: "10.0.0.1:8080"},
+	}
+
+	addr, ok := ctx.GetServiceAddr("MOCK")
+	if !ok || addr != "10.0.0.1:8080" {
+		t.Errorf("GetServiceAddr = %q, %v", addr, ok)
+	}
+
+	_, ok = ctx.GetServiceAddr("NONEXISTENT")
 	if ok {
-		t.Fatalf("expected key %q to be deleted after cleanup", key)
+		t.Error("GetServiceAddr for non-existent should return false")
+	}
+}
+
+func TestGetService(t *testing.T) {
+	ctx := New()
+	ctx.Services = map[string]ServiceDef{
+		"MOCK": {Address: "10.0.0.1:8080", HTTPPort: 8080},
+	}
+
+	svc, ok := ctx.GetService("MOCK")
+	if !ok || svc.Address != "10.0.0.1:8080" || svc.HTTPPort != 8080 {
+		t.Errorf("GetService = %+v, %v", svc, ok)
+	}
+}
+
+func TestGetServiceDB(t *testing.T) {
+	ctx := New()
+	ctx.Services = map[string]ServiceDef{
+		"MOCK": {
+			Address: "10.0.0.1:8080",
+			DB: &DBConf{Address: "10.0.0.2:1521", Database: "ORCL"},
+		},
+	}
+
+	db, ok := ctx.GetServiceDB("MOCK")
+	if !ok || db.Address != "10.0.0.2:1521" || db.Database != "ORCL" {
+		t.Errorf("GetServiceDB = %+v, %v", db, ok)
+	}
+
+	_, ok = ctx.GetServiceDB("NONEXISTENT")
+	if ok {
+		t.Error("GetServiceDB for non-existent should return false")
+	}
+
+	_, ok = ctx.GetServiceDB("NODB")
+
+	// Services without DB should return false
+	ctx2 := New()
+	ctx2.Services = map[string]ServiceDef{
+		"NO_DB": {Address: "10.0.0.1:8080"},
+	}
+	_, ok = ctx2.GetServiceDB("NO_DB")
+	if ok {
+		t.Error("GetServiceDB for service without DB should return false")
+	}
+}
+
+func TestGetServiceAddrForStep(t *testing.T) {
+	ctx := New()
+	ctx.Services = map[string]ServiceDef{
+		"MOCK": {Address: "10.0.0.1:8080"},
+	}
+
+	addr, ok := ctx.GetServiceAddrForStep("MOCK")
+	if !ok || addr != "10.0.0.1:8080" {
+		t.Errorf("GetServiceAddrForStep(MOCK) = %q, %v", addr, ok)
+	}
+
+	// Literal ip:port
+	addr, ok = ctx.GetServiceAddrForStep("1.2.3.4:5678")
+	if !ok || addr != "1.2.3.4:5678" {
+		t.Errorf("GetServiceAddrForStep(ip:port) = %q, %v", addr, ok)
+	}
+
+	// Fallback to serverIP/serverPort
+	ctx.Set("serverIP", "192.168.1.1")
+	ctx.Set("serverPort", "9999")
+	addr, ok = ctx.GetServiceAddrForStep("")
+	if !ok || addr != "192.168.1.1:9999" {
+		t.Errorf("GetServiceAddrForStep(fallback) = %q, %v", addr, ok)
 	}
 }

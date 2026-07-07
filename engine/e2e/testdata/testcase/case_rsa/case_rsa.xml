@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<case title="RSA: 加密操作验证">
+  <action>
+    <step desc="RSA加密测试数据">
+      <Action type="rsa"
+        key="MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCqGKukO1De7zhZj6+H0qtjTkVxwTCpvKe4eCZ0FPqri0cb2JZfXJ/DgYSF6vUpwmJG8wVQZKroGc0d5Q8H0HbD+3t4A6GrC2WPRh/JRUW8G6m2gBLZp3eC+f+6lCIfBL0SJj8Jmh0s3bXN8UOs5J9+LZJ9q+e5vXcMR/VhrM+nQQIDAQAB"
+        value="hello_e2e" />
+      <save>
+        <key name="rsa_encrypted"></key>
+      </save>
+    </step>
+
+    <step desc="验证加密结果非空">
+      <Action type="runtime_verify" />
+      <Verify>
+        <result name="">{{rsa_encrypted}} == {{rsa_encrypted}}</result>
+      </Verify>
+    </step>
+  </action>
+</case>

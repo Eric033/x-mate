@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<case title="TCP-xml_set: 标准BCD前缀XML交互">
+  <action>
+    <!-- 步骤1: 发送TCP XML请求，验证响应 -->
+    <step desc="TCP xml_set 请求">
+      <Action type="xml_set" server="TCMOCK" trancode="TRAN001" />
+      <value name="/Request/Header/TRAN_CODE">TRAN001</value>
+      <value name="/Request/Body/AMOUNT">10000</value>
+      <Verify>
+        <result name="//RESP_CODE">000000</result>
+        <result name="//RESP_MSG">SUCCESS</result>
+        <result name="//BALANCE">50000</result>
+      </Verify>
+      <save>
+        <key name="tcp_resp_code">//RESP_CODE</key>
+        <key name="tcp_balance">//BALANCE</key>
+      </save>
+    </step>
+
+    <!-- 步骤2: 验证提取的变量 -->
+    <step desc="验证TCP提取变量">
+      <Action type="runtime_verify" />
+      <Verify>
+        <result name="">{{tcp_resp_code}} == 000000</result>
+        <result name="">{{tcp_balance}} == 50000</result>
+      </Verify>
+    </step>
+  </action>
+</case>

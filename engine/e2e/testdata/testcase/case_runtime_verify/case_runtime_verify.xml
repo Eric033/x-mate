@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<case title="Runtime-Verify: 运行时表达式验证">
+  <action>
+    <step desc="创建订单生成变量">
+      <Action type="http" server="MOCK" method="POST" api="/api/order/create" />
+      <header name="Content-Type">application/json</header>
+      <body>{"tran_code":"RT001","amount":"7777","user_id":"rt_test"}</body>
+      <Verify>
+        <result name="$.ret_code">000000</result>
+      </Verify>
+      <save>
+        <key name="rt_amount">$.amount</key>
+        <key name="rt_ret_msg">$.ret_msg</key>
+      </save>
+    </step>
+
+    <step desc="验证金额大于0">
+      <Action type="runtime_verify" />
+      <Verify>
+        <result name="">{{rt_amount}} > 0</result>
+      </Verify>
+    </step>
+
+    <step desc="验证返回消息">
+      <Action type="runtime_verify" />
+      <Verify>
+        <result name="">{{rt_ret_msg}} == success</result>
+      </Verify>
+    </step>
+  </action>
+</case>
