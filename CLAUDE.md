@@ -1,11 +1,5 @@
 # CLAUDE.md — x-mate 项目开发约定
 
-## 开发流程
-
-- 开发任务通过 subagent 执行，subagent 使用 ds-fla 模型
-- 开发代码语言默认使用 Python（engine 模块为 Go）
-- 先设计后开发：设计方案输出确认后再写代码
-
 ## 架构约定
 
 ### 并行执行模型
@@ -30,7 +24,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-x-mate 是一个数据驱动的接口自动化测试框架（Go 实现），用于驱动 TCP/HTTP 接口的 XML 报文级测试。框架源自对 Apache JMeter 测试计划的重写，核心能力是加载 XML 模板 → 参数化填充 → 发送报文 → 校验响应 → 提取变量串联步骤。
+x-mate 是一个接口自动化测试框架（Go 实现），用于驱动 TCP/HTTP 接口的 XML 报文级测试。框架源自对 Apache JMeter 测试计划的重写，核心能力是加载 XML 模板 → 参数化填充 → 发送报文 → 校验响应 → 提取变量串联步骤。
 
 ## Commands
 
