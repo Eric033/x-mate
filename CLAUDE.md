@@ -70,6 +70,10 @@ go build ./cmd/mockserver/
 go build ./cmd/tcpmock/
 ```
 
+## 原始框架
+- 原框架基于jmeter 框架脚本 ./spec/interface.jmx
+- 脚本语法（xml）格式说明 ./spec/ENGINE_SRS.md
+
 ## Architecture
 
 ### Entry Point
