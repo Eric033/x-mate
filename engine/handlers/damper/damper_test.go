@@ -1,7 +1,6 @@
 package damper
 
 import (
-	"fmt"
 	"net"
 	"os"
 	"path/filepath"
@@ -318,7 +317,8 @@ func TestMCADamperSetHandler_Execute_Success(t *testing.T) {
 	tcpDamPort := parts[1]
 
 	ctx := context.New()
-	ctx.DamperTCP = fmt.Sprintf("%s:%s", tcpDamIP, tcpDamPort)
+	ctx.Set("tcpDamServerIP", tcpDamIP)
+	ctx.Set("tcpDamServerPort", tcpDamPort)
 	ctx.TestBase = tmpDir
 
 	data := &handler.StepData{
@@ -465,8 +465,13 @@ func TestMCADamperSetHandler_Execute_DamperTCPOverride(t *testing.T) {
 	listener, addr := startMockDamperTCPServer(t, "", true)
 	defer listener.Close()
 
+	parts := strings.Split(addr, ":")
+	tcpDamIP := parts[0]
+	tcpDamPort := parts[1]
+
 	ctx := context.New()
-	ctx.DamperTCP = addr // Use DamperTCP field directly
+	ctx.Set("tcpDamServerIP", tcpDamIP)
+	ctx.Set("tcpDamServerPort", tcpDamPort)
 	ctx.TestBase = tmpDir
 
 	data := &handler.StepData{

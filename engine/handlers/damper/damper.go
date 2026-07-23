@@ -64,9 +64,6 @@ func (h *TCPDamperSetHandler) Execute(data *handler.StepData, ctx *context.TestC
 		}
 	}
 	if addr == "" {
-		addr = ctx.DamperTCP
-	}
-	if addr == "" {
 		addr = ctx.GetOrDefault("tcpDamServerIP", "") + ":" + ctx.GetOrDefault("tcpDamServerPort", "")
 	}
 
@@ -148,9 +145,6 @@ func (h *MCADamperSetHandler) Execute(data *handler.StepData, ctx *context.TestC
 		} else {
 			addr = svc.Address
 		}
-	}
-	if addr == "" {
-		addr = ctx.DamperTCP
 	}
 	if addr == "" {
 		addr = ctx.GetOrDefault("tcpDamServerIP", "") + ":" + ctx.GetOrDefault("tcpDamServerPort", "")

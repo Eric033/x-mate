@@ -29,15 +29,10 @@ func main() {
 
 	fs := flag.NewFlagSet("engine", flag.ExitOnError)
 	fs.StringVar(&cfg.ConfigPath, "config", "", "Path to YAML config file")
-	fs.StringVar(&cfg.ActiveProfile, "profile", "default", "Active profile for multi-env config")
 	fs.StringVar(&cfg.TestBase, "test-base", "", "Test case root directory (required)")
-	fs.StringVar(&cfg.Server, "server", "", "Target server address ip:port or ip1:port1@ip2:port2")
 	fs.StringVar(&cfg.Flags, "flags", "core", "Case tag filter")
 	fs.BoolVar(&cfg.Verbose, "verbose", false, "Enable verbose logging")
 	fs.BoolVar(&cfg.DryRun, "dry-run", false, "Validate only, do not execute")
-	fs.StringVar(&cfg.DBInfo, "db-info", "", "Database connection info ip:port:dbname:user:passwd")
-	fs.StringVar(&cfg.DamperServer, "damper-server", "", "Damper server address ip:port:tcpPort:httpPort")
-	fs.StringVar(&cfg.EnvName, "env-name", "UNDEFINED", "Environment name")
 	fs.StringVar(&cfg.ParentGUID, "parent-guid", "92508788-4c1c-11e9-808b-005056a01111", "Parent GUID")
 	var runAll bool
 	fs.BoolVar(&runAll, "run-all", false, "Run all cases, ignore flags filtering")
@@ -104,7 +99,7 @@ func main() {
 	}
 
 	// Run tests
-	log.Printf("Engine starting — testBase=%s flags=%s profile=%s", cfg.TestBase, cfg.Flags, cfg.ActiveProfile)
+	log.Printf("Engine starting — testBase=%s flags=%s env=%s", cfg.TestBase, cfg.Flags, cfg.EnvName)
 	result, runErr := r.Run(ctx)
 
 	// Print report

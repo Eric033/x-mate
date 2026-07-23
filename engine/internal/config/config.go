@@ -11,39 +11,36 @@ import (
 	"github.com/Eric033/x-mate/engine/internal/context"
 )
 
-// AppConfig is the top-level YAML config structure.
-type AppConfig struct {
-	Engine   EngineConfig               `yaml:"engine"`
-	Services map[string]context.ServiceDef  `yaml:"services"`
+// forbiddenEngineKeys lists YAML keys that belong to CLI flags and must NOT
+// appear in environment YAML files.
+var forbiddenEngineKeys = []string{
+	"flags", "concurrency", "dry-run", "verbose",
+	"test-base", "parent-guid", "engine",
 }
 
-// EngineConfig holds engine-level settings.
-type EngineConfig struct {
-	TestBase    string `yaml:"test-base"`
-	Flags       string `yaml:"flags"`
-	Verbose     bool   `yaml:"verbose"`
-	DryRun      bool   `yaml:"dry-run"`
-	EnvName     string `yaml:"env-name"`
-	ParentGUID  string `yaml:"parent-guid"`
-	Concurrency int    `yaml:"concurrency"`
+// EnvironmentConfig is the top-level YAML config structure.
+// It describes only the target environment — no execution parameters.
+type EnvironmentConfig struct {
+	Environment EnvironmentMeta              `yaml:"environment"`
+	Services    map[string]context.ServiceDef `yaml:"services"`
+}
+
+// EnvironmentMeta holds metadata about the environment.
+type EnvironmentMeta struct {
+	Name string `yaml:"name"`
 }
 
 // Config holds all resolved configuration (YAML + CLI overrides).
 type Config struct {
-	TestBase      string
-	Server        string  // kept for backward compat CLI
-	Flags         string
-	Verbose       bool
-	DryRun        bool
-	DBInfo        string  // kept for backward compat CLI
-	DamperServer  string  // kept for backward compat CLI
-	EnvName       string
-	ParentGUID    string
+	TestBase   string
+	Flags      string
+	Verbose    bool
+	DryRun     bool
+	ParentGUID string
+	EnvName    string // from YAML environment.name
 
-	// New fields
-	ConfigPath    string
-	ActiveProfile string
-	Concurrency   int     // max concurrent goroutines (0/1 = serial)
+	ConfigPath  string
+	Concurrency int // max concurrent goroutines (0/1 = serial)
 
 	// Resolved services (populated from YAML)
 	Services map[string]context.ServiceDef
@@ -53,192 +50,85 @@ type Config struct {
 func Default() *Config {
 	return &Config{
 		Flags:      "core",
-		EnvName:    "UNDEFINED",
 		ParentGUID: "92508788-4c1c-11e9-808b-005056a01111",
-		ActiveProfile: "default",
 	}
 }
 
-// LoadYAML loads and merges YAML configuration files.
-// It looks for:
-//   1. application.yaml (base)
-//   2. application-{profile}.yaml (profile-specific, optional)
+// LoadYAML loads a single YAML environment file from ConfigPath.
+// If ConfigPath is empty, it searches default locations.
 func (c *Config) LoadYAML() error {
-	basePath := c.ConfigPath
-	if basePath == "" {
-		basePath = "application.yaml"
-	}
-
-	// Try to find the config file
-	baseData, err := os.ReadFile(basePath)
-	if err != nil {
-		// If --config was explicitly specified, error out
-		if c.ConfigPath != "" {
-			return fmt.Errorf("config file %s: %w", c.ConfigPath, err)
-		}
-		// Otherwise try default locations
+	path := c.ConfigPath
+	if path == "" {
+		// Try default locations
 		for _, p := range []string{
+			"application.yaml",
 			"engine.yaml",
 			"config/application.yaml",
 			filepath.Join(os.Getenv("HOME"), ".config", "engine", "application.yaml"),
 		} {
-			baseData, err = os.ReadFile(p)
-			if err == nil {
-				basePath = p
+			if _, err := os.Stat(p); err == nil {
+				path = p
 				break
 			}
 		}
-		if baseData == nil {
-			// No config file found; only error if no CLI overrides provided
+		if path == "" {
+			// No config file found; not an error when not explicitly needed
 			return nil
 		}
 	}
 
-	// Parse base YAML
-	appCfg, err := parseMultiDocYAML(baseData)
+	data, err := os.ReadFile(path)
 	if err != nil {
-		return fmt.Errorf("parse %s: %w", basePath, err)
+		return fmt.Errorf("config file %s: %w", path, err)
 	}
 
-	// Look for profile-specific file
-	profilePath := strings.TrimSuffix(basePath, ".yaml") + "-" + c.ActiveProfile + ".yaml"
-	if profileData, err := os.ReadFile(profilePath); err == nil {
-		profileCfg, err := parseMultiDocYAML(profileData)
-		if err != nil {
-			return fmt.Errorf("parse %s: %w", profilePath, err)
-		}
-		appCfg = mergeAppConfig(appCfg, profileCfg)
+	// Strict validation: refuse YAML that contains forbidden engine keys
+	if err := validateNoForbiddenKeys(data); err != nil {
+		return fmt.Errorf("validate %s: %w", path, err)
 	}
 
-	// Apply to Config
-	c.applyAppConfig(appCfg)
+	// Parse as single document (no multi-doc support without profiles)
+	var envCfg EnvironmentConfig
+	if err := yaml.Unmarshal(data, &envCfg); err != nil {
+		return fmt.Errorf("parse %s: %w", path, err)
+	}
+
+	c.applyEnvironmentConfig(&envCfg)
 	return nil
 }
 
-// parseMultiDocYAML handles YAML with "---" document separators (spring profiles style).
-func parseMultiDocYAML(data []byte) (*AppConfig, error) {
-	decoder := yaml.NewDecoder(strings.NewReader(string(data)))
-	var result AppConfig
-
-	for {
-		var doc AppConfig
-		err := decoder.Decode(&doc)
-		if err != nil {
-			break
-		}
-		merged := mergeAppConfig(&result, &doc)
-		result = *merged
+// validateNoForbiddenKeys checks that the YAML content does not contain
+// top-level keys that belong in CLI flags rather than environment config.
+func validateNoForbiddenKeys(data []byte) error {
+	var raw map[string]yaml.Node
+	if err := yaml.Unmarshal(data, &raw); err != nil {
+		return err
 	}
-
-	return &result, nil
+	for key := range raw {
+		for _, forbidden := range forbiddenEngineKeys {
+			if key == forbidden {
+				return fmt.Errorf(
+					"key %q is not allowed in environment YAML; "+
+						"use CLI flags instead", key)
+			}
+		}
+	}
+	return nil
 }
 
-// mergeAppConfig merges src into dst (src fields override dst).
-func mergeAppConfig(dst, src *AppConfig) *AppConfig {
-	if src == nil {
-		return dst
-	}
-
-	// Merge engine fields
-	if src.Engine.TestBase != "" {
-		dst.Engine.TestBase = src.Engine.TestBase
-	}
-	if src.Engine.Flags != "" {
-		dst.Engine.Flags = src.Engine.Flags
-	}
-	if src.Engine.Verbose {
-		dst.Engine.Verbose = src.Engine.Verbose
-	}
-	if src.Engine.DryRun {
-		dst.Engine.DryRun = src.Engine.DryRun
-	}
-	if src.Engine.EnvName != "" {
-		dst.Engine.EnvName = src.Engine.EnvName
-	}
-	if src.Engine.ParentGUID != "" {
-		dst.Engine.ParentGUID = src.Engine.ParentGUID
-	}
-	if src.Engine.Concurrency > 0 {
-		dst.Engine.Concurrency = src.Engine.Concurrency
-	}
-
-	// Merge services (deep merge by name)
-	if dst.Services == nil {
-		dst.Services = make(map[string]context.ServiceDef)
-	}
-	for name, svc := range src.Services {
-		existing, exists := dst.Services[name]
-		if !exists {
-			dst.Services[name] = svc
-			continue
-		}
-		// Deep merge service
-		if svc.Address != "" {
-			existing.Address = svc.Address
-		}
-		if svc.TCPPort != 0 {
-			existing.TCPPort = svc.TCPPort
-		}
-		if svc.HTTPPort != 0 {
-			existing.HTTPPort = svc.HTTPPort
-		}
-		if svc.DB != nil {
-			if existing.DB == nil {
-				existing.DB = &context.DBConf{}
-			}
-			if svc.DB.Address != "" {
-				existing.DB.Address = svc.DB.Address
-			}
-			if svc.DB.Database != "" {
-				existing.DB.Database = svc.DB.Database
-			}
-			if svc.DB.Username != "" {
-				existing.DB.Username = svc.DB.Username
-			}
-			if svc.DB.Password != "" {
-				existing.DB.Password = svc.DB.Password
-			}
-			if svc.DB.Type != "" {
-				existing.DB.Type = svc.DB.Type
-			}
-		}
-		dst.Services[name] = existing
-	}
-
-	return dst
-}
-
-// applyAppConfig copies AppConfig fields into the flat Config struct.
-func (c *Config) applyAppConfig(appCfg *AppConfig) {
-	if appCfg == nil {
+// applyEnvironmentConfig copies EnvironmentConfig fields into the flat Config struct.
+func (c *Config) applyEnvironmentConfig(envCfg *EnvironmentConfig) {
+	if envCfg == nil {
 		return
 	}
 
-	// Engine fields (only if not already set by CLI)
-	if c.TestBase == "" {
-		c.TestBase = appCfg.Engine.TestBase
-	}
-	if c.Flags == "core" && appCfg.Engine.Flags != "" {
-		c.Flags = appCfg.Engine.Flags
-	}
-	if !c.Verbose {
-		c.Verbose = appCfg.Engine.Verbose
-	}
-	if !c.DryRun {
-		c.DryRun = appCfg.Engine.DryRun
-	}
-	if c.EnvName == "UNDEFINED" && appCfg.Engine.EnvName != "" {
-		c.EnvName = appCfg.Engine.EnvName
-	}
-	if c.ParentGUID == "92508788-4c1c-11e9-808b-005056a01111" && appCfg.Engine.ParentGUID != "" {
-		c.ParentGUID = appCfg.Engine.ParentGUID
-	}
-	if c.Concurrency == 0 && appCfg.Engine.Concurrency > 0 {
-		c.Concurrency = appCfg.Engine.Concurrency
+	// Environment metadata
+	if envCfg.Environment.Name != "" {
+		c.EnvName = envCfg.Environment.Name
 	}
 
 	// Services
-	c.Services = appCfg.Services
+	c.Services = envCfg.Services
 }
 
 // InitContext populates a TestContext from Config.
@@ -279,7 +169,6 @@ func (c *Config) InitContext(ctx *context.TestContext) {
 
 	// Backward compat: populate old-style vars if single service exists
 	if len(c.Services) > 0 {
-		// Pick first service as "default" for backward compat
 		for _, svc := range c.Services {
 			ip, port := splitHostPort(svc.Address)
 			ctx.Set("serverIP", ip)
@@ -297,56 +186,10 @@ func (c *Config) InitContext(ctx *context.TestContext) {
 		}
 	}
 
-	// Backward compat: old-style parsed servers/db pools (from CLI fallback)
-	if c.Server != "" {
-		ctx.Servers = ParseServer(c.Server)
-		for i, s := range ctx.Servers {
-			ctx.Set(fmt.Sprintf("server_%d", i+1), s.IP)
-			ctx.Set(fmt.Sprintf("port_%d", i+1), s.Port)
-		}
-	}
-
-	// Damper (backward compat)
-	if c.DamperServer != "" {
-		tcpAddr, httpAddr := ParseDamper(c.DamperServer)
-		ctx.DamperTCP = tcpAddr
-		ctx.DamperHTTP = httpAddr
-		damParts := strings.Split(c.DamperServer, ":")
-		if len(damParts) >= 4 {
-			ctx.Set("tcpDamServerIP", damParts[0])
-			ctx.Set("tcpDamServerPort", damParts[2])
-			ctx.Set("httpDamServerIP", damParts[0])
-			ctx.Set("httpDamServerPort", damParts[3])
-		}
-	}
-
-	// DB pools (backward compat)
-	if c.DBInfo != "" {
-		ctx.DBPools = ParseDBInfo(c.DBInfo)
-		for i, db := range ctx.DBPools {
-			ctx.Set(fmt.Sprintf("dbips_%d", i+1), db.IP)
-			ctx.Set(fmt.Sprintf("dbports_%d", i+1), db.Port)
-			ctx.Set(fmt.Sprintf("dbnames_%d", i+1), db.Name)
-		}
-		// Set DB_* shorthand from first DB pool
-		if len(ctx.DBPools) > 0 {
-			db0 := ctx.DBPools[0]
-			ctx.Set("DB_IP", db0.IP)
-			ctx.Set("DB_port", db0.Port)
-			ctx.Set("DB_name", db0.Name)
-			ctx.Set("DB_user", db0.User)
-			ctx.Set("DB_passwd", db0.Passwd)
-			ctx.Set("DB_type", db0.Type)
-		}
-	}
-
 	// Raw config vars
 	ctx.Set("testBase", c.TestBase)
 	ctx.Set("flags", c.Flags)
-	ctx.Set("G_server", c.Server)
-	ctx.Set("G_DamplerServer", c.DamperServer)
 	ctx.Set("parent_guid", c.ParentGUID)
-	ctx.Set("DB_info", c.DBInfo)
 	ctx.Set("envName", c.EnvName)
 }
 
@@ -357,74 +200,4 @@ func splitHostPort(addr string) (string, string) {
 		return addr, ""
 	}
 	return addr[:colonIdx], addr[colonIdx+1:]
-}
-
-// ParseServer parses the --server flag into server entries.
-// Format: "ip1:port1" or "ip1:port1@ip2:port2"
-func ParseServer(raw string) []context.ServerEntry {
-	var servers []context.ServerEntry
-	parts := strings.Split(raw, "@")
-	for _, p := range parts {
-		colonIdx := strings.LastIndex(p, ":")
-		if colonIdx < 0 {
-			servers = append(servers, context.ServerEntry{IP: p, Port: ""})
-			continue
-		}
-		servers = append(servers, context.ServerEntry{
-			IP:   p[:colonIdx],
-			Port: p[colonIdx+1:],
-		})
-	}
-	return servers
-}
-
-// ParseDamper parses the --damper-server flag.
-// Format: "ip:port:tcpPort:httpPort"
-func ParseDamper(raw string) (tcpAddr, httpAddr string) {
-	parts := strings.Split(raw, ":")
-	if len(parts) >= 4 {
-		tcpAddr = parts[0] + ":" + parts[2]
-		httpAddr = parts[0] + ":" + parts[3]
-	} else if len(parts) >= 2 {
-		tcpAddr = parts[0] + ":" + parts[1]
-		httpAddr = parts[0] + ":" + parts[1]
-	}
-	return
-}
-
-// ParseDBInfo parses --db-info into individual fields.
-// Format: "ip:port:dbname:user:passwd" or multi-db "ip1:port1:db1:user1:pwd1@ip2:port2:db2:user2:pwd2"
-func ParseDBInfo(raw string) []context.DBConfig {
-	var dbs []context.DBConfig
-	if raw == "" || raw == "UNDEFINED" {
-		return dbs
-	}
-
-	// Split multi-db by @
-	groups := strings.Split(raw, "@")
-	for _, g := range groups {
-		parts := strings.Split(g, ":")
-		db := context.DBConfig{
-			User:    "readonly",
-			Passwd:  "readonly",
-			Type:    "UNDEFINED",
-		}
-		if len(parts) >= 1 {
-			db.IP = parts[0]
-		}
-		if len(parts) >= 2 {
-			db.Port = parts[1]
-		}
-		if len(parts) >= 3 {
-			db.Name = parts[2]
-		}
-		if len(parts) >= 4 {
-			db.User = parts[3]
-		}
-		if len(parts) >= 5 {
-			db.Passwd = parts[4]
-		}
-		dbs = append(dbs, db)
-	}
-	return dbs
 }

@@ -30,14 +30,8 @@ type TestContext struct {
 	mu        sync.RWMutex
 	Variables map[string]string
 
-	// Services (new, from YAML config) — service name → definition
+	// Services (from YAML config) — service name → definition
 	Services map[string]ServiceDef
-
-	// Legacy fields (backward compat)
-	Servers    []ServerEntry
-	DBPools    []DBConfig
-	DamperTCP  string // tcpDamServerIP:tcpDamServerPort
-	DamperHTTP string // httpDamServerIP:httpDamServerPort
 
 	TestBase    string
 	Flags       string
@@ -47,22 +41,6 @@ type TestContext struct {
 	DryRun      bool
 	Concurrency int // max concurrent goroutines (0/1 = serial)
 	RunAll      bool   // skip all flags filtering, run every case
-}
-
-// ServerEntry represents a target server address.
-type ServerEntry struct {
-	IP   string
-	Port string
-}
-
-// DBConfig represents a database connection configuration.
-type DBConfig struct {
-	IP     string
-	Port   string
-	Name   string
-	User   string
-	Passwd string
-	Type   string
 }
 
 // New creates a fresh TestContext.
@@ -159,16 +137,12 @@ func (c *TestContext) Clone() *TestContext {
 	defer c.mu.RUnlock()
 
 	clone := &TestContext{
-		Variables:  make(map[string]string, len(c.Variables)),
-		Services:   make(map[string]ServiceDef, len(c.Services)),
-		Servers:    make([]ServerEntry, len(c.Servers)),
-		DBPools:    make([]DBConfig, len(c.DBPools)),
-		DamperTCP:  c.DamperTCP,
-		DamperHTTP: c.DamperHTTP,
-		TestBase:   c.TestBase,
-		Flags:      c.Flags,
-		EnvName:    c.EnvName,
-		ParentGUID: c.ParentGUID,
+		Variables:   make(map[string]string, len(c.Variables)),
+		Services:    make(map[string]ServiceDef, len(c.Services)),
+		TestBase:    c.TestBase,
+		Flags:       c.Flags,
+		EnvName:     c.EnvName,
+		ParentGUID:  c.ParentGUID,
 		Verbose:     c.Verbose,
 		DryRun:      c.DryRun,
 		Concurrency: c.Concurrency,
@@ -181,8 +155,6 @@ func (c *TestContext) Clone() *TestContext {
 	for k, v := range c.Services {
 		clone.Services[k] = v
 	}
-	copy(clone.Servers, c.Servers)
-	copy(clone.DBPools, c.DBPools)
 
 	return clone
 }
@@ -234,21 +206,26 @@ func (c *TestContext) GenerateSystemVars(serverName string) {
 	// time_no
 	c.Set("time_no", timeStr6)
 
-	// serverIP / serverPort — from service name or legacy
+	// serverIP / serverPort — from service name or first service
 	if serverName != "" {
 		if svc, ok := c.Services[serverName]; ok {
 			ip, port := splitHostPort(svc.Address)
 			c.Set("serverIP", ip)
 			c.Set("serverPort", port)
 		}
-	} else if len(c.Servers) > 0 {
-		// Legacy: use first server
-		c.Set("serverIP", c.Servers[0].IP)
-		c.Set("serverPort", c.Servers[0].Port)
+	} else if len(c.Services) > 0 {
+		// Use first service
+		for _, svc := range c.Services {
+			ip, port := splitHostPort(svc.Address)
+			c.Set("serverIP", ip)
+			c.Set("serverPort", port)
+			break
+		}
 	}
 }
 
 // GenerateSystemVarsLegacy is kept for backward compat with tests.
+// It uses the first service instead of legacy Servers list.
 func (c *TestContext) GenerateSystemVarsLegacy(serverIndex int) {
 	now := time.Now()
 
@@ -272,9 +249,14 @@ func (c *TestContext) GenerateSystemVarsLegacy(serverIndex int) {
 
 	c.Set("time_no", timeStr6)
 
-	if serverIndex > 0 && serverIndex <= len(c.Servers) {
-		c.Set("serverIP", c.Servers[serverIndex-1].IP)
-		c.Set("serverPort", c.Servers[serverIndex-1].Port)
+	// Use first service if available
+	if len(c.Services) > 0 {
+		for _, svc := range c.Services {
+			ip, port := splitHostPort(svc.Address)
+			c.Set("serverIP", ip)
+			c.Set("serverPort", port)
+			break
+		}
 	}
 }
 

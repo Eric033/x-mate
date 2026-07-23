@@ -65,26 +65,6 @@ func TestClone_WithServices(t *testing.T) {
 	}
 }
 
-func TestClone_WithServers(t *testing.T) {
-	ctx := New()
-	ctx.Servers = []ServerEntry{{IP: "10.0.0.1", Port: "9996"}, {IP: "10.0.0.2", Port: "8080"}}
-
-	clone := ctx.Clone()
-
-	if len(clone.Servers) != 2 {
-		t.Fatalf("cloned servers len = %d", len(clone.Servers))
-	}
-	if clone.Servers[0].IP != "10.0.0.1" {
-		t.Errorf("server[0].IP = %q", clone.Servers[0].IP)
-	}
-
-	// Modify clone should not affect original
-	clone.Servers[0].IP = "modified"
-	if ctx.Servers[0].IP != "10.0.0.1" {
-		t.Error("original servers modified via clone")
-	}
-}
-
 func TestGenerateSystemVars_NoService(t *testing.T) {
 	ctx := New()
 	ctx.GenerateSystemVars("")
@@ -136,9 +116,9 @@ func TestGenerateSystemVars_SeqNo(t *testing.T) {
 		t.Errorf("seq_no too short: %q", seqNo)
 	}
 
-	// Verify format: date_str_6(7 chars) + 9 digits + 00 = 18 chars
-	if len(seqNo) != 18 {
-		t.Errorf("seq_no length = %d, want 18", len(seqNo))
+	// Verify format: date_str_6(YMMdd, 5 chars) + 9 digits + 00 = 16 chars
+	if len(seqNo) != 16 {
+		t.Errorf("seq_no length = %d, want 16", len(seqNo))
 	}
 
 	// Last two chars should be 00
@@ -153,33 +133,32 @@ func TestGenerateSystemVars_SeqNo(t *testing.T) {
 	}
 }
 
-func TestGenerateSystemVarsLegacy_WithServerIndex(t *testing.T) {
+func TestGenerateSystemVarsLegacy_WithService(t *testing.T) {
 	ctx := New()
-	ctx.Servers = []ServerEntry{
-		{IP: "10.0.0.1", Port: "9996"},
-		{IP: "10.0.0.2", Port: "8080"},
+	ctx.Services = map[string]ServiceDef{
+		"SVC1": {Address: "10.0.0.1:9996"},
+		"SVC2": {Address: "10.0.0.2:8080"},
 	}
 
 	ctx.GenerateSystemVarsLegacy(2)
 
 	ip, _ := ctx.Get("serverIP")
-	if ip != "10.0.0.2" {
-		t.Errorf("serverIP = %q, want 10.0.0.2", ip)
+	if ip != "10.0.0.1" {
+		t.Errorf("serverIP = %q, want 10.0.0.1", ip)
 	}
 	port, _ := ctx.Get("serverPort")
-	if port != "8080" {
-		t.Errorf("serverPort = %q, want 8080", port)
+	if port != "9996" {
+		t.Errorf("serverPort = %q, want 9996", port)
 	}
 }
 
-func TestGenerateSystemVarsLegacy_OutOfRange(t *testing.T) {
+func TestGenerateSystemVarsLegacy_NoService(t *testing.T) {
 	ctx := New()
-	ctx.Servers = []ServerEntry{{IP: "10.0.0.1", Port: "9996"}}
 
-	// Should not panic with out-of-range index
+	// Should not set serverIP with no services
 	ctx.GenerateSystemVarsLegacy(5)
 	if _, ok := ctx.Get("serverIP"); ok {
-		t.Error("serverIP should not be set with out-of-range index")
+		t.Error("serverIP should not be set with no services")
 	}
 }
 
@@ -305,8 +284,6 @@ func TestGetServiceDB(t *testing.T) {
 	if ok {
 		t.Error("GetServiceDB for non-existent should return false")
 	}
-
-	_, ok = ctx.GetServiceDB("NODB")
 
 	// Services without DB should return false
 	ctx2 := New()

@@ -1,8 +1,5 @@
-engine:
-  test-base: ./sample
-  flags: core
-  verbose: true
-  env-name: DEMO
+environment:
+  name: DEMO
 
 services:
   MOCK:
