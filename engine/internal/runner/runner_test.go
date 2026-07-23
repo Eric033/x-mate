@@ -59,8 +59,13 @@ func TestRunner_Run_NoTestCases(t *testing.T) {
 	registry := handler.NewRegistry()
 	runner := NewRunner(registry)
 
-	report := runner.Run(ctx)
+	report, err := runner.Run(ctx)
 
+	// Directory exists but doesn't have a testcase/ subdirectory.
+	// The new Run signature returns an error when it can't read the testcase dir.
+	if err == nil {
+		t.Error("expected error for missing testcase subdirectory, got nil")
+	}
 	if report.TotalCases != 0 {
 		t.Errorf("expected 0 cases, got %d", report.TotalCases)
 	}
@@ -70,7 +75,7 @@ func TestRunner_Run_DryRun(t *testing.T) {
 	tmpDir := setupTempTestCaseDir(t)
 
 	// Create a test case
-	caseXML := `<case title="TestDryRun">
+	caseXML := `<case flags="core" title="TestDryRun">
 		<action>
 			<step desc="dry run step">
 				<Action type="xml_set" server_index="1" trancode="T001"/>
@@ -92,7 +97,7 @@ func TestRunner_Run_DryRun(t *testing.T) {
 		logBuf.WriteString("\n")
 	}
 
-	report := runner.Run(ctx)
+	report, _ := runner.Run(ctx)
 
 	if report.TotalCases != 0 {
 		t.Errorf("expected 0 cases in dry-run mode, got %d", report.TotalCases)
@@ -107,7 +112,7 @@ func TestRunner_Run_DryRun(t *testing.T) {
 func TestRunner_Run_SingleCase(t *testing.T) {
 	tmpDir := setupTempTestCaseDir(t)
 
-	caseXML := `<case title="SimplePassCase">
+	caseXML := `<case flags="core" title="SimplePassCase">
 		<setup>
 			<step desc="setup step">
 				<Action type="http" server_index="1"/>
@@ -135,7 +140,7 @@ func TestRunner_Run_SingleCase(t *testing.T) {
 	registry.Register("http", dummyHandler)
 
 	runner := NewRunner(registry)
-	report := runner.Run(ctx)
+	report, _ := runner.Run(ctx)
 
 	if report.TotalCases != 1 {
 		t.Errorf("expected 1 case, got %d", report.TotalCases)
@@ -154,6 +159,9 @@ func TestRunner_Run_SingleCase(t *testing.T) {
 	result := report.Results[0]
 	if result.CaseName != "case001" {
 		t.Errorf("expected CaseName 'case001', got '%s'", result.CaseName)
+	}
+	if result.Status != CasePassed {
+		t.Errorf("expected Status 'passed', got '%s'", result.Status)
 	}
 
 	// Should have 3 steps: setup, action, teardown
@@ -183,7 +191,7 @@ func TestRunner_Run_SingleCase(t *testing.T) {
 func TestRunner_Run_WithFailure(t *testing.T) {
 	tmpDir := setupTempTestCaseDir(t)
 
-	caseXML := `<case title="FailCase">
+	caseXML := `<case flags="core" title="FailCase">
 		<action>
 			<step desc="failing step">
 				<Action type="failing_handler" server_index="1"/>
@@ -201,7 +209,7 @@ func TestRunner_Run_WithFailure(t *testing.T) {
 	registry.Register("failing_handler", failingHandler)
 
 	runner := NewRunner(registry)
-	report := runner.Run(ctx)
+	report, _ := runner.Run(ctx)
 
 	if report.TotalCases != 1 {
 		t.Errorf("expected 1 case, got %d", report.TotalCases)
@@ -217,11 +225,16 @@ func TestRunner_Run_WithFailure(t *testing.T) {
 		t.Fatalf("expected 1 result, got %d", len(report.Results))
 	}
 
-	if len(report.Results[0].Steps) != 1 {
-		t.Fatalf("expected 1 step, got %d", len(report.Results[0].Steps))
+	result := report.Results[0]
+	if result.Status != CaseFailed {
+		t.Errorf("expected Status 'failed', got '%s'", result.Status)
 	}
 
-	step := report.Results[0].Steps[0]
+	if len(result.Steps) != 1 {
+		t.Fatalf("expected 1 step, got %d", len(result.Steps))
+	}
+
+	step := result.Steps[0]
 	if step.Pass {
 		t.Fatal("expected step to fail")
 	}
@@ -233,7 +246,7 @@ func TestRunner_Run_WithFailure(t *testing.T) {
 func TestRunner_Run_UnregisteredHandler(t *testing.T) {
 	tmpDir := setupTempTestCaseDir(t)
 
-	caseXML := `<case title="UnknownHandler">
+	caseXML := `<case flags="core" title="UnknownHandler">
 		<action>
 			<step desc="unknown type">
 				<Action type="nonexistent_type" server_index="1"/>
@@ -249,7 +262,7 @@ func TestRunner_Run_UnregisteredHandler(t *testing.T) {
 	// Don't register anything for "nonexistent_type"
 
 	runner := NewRunner(registry)
-	report := runner.Run(ctx)
+	report, _ := runner.Run(ctx)
 
 	if report.TotalCases != 1 {
 		t.Errorf("expected 1 case, got %d", report.TotalCases)
@@ -262,7 +275,12 @@ func TestRunner_Run_UnregisteredHandler(t *testing.T) {
 		t.Fatalf("expected 1 result, got %d", len(report.Results))
 	}
 
-	step := report.Results[0].Steps[0]
+	result := report.Results[0]
+	if result.Status != CaseFailed {
+		t.Errorf("expected Status 'failed', got '%s'", result.Status)
+	}
+
+	step := result.Steps[0]
 	if step.Pass {
 		t.Fatal("expected step to fail")
 	}
@@ -275,7 +293,7 @@ func TestRunner_Run_MultipleCases(t *testing.T) {
 	tmpDir := setupTempTestCaseDir(t)
 
 	// Create two test cases
-	case1XML := `<case title="CaseOne">
+	case1XML := `<case flags="core" title="CaseOne">
 		<action>
 			<step desc="step one">
 				<Action type="mock_handler" server_index="1"/>
@@ -284,7 +302,7 @@ func TestRunner_Run_MultipleCases(t *testing.T) {
 	</case>`
 	createTestCase(t, tmpDir, "case001", case1XML)
 
-	case2XML := `<case title="CaseTwo">
+	case2XML := `<case flags="core" title="CaseTwo">
 		<action>
 			<step desc="step two">
 				<Action type="mock_handler" server_index="1"/>
@@ -301,7 +319,7 @@ func TestRunner_Run_MultipleCases(t *testing.T) {
 	registry.Register("mock_handler", dummyHandler)
 
 	runner := NewRunner(registry)
-	report := runner.Run(ctx)
+	report, _ := runner.Run(ctx)
 
 	if report.TotalCases != 2 {
 		t.Errorf("expected 2 cases, got %d", report.TotalCases)
@@ -336,18 +354,27 @@ func TestRunner_Run_InvalidXML(t *testing.T) {
 	registry := handler.NewRegistry()
 	runner := NewRunner(registry)
 
-	report := runner.Run(ctx)
+	report, _ := runner.Run(ctx)
 
-	// The case should be processed but steps will be empty since parsing fails
+	// The case should be processed with Error status since XML parsing fails
 	if report.TotalCases != 1 {
 		t.Errorf("expected 1 case, got %d", report.TotalCases)
+	}
+	if report.ErrorCases != 1 {
+		t.Errorf("expected 1 error, got %d", report.ErrorCases)
+	}
+	if len(report.Results) != 1 {
+		t.Fatalf("expected 1 result, got %d", len(report.Results))
+	}
+	if report.Results[0].Status != CaseError {
+		t.Errorf("expected Status 'error', got '%s'", report.Results[0].Status)
 	}
 }
 
 func TestRunner_Run_CaseNoAction(t *testing.T) {
 	tmpDir := setupTempTestCaseDir(t)
 
-	caseXML := `<case title="NoActionCase">
+	caseXML := `<case flags="core" title="NoActionCase">
 		<!-- no action or setup or teardown -->
 	</case>`
 	createTestCase(t, tmpDir, "empty001", caseXML)
@@ -358,29 +385,32 @@ func TestRunner_Run_CaseNoAction(t *testing.T) {
 	registry := handler.NewRegistry()
 	runner := NewRunner(registry)
 
-	report := runner.Run(ctx)
+	report, _ := runner.Run(ctx)
 
 	if report.TotalCases != 1 {
 		t.Errorf("expected 1 case, got %d", report.TotalCases)
 	}
-	if report.PassedCases != 1 {
-		t.Errorf("expected 1 passed, got %d", report.PassedCases)
+	if report.ErrorCases != 1 {
+		t.Errorf("expected 1 error (zero steps), got %d", report.ErrorCases)
 	}
 
 	if len(report.Results) != 1 {
 		t.Fatalf("expected 1 result, got %d", len(report.Results))
 	}
 
-	// No steps, so it should pass
-	if len(report.Results[0].Steps) != 0 {
-		t.Errorf("expected 0 steps, got %d", len(report.Results[0].Steps))
+	result := report.Results[0]
+	if result.Status != CaseError {
+		t.Errorf("expected Status 'error', got '%s'", result.Status)
+	}
+	if len(result.Steps) != 0 {
+		t.Errorf("expected 0 steps, got %d", len(result.Steps))
 	}
 }
 
 func TestRunner_Run_RequestResponseLogging(t *testing.T) {
 	tmpDir := setupTempTestCaseDir(t)
 
-	caseXML := `<case title="LoggingCase">
+	caseXML := `<case flags="core" title="LoggingCase">
 		<action>
 			<step desc="logging step">
 				<Action type="mock_handler" server_index="1"/>
@@ -393,7 +423,6 @@ func TestRunner_Run_RequestResponseLogging(t *testing.T) {
 
 	ctx := context.New()
 	ctx.TestBase = tmpDir
-	// Verbose flag is no longer required for request/response logging
 
 	registry := handler.NewRegistry()
 	dummyHandler := &dummyRunnerHandler{success: true, requestData: "test-request", responseData: "test-response"}
@@ -405,7 +434,7 @@ func TestRunner_Run_RequestResponseLogging(t *testing.T) {
 		logBuf.WriteString("\n")
 	}
 
-	report := runner.Run(ctx)
+	report, _ := runner.Run(ctx)
 
 	if report.TotalCases != 1 {
 		t.Errorf("expected 1 case, got %d", report.TotalCases)
@@ -433,7 +462,7 @@ func TestRunner_Run_TitleFallback(t *testing.T) {
 	tmpDir := setupTempTestCaseDir(t)
 
 	// Use tittle attribute (old format)
-	caseXML := `<case tittle="OldTitle">
+	caseXML := `<case flags="core" tittle="OldTitle">
 		<action>
 			<step desc="test step">
 				<Action type="mock_handler" server_index="1"/>
@@ -450,7 +479,7 @@ func TestRunner_Run_TitleFallback(t *testing.T) {
 	registry.Register("mock_handler", dummyHandler)
 
 	runner := NewRunner(registry)
-	report := runner.Run(ctx)
+	report, _ := runner.Run(ctx)
 
 	if report.TotalCases != 1 {
 		t.Errorf("expected 1 case, got %d", report.TotalCases)
@@ -483,7 +512,7 @@ func TestRunner_Run_DryRunError(t *testing.T) {
 		logBuf.WriteString("\n")
 	}
 
-	report := runner.Run(ctx)
+	report, _ := runner.Run(ctx)
 
 	if report.TotalCases != 0 {
 		t.Errorf("expected 0 cases in dry-run, got %d", report.TotalCases)
@@ -502,7 +531,11 @@ func TestRunner_Run_ReadDirError(t *testing.T) {
 	registry := handler.NewRegistry()
 	runner := NewRunner(registry)
 
-	report := runner.Run(ctx)
+	report, err := runner.Run(ctx)
+
+	if err == nil {
+		t.Error("expected error for nonexistent directory, got nil")
+	}
 
 	if report.TotalCases != 0 {
 		t.Errorf("expected 0 cases, got %d", report.TotalCases)
@@ -513,7 +546,7 @@ func TestRunner_Run_StepHandlerRouting(t *testing.T) {
 	tmpDir := setupTempTestCaseDir(t)
 
 	// Test that the handler routing works for different step types
-	caseXML := `<case title="RoutingTest">
+	caseXML := `<case flags="core" title="RoutingTest">
 		<action>
 			<step desc="tcp step">
 				<Action type="xml_set" server_index="1" trancode="T001"/>
@@ -538,7 +571,7 @@ func TestRunner_Run_StepHandlerRouting(t *testing.T) {
 	registry.Register("mca", &dummyRunnerHandler{success: true})
 
 	runner := NewRunner(registry)
-	report := runner.Run(ctx)
+	report, _ := runner.Run(ctx)
 
 	if report.TotalCases != 1 {
 		t.Errorf("expected 1 case, got %d", report.TotalCases)
@@ -562,6 +595,133 @@ func TestRunner_Run_StepHandlerRouting(t *testing.T) {
 		if s.Type != expectedTypes[i] {
 			t.Errorf("step %d type = %q, want %q", i, s.Type, expectedTypes[i])
 		}
+	}
+}
+
+// TestRunner_Run_SkippedCase — case without flags should be Skipped
+func TestRunner_Run_SkippedCase(t *testing.T) {
+	tmpDir := setupTempTestCaseDir(t)
+
+	// No flags attribute → should be skipped
+	caseXML := `<case title="NoFlagsCase">
+		<action>
+			<step desc="should not run">
+				<Action type="mock_handler" server_index="1"/>
+			</step>
+		</action>
+	</case>`
+	createTestCase(t, tmpDir, "skip001", caseXML)
+
+	ctx := context.New()
+	ctx.TestBase = tmpDir
+	ctx.Flags = "core"
+
+	registry := handler.NewRegistry()
+	dummyHandler := &dummyRunnerHandler{success: true}
+	registry.Register("mock_handler", dummyHandler)
+
+	runner := NewRunner(registry)
+	report, _ := runner.Run(ctx)
+
+	if report.TotalCases != 1 {
+		t.Errorf("expected 1 case, got %d", report.TotalCases)
+	}
+	if report.SkippedCases != 1 {
+		t.Errorf("expected 1 skipped, got %d", report.SkippedCases)
+	}
+	if report.PassedCases != 0 {
+		t.Errorf("expected 0 passed, got %d", report.PassedCases)
+	}
+
+	if len(report.Results) != 1 {
+		t.Fatalf("expected 1 result, got %d", len(report.Results))
+	}
+	if report.Results[0].Status != CaseSkipped {
+		t.Errorf("expected Status 'skipped', got '%s'", report.Results[0].Status)
+	}
+}
+
+// TestRunner_Run_FlagsMismatch — flags mismatch should be Skipped
+func TestRunner_Run_FlagsMismatch(t *testing.T) {
+	tmpDir := setupTempTestCaseDir(t)
+
+	caseXML := `<case flags="extended" title="ExtendedOnlyCase">
+		<action>
+			<step desc="should not run">
+				<Action type="mock_handler" server_index="1"/>
+			</step>
+		</action>
+	</case>`
+	createTestCase(t, tmpDir, "extended001", caseXML)
+
+	ctx := context.New()
+	ctx.TestBase = tmpDir
+	ctx.Flags = "core"
+
+	registry := handler.NewRegistry()
+	dummyHandler := &dummyRunnerHandler{success: true}
+	registry.Register("mock_handler", dummyHandler)
+
+	runner := NewRunner(registry)
+	report, _ := runner.Run(ctx)
+
+	if report.TotalCases != 1 {
+		t.Errorf("expected 1 case, got %d", report.TotalCases)
+	}
+	if report.SkippedCases != 1 {
+		t.Errorf("expected 1 skipped, got %d", report.SkippedCases)
+	}
+	if report.PassedCases != 0 {
+		t.Errorf("expected 0 passed, got %d", report.PassedCases)
+	}
+
+	if len(report.Results) != 1 {
+		t.Fatalf("expected 1 result, got %d", len(report.Results))
+	}
+	if report.Results[0].Status != CaseSkipped {
+		t.Errorf("expected Status 'skipped', got '%s'", report.Results[0].Status)
+	}
+}
+
+// TestRunner_Run_FlagsMatch — flags matching should execute normally
+func TestRunner_Run_FlagsMatch(t *testing.T) {
+	tmpDir := setupTempTestCaseDir(t)
+
+	caseXML := `<case flags="core" title="CoreCase">
+		<action>
+			<step desc="should run">
+				<Action type="mock_handler" server_index="1"/>
+			</step>
+		</action>
+	</case>`
+	createTestCase(t, tmpDir, "core001", caseXML)
+
+	ctx := context.New()
+	ctx.TestBase = tmpDir
+	ctx.Flags = "core"
+
+	registry := handler.NewRegistry()
+	dummyHandler := &dummyRunnerHandler{success: true}
+	registry.Register("mock_handler", dummyHandler)
+
+	runner := NewRunner(registry)
+	report, _ := runner.Run(ctx)
+
+	if report.TotalCases != 1 {
+		t.Errorf("expected 1 case, got %d", report.TotalCases)
+	}
+	if report.PassedCases != 1 {
+		t.Errorf("expected 1 passed, got %d", report.PassedCases)
+	}
+	if report.SkippedCases != 0 {
+		t.Errorf("expected 0 skipped, got %d", report.SkippedCases)
+	}
+
+	if len(report.Results) != 1 {
+		t.Fatalf("expected 1 result, got %d", len(report.Results))
+	}
+	if report.Results[0].Status != CasePassed {
+		t.Errorf("expected Status 'passed', got '%s'", report.Results[0].Status)
 	}
 }
 

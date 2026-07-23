@@ -16,9 +16,20 @@ import (
 	"github.com/Eric033/x-mate/engine/internal/handler"
 )
 
+// CaseStatus represents the explicit status of a test case.
+type CaseStatus string
+
+const (
+	CasePassed  CaseStatus = "passed"
+	CaseFailed  CaseStatus = "failed"
+	CaseSkipped CaseStatus = "skipped"
+	CaseError   CaseStatus = "error"
+)
+
 // CaseResult holds the execution result of a single test case.
 type CaseResult struct {
 	CaseName string
+	Status   CaseStatus
 	Steps    []StepReport
 	Duration time.Duration
 }
@@ -34,32 +45,32 @@ type StepReport struct {
 
 // Report holds the overall test run report.
 type Report struct {
-	StartTime   time.Time
-	EndTime     time.Time
-	TotalCases  int
-	PassedCases int
-	FailedCases int
-	Results     []CaseResult
-	mu          sync.Mutex // protects Results for concurrent access
+	StartTime    time.Time
+	EndTime      time.Time
+	TotalCases   int
+	PassedCases  int
+	FailedCases  int
+	SkippedCases int
+	ErrorCases   int
+	Results      []CaseResult
+	mu           sync.Mutex // protects Results for concurrent access
 }
 
-// appendResult safely appends a case result to the report.
+// appendResult safely appends a case result to the report, counting by Status.
 func (r *Report) appendResult(cr CaseResult) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	r.Results = append(r.Results, cr)
 	r.TotalCases++
-	allPass := true
-	for _, s := range cr.Steps {
-		if !s.Pass {
-			allPass = false
-			break
-		}
-	}
-	if allPass {
+	switch cr.Status {
+	case CasePassed:
 		r.PassedCases++
-	} else {
+	case CaseFailed:
 		r.FailedCases++
+	case CaseSkipped:
+		r.SkippedCases++
+	case CaseError:
+		r.ErrorCases++
 	}
 }
 
@@ -84,7 +95,7 @@ func NewRunner(registry *handler.Registry) *Runner {
 }
 
 // Run executes all test cases in the testBase directory.
-func (r *Runner) Run(ctx *context.TestContext) *Report {
+func (r *Runner) Run(ctx *context.TestContext) (*Report, error) {
 	report := &Report{StartTime: time.Now()}
 	defer func() {
 		report.EndTime = time.Now()
@@ -95,7 +106,7 @@ func (r *Runner) Run(ctx *context.TestContext) *Report {
 	entries, err := os.ReadDir(testcaseDir)
 	if err != nil {
 		r.Logger("ERROR: cannot read testcase directory: %v", err)
-		return report
+		return report, fmt.Errorf("read testcase directory %s: %w", testcaseDir, err)
 	}
 
 	var caseDirs []string
@@ -156,7 +167,7 @@ func (r *Runner) Run(ctx *context.TestContext) *Report {
 	wg.Wait()
 	r.drainParallelResults(report, parallelCh)
 
-	return report
+	return report, nil
 }
 
 // isCaseParallel checks whether a test case has parallel="true" attribute.
@@ -265,6 +276,7 @@ type caseXML struct {
 	Title    string   `xml:"title,attr"`
 	GUID     string   `xml:"guid,attr"`
 	Parallel string   `xml:"parallel,attr"`
+	Flags    string   `xml:"flags,attr"`
 	Setup    *phaseXML `xml:"setup"`
 	Action   *phaseXML `xml:"action"`
 	Teardown *phaseXML `xml:"teardown"`
@@ -304,6 +316,7 @@ func (r *Runner) runCase(ctx *context.TestContext, dirName string) CaseResult {
 	xmlPath, err := findCaseXML(caseDir)
 	if err != nil {
 		r.Logger("ERROR: %s: %v", dirName, err)
+		result.Status = CaseError
 		result.Duration = time.Since(start)
 		return result
 	}
@@ -311,6 +324,7 @@ func (r *Runner) runCase(ctx *context.TestContext, dirName string) CaseResult {
 	data, err := os.ReadFile(xmlPath)
 	if err != nil {
 		r.Logger("ERROR: %s: %v", dirName, err)
+		result.Status = CaseError
 		result.Duration = time.Since(start)
 		return result
 	}
@@ -325,6 +339,7 @@ func (r *Runner) runCase(ctx *context.TestContext, dirName string) CaseResult {
 	var tc caseXML
 	if err := xml.Unmarshal(data, &tc); err != nil {
 		r.Logger("ERROR: %s: parse XML: %v", dirName, err)
+		result.Status = CaseError
 		result.Duration = time.Since(start)
 		return result
 	}
@@ -338,10 +353,14 @@ func (r *Runner) runCase(ctx *context.TestContext, dirName string) CaseResult {
 		title = dirName
 	}
 
-	// Check flags filter
-	if ctx.Flags != "" {
-		// Simple flags matching: if case has a "flags" attribute, check it
-		// For now, pass through (flags can be extended)
+	// Check flags filter for skip logic.
+	// Only filter when ctx.Flags is set (non-empty).
+	// When ctx.Flags is empty, all cases execute (backward compat).
+	if ctx.Flags != "" && (tc.Flags == "" || tc.Flags != ctx.Flags) {
+		r.Logger("%s --- SKIPPED: %s (flags=%q, ctx.Flags=%q)", caseGUID, title, tc.Flags, ctx.Flags)
+		result.Status = CaseSkipped
+		result.Duration = time.Since(start)
+		return result
 	}
 
 	ctx.GenerateRandomVars()
@@ -373,8 +392,30 @@ func (r *Runner) runCase(ctx *context.TestContext, dirName string) CaseResult {
 		}
 	}
 
+	// Check for zero steps (error condition)
+	if stepSeq == 0 {
+		r.Logger("ERROR: %s: case has zero steps (setup/action/teardown are all empty)", title)
+		result.Status = CaseError
+		result.Duration = time.Since(start)
+		return result
+	}
+
 	// Cleanup temporary variables
 	ctx.CleanupTemporary()
+
+	// Determine pass/fail from steps
+	allPass := true
+	for _, s := range result.Steps {
+		if !s.Pass {
+			allPass = false
+			break
+		}
+	}
+	if allPass {
+		result.Status = CasePassed
+	} else {
+		result.Status = CaseFailed
+	}
 
 	result.Duration = time.Since(start)
 	r.Logger("%s === CASE END: %s (%s) ===", caseGUID, title, result.Duration)

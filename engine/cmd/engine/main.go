@@ -102,12 +102,12 @@ func main() {
 
 	// Run tests
 	log.Printf("Engine starting — testBase=%s flags=%s profile=%s", cfg.TestBase, cfg.Flags, cfg.ActiveProfile)
-	result := r.Run(ctx)
+	result, runErr := r.Run(ctx)
 
 	// Print report
 	report.PrintReport(reportWriter, result)
 
-	if result.FailedCases > 0 {
+	if result.FailedCases > 0 || result.ErrorCases > 0 || runErr != nil {
 		os.Exit(1)
 	}
 }

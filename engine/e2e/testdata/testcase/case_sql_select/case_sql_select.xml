@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<case title="SQL-Select: 数据库查询验证">
+<case flags="core" title="SQL-Select: 数据库查询验证">
   <setup>
     <step desc="查询活跃用户">
       <Action type="sql_select" server="TESTDB">SELECT name, email, status FROM users WHERE status = 'ACTIVE' ORDER BY id</Action>

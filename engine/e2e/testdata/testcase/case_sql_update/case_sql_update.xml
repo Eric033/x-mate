@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<case title="SQL-Update: 数据库更新操作验证">
+<case flags="core" title="SQL-Update: 数据库更新操作验证">
   <action>
     <!-- 步骤1: 插入新用户 -->
     <step desc="插入用户">

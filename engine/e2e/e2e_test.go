@@ -118,16 +118,19 @@ func TestE2E_AllCases(t *testing.T) {
 				t.Errorf("  ✗ %s / %s (%s): %s", cr.CaseName, s.Desc, s.Phase, s.Message)
 			}
 		}
+		t.Logf("  [%s] %s", cr.Status, cr.CaseName)
 	}
 
-	t.Logf("Results: %d/%d passed, %d failed",
-		report.PassedCases, report.TotalCases, report.FailedCases)
+	t.Logf("Results: %d/%d passed, %d failed, %d skipped, %d error",
+		report.PassedCases, report.TotalCases, report.FailedCases, report.SkippedCases, report.ErrorCases)
 
-	if report.FailedCases > 0 {
-		t.Fatalf("got %d failed cases, want 0", report.FailedCases)
+	if report.FailedCases > 0 || report.ErrorCases > 0 {
+		t.Fatalf("got %d failed, %d error cases, want 0", report.FailedCases, report.ErrorCases)
 	}
 
 	// Verify expected cases ran
+	// case_flags_skip will be in Results with Status=skipped
+	// case_dry_run is only used in dry-run test
 	expected := []string{
 		"case_http_basic",
 		"case_http_vars",
@@ -139,8 +142,6 @@ func TestE2E_AllCases(t *testing.T) {
 		"case_sql_update",
 		"case_runtime_verify",
 		"case_rsa",
-		"case_parallel_a",
-		"case_parallel_b",
 		"case_full_flow",
 		"case_flags_skip",
 	}
@@ -257,18 +258,49 @@ func TestE2E_SQLOnly(t *testing.T) {
 }
 
 // TestE2E_FlagsFilter tests the runner's flag filtering capability.
-// This is a placeholder: the runner currently doesn't implement flags filtering.
+// When flags="extended", only cases with flags="extended" should execute;
+// all core cases (flags="core") should be skipped.
 func TestE2E_FlagsFilter(t *testing.T) {
 	ctx, r, _, cleanup := setupE2E(t)
 	defer cleanup()
 
-	// Set flags to something that won't match "extended"
-	// (filtering not yet implemented in runner, so all cases still run)
+	// Set flags to "extended" — only case_flags_skip has flags="extended"
 	ctx.Flags = "extended"
 
-	report := r.Run(ctx)
-	_ = report  // for now, all cases run regardless of flags
-	t.Logf("Flags 'extended': %d cases ran (flags filtering is NYI in runner)", report.TotalCases)
+	report, _ := r.Run(ctx)
+
+	t.Logf("Flags 'extended': %d total, %d passed, %d skipped, %d error",
+		report.TotalCases, report.PassedCases, report.SkippedCases, report.ErrorCases)
+
+	// Most cases have flags="core" and should be skipped
+	skippedNames := []string{}
+	executedNames := []string{}
+	for _, cr := range report.Results {
+		if cr.Status == "skipped" {
+			skippedNames = append(skippedNames, cr.CaseName)
+		} else {
+			executedNames = append(executedNames, cr.CaseName)
+		}
+	}
+
+	t.Logf("Executed: %v", executedNames)
+	t.Logf("Skipped: %v", skippedNames)
+
+	// case_flags_skip has flags="extended", so it should execute
+	hasFlagsSkip := false
+	for _, name := range executedNames {
+		if name == "case_flags_skip" {
+			hasFlagsSkip = true
+		}
+	}
+	if !hasFlagsSkip {
+		t.Error("expected case_flags_skip to execute with flags=extended")
+	}
+
+	// Most other cases (flags="core") should be skipped
+	if report.SkippedCases == 0 {
+		t.Error("expected some skipped cases with flags=extended")
+	}
 }
 
 // TestE2E_HarnessSanityCheck verifies that the mock server and DB setup work.

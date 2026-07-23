@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<case title="RSA: 加密操作验证">
+<case flags="core" title="RSA: 加密操作验证">
   <action>
     <step desc="RSA加密测试数据">
       <Action type="rsa"

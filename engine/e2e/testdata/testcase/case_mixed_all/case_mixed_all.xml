@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<case title="Mixed-All: 综合测试(HTTP+TCP+SQL+RSA+Runtime)">
+<case flags="core" title="Mixed-All: 综合测试(HTTP+TCP+SQL+RSA+Runtime)">
   <setup>
     <!-- SQL: 确认初始数据 -->
     <step desc="SETUP-SQL: 查询用户数">
