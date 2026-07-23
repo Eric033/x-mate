@@ -51,16 +51,26 @@ go test ./internal/runner/ -run TestRunner_Run_SingleCase -v
 go test ./... -cover
 
 # Run a demo against the built-in mock server
-go run ./cmd/engine/ --test-base ./sample --start-mock --profile default
+go run ./cmd/engine/ --test-base ./sample --start-mock --flags core
 
 # Run with verbose logging
 go run ./cmd/engine/ --test-base ./sample --start-mock --verbose
 
 # Dry-run (validate XML without executing)
+# Run with custom flags filter
+# --flags 支持多标签（空格分隔）、大小写不敏感
+# 无 flags 属性的 case 会被跳过，使用 --run-all 忽略过滤
+# 默认值: core
+go run ./cmd/engine/ --test-base ./sample --start-mock --flags core smoke
+
+# Dry-run (validate XML without executing)
 go run ./cmd/engine/ --test-base ./sample --dry-run
 
-# Run with a custom YAML profile
-go run ./cmd/engine/ --test-base ./sample --profile qa
+# Run all cases (ignore flags filter)
+go run ./cmd/engine/ --test-base ./sample --run-all --start-mock
+
+# Run with a custom YAML config
+go run ./cmd/engine/ --config ./sample/config/qa.yaml --test-base ./sample --flags core --start-mock
 
 # Save report to file
 go run ./cmd/engine/ --test-base ./sample --start-mock --report-file report.log
@@ -123,6 +133,68 @@ See `engine/sample/testcase/case_demo/case_demo.xml` for a working example.
 | `mca_damper_set` | Damper MCADamperSetHandler | MCA via Damper proxy |
 | `rsa` | RSA RSAHandler | In-memory encryption |
 | `runtime_verify` | Runtime RuntimeVerifyHandler | Expression evaluation |
+| `sql_exe` | SQL SelectHandler | Execute any SQL statement |
+| `sql_select` | SQL SelectHandler | SQL query with result verification |
+| `sql_update` | SQL UpdateHandler | SQL update/insert/delete |
+
+### Flags Filtering（用例标签过滤）
+
+每条 case 通过 XML 的 `flags` 属性（空格分隔多标签）标记所属类别，CLI 的 `--flags` 参数控制哪些 case 被执行。
+
+**规则**:
+- **多标签匹配**：case 的任意标签与 CLI `--flags` 任意标签匹配（`strings.EqualFold`）即执行。
+  - 例：case `flags="core smoke"` 匹配 `--flags"core"` 和 `--flags"smoke extended"`
+- **大小写不敏感**: `Core` 与 `core` 视为相同。
+- **空 flags 跳过**: case 没写 `flags` 属性 → 跳过（logs `SKIPPED`）。
+- **`--run-all`**: 设置 `ctx.RunAll=true`，runner 直接跳过 flags 检查，所有 case 都执行。
+
+实现位置：`runner.go` `runCase()` 方法中 flags 过滤逻辑。
+
+### Verify / Assertion 统一
+
+断言统一使用 `<Verify><result>` 语法，引擎根据响应类型自动选择解析方式：
+- **XML 响应**（`//` 前缀）→ XPath 取值
+- **JSON 响应**（`$` 前缀）→ JSONPath 取值
+- **SQL 查询结果**（形如 `STATUS[0]`）→ 按位置列取值
+
+旧格式 `<result name="...">value</result>` 与新格式均受支持。
+
+```xml
+<!-- JSON 响应 -->
+<Verify>
+  <result name="$.ret_code">000000</result>
+  <result name="$.status">ACTIVE</result>
+</Verify>
+
+<!-- XML 响应 -->
+<Verify>
+  <result name="//Response/RET_CODE">000000</result>
+</Verify>
+
+<!-- SQL 查询结果 -->
+<Verify>
+  <result name="STATUS[0]">ACTIVE</result>
+</Verify>
+```
+
+### SQL Handler 注册
+
+SQL 相关的 step type 在 `main.go` `registerHandlers()` 中注册：
+```go
+reg.Register("sql_exe", &sqlHandler.SelectHandler{PoolManager: dbManager})
+reg.Register("sql_select", &sqlHandler.SelectHandler{PoolManager: dbManager})
+reg.Register("sql_update", &sqlHandler.UpdateHandler{PoolManager: dbManager})
+```
+
+DB 连接池（`sampler.DBPoolManager`）从 YAML config 的 `services.<name>.db` 定义初始化：
+
+```yaml
+services:
+  DB:
+    type: sqlite3
+    address: "localhost"
+    database: "test.db"
+```
 
 ### Variable System
 
@@ -140,4 +212,13 @@ See `engine/sample/testcase/case_demo/case_demo.xml` for a working example.
 
 ### Config Profiles
 
-YAML config discovery (`LoadYAML()`): `--config` path → `application.yaml` → `engine.yaml` → `config/application.yaml` → `~/.config/engine/application.yaml`. With `--profile qa`, additionally loads and merges `application-qa.yaml`. Multi-document YAML (with `---` separators) is supported. CLI flags override YAML values.
+YAML config discovery (`LoadYAML()`): `--config` path → `application.yaml` → `engine.yaml` → `config/application.yaml` → `~/.config/engine/application.yaml`.
+
+**配置搜索优先级（从高到低）:**
+1. `--config` 参数指定的路径（显式指定，最高优先级）
+2. `application.yaml`（当前目录）
+3. `engine.yaml`（当前目录）
+4. `config/application.yaml`
+5. `~/.config/engine/application.yaml`
+
+配置文件内可以包含 `---` 多文档 YAML 分隔符，`LoadYAML()` 会合并所有文档。CLI flags（如 `--flags`）会覆盖 YAML 中同名字段。

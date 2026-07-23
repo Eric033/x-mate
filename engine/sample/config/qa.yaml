@@ -1,0 +1,6 @@
+environment:
+  name: QA
+
+services:
+  MOCK:
+    address: "127.0.0.1:19876"
