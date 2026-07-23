@@ -107,7 +107,7 @@ func TestE2E_AllCases(t *testing.T) {
 	ctx, r, _, cleanup := setupE2E(t)
 	defer cleanup()
 
-	report := r.Run(ctx)
+	report, _ := r.Run(ctx)
 
 	// Log all results
 	for _, cr := range report.Results {
@@ -162,7 +162,7 @@ func TestE2E_DryRun(t *testing.T) {
 	defer cleanup()
 
 	ctx.DryRun = true
-	report := r.Run(ctx)
+	report, _ := r.Run(ctx)
 
 	// In dry-run mode, all cases are parsed but not executed
 	t.Logf("Dry-run: %d cases parsed", report.TotalCases)
@@ -186,7 +186,7 @@ func TestE2E_Parallel(t *testing.T) {
 	// (runner doesn't support flags-based filtering yet, so we use a sub-context)
 	ctx.Concurrency = 4
 
-	report := r.Run(ctx)
+	report, _ := r.Run(ctx)
 
 	for _, cr := range report.Results {
 		for _, s := range cr.Steps {
@@ -212,7 +212,7 @@ func TestE2E_HTTPBasicOnly(t *testing.T) {
 	// We create a symlink-free copy by constructing paths manually
 	_ = ctx  // we use the full testBase, runner handles iteration
 
-	report := r.Run(ctx)
+	report, _ := r.Run(ctx)
 
 	httpCases := 0
 	for _, cr := range report.Results {
@@ -237,7 +237,7 @@ func TestE2E_SQLOnly(t *testing.T) {
 	defer cleanup()
 	_ = dbManager
 
-	report := r.Run(ctx)
+	report, _ := r.Run(ctx)
 
 	sqlCases := 0
 	for _, cr := range report.Results {

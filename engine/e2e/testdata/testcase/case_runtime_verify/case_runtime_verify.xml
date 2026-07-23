@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<case flags="core" title="Runtime-Verify: 运行时表达式验证">
+<case guid="47372159-4326-4ef9-9e6a-b83602e776bc"  flags="core" title="Runtime-Verify: 运行时表达式验证">
   <action>
     <step desc="创建订单生成变量">
       <Action type="http" server="MOCK" method="POST" api="/api/order/create" />

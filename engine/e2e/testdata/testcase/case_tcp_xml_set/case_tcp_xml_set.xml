@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<case flags="core" title="TCP-xml_set: 标准BCD前缀XML交互">
+<case guid="dc969a76-904f-49cb-88b5-f42e4a834a46"  flags="core" title="TCP-xml_set: 标准BCD前缀XML交互">
   <action>
     <!-- 步骤1: 发送TCP XML请求，验证响应 -->
     <step desc="TCP xml_set 请求">

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<case flags="extended" title="Flags-Skip: 被flags过滤跳过的用例(flags=extended)">
+<case guid="43b2e5c6-b9c3-4588-86f9-8700987d738d"  flags="extended" title="Flags-Skip: 被flags过滤跳过的用例(flags=extended)">
   <action>
     <step desc="不执行步骤">
       <Action type="http" server="MOCK" method="GET" api="/api/order/query" />

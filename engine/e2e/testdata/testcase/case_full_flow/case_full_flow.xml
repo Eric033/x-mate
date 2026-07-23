@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<case flags="core" title="Full-Flow: 完整生命周期(setup→action→teardown)">
+<case guid="fbe71a4d-a384-4212-87d6-4e3801d52646"  flags="core" title="Full-Flow: 完整生命周期(setup→action→teardown)">
   <setup>
     <step desc="SETUP: 健康检查">
       <Action type="http" server="MOCK" method="GET" api="/health" />

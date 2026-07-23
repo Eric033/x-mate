@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<case flags="core" title="HTTP-Errors: 异常响应处理">
+<case guid="9386863c-2cd9-41b7-befc-1e9dd1dc1974"  flags="core" title="HTTP-Errors: 异常响应处理">
   <action>
     <step desc="500错误">
       <Action type="http" server="MOCK" method="GET" api="/api/error/500" />

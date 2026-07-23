@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<case flags="core" title="TCP-xml_set_8: 8字节BCD前缀XML交互">
+<case guid="1f950bd5-cc8a-4d3f-9336-12f81d636620"  flags="core" title="TCP-xml_set_8: 8字节BCD前缀XML交互">
   <action>
     <step desc="TCP xml_set_8 请求">
       <Action type="xml_set_8" server="TCMOCK" trancode="TRAN001" />

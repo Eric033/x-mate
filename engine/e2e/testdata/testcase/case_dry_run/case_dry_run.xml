@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<case flags="core" title="Dry-Run: 只验证不执行">
+<case guid="93f938f1-9c47-4494-96f7-cab1b5caf004"  flags="core" title="Dry-Run: 只验证不执行">
   <action>
     <step desc="这个步骤不会真正执行">
       <Action type="http" server="MOCK" method="GET" api="/api/order/query" />

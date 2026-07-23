@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<case flags="core" title="TCP-MCA: 换行结尾的XML交互">
+<case guid="fa2a88fa-f99b-4de1-b21e-208c5a849f40"  flags="core" title="TCP-MCA: 换行结尾的XML交互">
   <action>
     <step desc="TCP MCA 请求">
       <Action type="mca" server="TCMOCK" trancode="MCA001" />
