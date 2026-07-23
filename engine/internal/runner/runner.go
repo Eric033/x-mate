@@ -456,19 +456,16 @@ func (r *Runner) runStep(ctx *context.TestContext, phase string, s stepXML, case
 		}
 		r.Logger("%s   Values:\n%s", prefix, sb.String())
 	}
-	if len(stepData.Results) > 0 {
+	if len(stepData.Assertions) > 0 {
 		var sb strings.Builder
-		for _, v := range stepData.Results {
-			sb.WriteString(fmt.Sprintf("      %s = %s\n", v.Key, v.Value))
+		for _, a := range stepData.Assertions {
+			name := a.XPath
+			if a.JSONPath != "" {
+				name = a.JSONPath
+			}
+			sb.WriteString(fmt.Sprintf("      %s = %s\n", name, a.Expected))
 		}
-		r.Logger("%s   Expected:\n%s", prefix, sb.String())
-	}
-	if len(stepData.VerifyResults) > 0 {
-		var sb strings.Builder
-		for _, v := range stepData.VerifyResults {
-			sb.WriteString(fmt.Sprintf("      %s = %s\n", v.Name, v.Value))
-		}
-		r.Logger("%s   Verify:\n%s", prefix, sb.String())
+		r.Logger("%s   Assertions:\n%s", prefix, sb.String())
 	}
 
 	// Generate system variables for this step

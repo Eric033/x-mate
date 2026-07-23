@@ -9,8 +9,26 @@ import (
 	"github.com/Eric033/x-mate/engine/internal/handler"
 	"github.com/Eric033/x-mate/engine/internal/sampler"
 	"github.com/Eric033/x-mate/engine/internal/template"
+	"github.com/Eric033/x-mate/engine/internal/vars"
 	"github.com/Eric033/x-mate/engine/internal/xmlhelper"
 )
+
+// verifyAssertions performs XPath-based verification for damper handlers.
+func verifyAssertions(response string, assertions []handler.Assertion, ctx *context.TestContext) []string {
+	var failures []string
+	for _, a := range assertions {
+		if a.XPath == "" {
+			continue
+		}
+		actual, _ := xmlhelper.Get(a.XPath, response)
+		expected := vars.ResolveAll(ctx, a.Expected)
+		if actual != expected {
+			failures = append(failures,
+				fmt.Sprintf("[ tag %s mismatch: expected=%s actual=%s ]", a.XPath, expected, actual))
+		}
+	}
+	return failures
+}
 
 // TCPDamperSetHandler handles tcp_damper_set step type.
 type TCPDamperSetHandler struct{}
@@ -66,14 +84,14 @@ func (h *TCPDamperSetHandler) Execute(data *handler.StepData, ctx *context.TestC
 		response = response[6:]
 	}
 
-	// Verify
+	// Verify using unified Assertions
 	ok := true
 	var failureMsg string
-	for _, r := range data.Results {
-		actual, _ := xmlhelper.Get(r.Key, response)
-		if actual != r.Value {
+	if len(data.Assertions) > 0 {
+		failures := verifyAssertions(response, data.Assertions, ctx)
+		if len(failures) > 0 {
 			ok = false
-			failureMsg += fmt.Sprintf("[ tag %s mismatch: expected=%s actual=%s ]", r.Key, r.Value, actual)
+			failureMsg = strings.Join(failures, "")
 		}
 	}
 
@@ -152,14 +170,14 @@ func (h *MCADamperSetHandler) Execute(data *handler.StepData, ctx *context.TestC
 		response = response[:len(response)-2]
 	}
 
-	// Verify
+	// Verify using unified Assertions
 	ok := true
 	var failureMsg string
-	for _, r := range data.Results {
-		actual, _ := xmlhelper.Get(r.Key, response)
-		if actual != r.Value {
+	if len(data.Assertions) > 0 {
+		failures := verifyAssertions(response, data.Assertions, ctx)
+		if len(failures) > 0 {
 			ok = false
-			failureMsg += fmt.Sprintf("[ tag %s mismatch: expected=%s actual=%s ]", r.Key, r.Value, actual)
+			failureMsg = strings.Join(failures, "")
 		}
 	}
 

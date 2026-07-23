@@ -4,7 +4,9 @@
     <!-- SQL: 确认初始数据 -->
     <step desc="SETUP-SQL: 查询用户数">
       <Action type="sql_select" server="TESTDB">SELECT COUNT(*) as cnt FROM users</Action>
-      <result name="cnt[0]">3</result>
+      <Verify>
+        <result name="cnt[0]">3</result>
+      </Verify>
     </step>
 
     <!-- HTTP: 健康检查 -->
@@ -40,12 +42,12 @@
       <value name="/Request/Body/USER_ID">mixed_user</value>
       <value name="/Request/Body/PRODUCT">E2E_TEST</value>
       <Verify>
-        <result name="//RESP_CODE">000000</result>
-        <result name="//RESP_MSG">SUCCESS</result>
+        <result name="//resp_code">000000</result>
+        <result name="//resp_msg">SUCCESS</result>
       </Verify>
       <save>
-        <key name="mixed_tcp_resp">//RESP_CODE</key>
-        <key name="mixed_tcp_balance">//BALANCE</key>
+        <key name="mixed_tcp_resp">//resp_code</key>
+        <key name="mixed_tcp_balance">//balance</key>
       </save>
     </step>
 
@@ -58,8 +60,10 @@
     </step>
     <step desc="SQL-SELECT">
       <Action type="sql_select" server="TESTDB">SELECT status, amount FROM orders WHERE user_id = 1 ORDER BY id DESC LIMIT 1</Action>
-      <result name="status[0]">COMPLETED</result>
-      <result name="amount[0]">12345</result>
+      <Verify>
+        <result name="status[0]">COMPLETED</result>
+        <result name="amount[0]">12345</result>
+      </Verify>
       <save>
         <key name="mixed_sql_status">status[0]</key>
       </save>
@@ -88,10 +92,15 @@
         <result name="">{{mixed_amount}} == 12345</result>
       </Verify>
     </step>
-    <step desc="Runtime-验证TCP变量">
+    <step desc="Runtime-验证TCP-resp">
       <Action type="runtime_verify" />
       <Verify>
         <result name="">{{mixed_tcp_resp}} == 000000</result>
+      </Verify>
+    </step>
+    <step desc="Runtime-验证TCP-balance">
+      <Action type="runtime_verify" />
+      <Verify>
         <result name="">{{mixed_tcp_balance}} == 50000</result>
       </Verify>
     </step>

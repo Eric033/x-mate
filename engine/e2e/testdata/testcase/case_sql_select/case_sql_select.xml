@@ -4,8 +4,10 @@
     <step desc="查询活跃用户">
       <Action type="sql_select" server="TESTDB">SELECT name, email, status FROM users WHERE status = 'ACTIVE' ORDER BY id</Action>
       <!-- Expected: COLUMN[row]@@@value format -->
-      <result name="name[0]">Alice</result>
-      <result name="name[1]">Bob</result>
+      <Verify>
+        <result name="name[0]">Alice</result>
+        <result name="name[1]">Bob</result>
+      </Verify>
       <save>
         <key name="first_user">name[0]</key>
         <key name="second_user">name[1]</key>

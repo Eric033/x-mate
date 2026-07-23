@@ -45,13 +45,25 @@ func (h *SelectHandler) Execute(data *handler.StepData, ctx *context.TestContext
 	// Store resultVariable for extraction
 	ctx.Set("resultVariable", fmt.Sprintf("%d rows", len(result.Rows)))
 
-	// Verify
+	// Verify using unified Assertions
 	ok := true
 	var failureMsg string
-	if len(data.VerifyValues) > 0 {
-		ok, failureMsg = h.verify(result, data.VerifyValues)
-	} else if len(data.Results) > 0 {
-		ok, failureMsg = h.verifyResults(result, data.Results)
+	if len(data.Assertions) > 0 {
+		// Split assertions into KV-style (with XPath containing column[row]) and raw value-style (empty XPath)
+		var kvResults []handler.KV
+		var rawValues []string
+		for _, a := range data.Assertions {
+			if a.XPath != "" {
+				kvResults = append(kvResults, handler.KV{Key: a.XPath, Value: a.Expected})
+			} else {
+				rawValues = append(rawValues, a.Expected)
+			}
+		}
+		if len(rawValues) > 0 {
+			ok, failureMsg = h.verify(result, rawValues)
+		} else if len(kvResults) > 0 {
+			ok, failureMsg = h.verifyResults(result, kvResults)
+		}
 	}
 
 	// Extract vars from result set
@@ -184,14 +196,15 @@ func (h *UpdateHandler) Execute(data *handler.StepData, ctx *context.TestContext
 	affectedStr := fmt.Sprintf("%d", affected)
 	ctx.Set("sqlActualResult_1", affectedStr)
 
-	// Verify
+	// Verify using unified Assertions
 	ok := true
 	var failureMsg string
-	for _, v := range data.VerifyValues {
-		if strings.TrimSpace(v) == "*" || v == "" {
+	for _, a := range data.Assertions {
+		v := strings.TrimSpace(a.Expected)
+		if v == "*" || v == "" {
 			continue
 		}
-		if affectedStr != strings.TrimSpace(v) {
+		if affectedStr != v {
 			ok = false
 			failureMsg = fmt.Sprintf("[ sql_update mismatch: expected=%s actual=%s ]", v, affectedStr)
 		}

@@ -88,23 +88,27 @@ func (b *Base) BuildAndSend(data *handler.StepData, ctx *context.TestContext) (r
 	return request, response, nil
 }
 
-// Verify performs XPath-based verification against the response.
-func (b *Base) Verify(response string, results []handler.KV) (bool, string) {
-	if len(results) == 0 {
+// Verify performs XPath-based verification against the response using unified Assertions.
+func (b *Base) Verify(response string, assertions []handler.Assertion, ctx *context.TestContext) (bool, string) {
+	if len(assertions) == 0 {
 		return true, ""
 	}
 
 	var failures []string
-	for _, r := range results {
-		actual, err := xmlhelper.Get(r.Key, response)
-		if err != nil {
-			failures = append(failures, fmt.Sprintf("[ tag %s mismatch: %v ]", r.Key, err))
+	for _, a := range assertions {
+		// TCP only supports XPath assertions; skip non-XPath ones silently
+		if a.XPath == "" {
 			continue
 		}
-		expected := r.Value
+		actual, err := xmlhelper.Get(a.XPath, response)
+		if err != nil {
+			failures = append(failures, fmt.Sprintf("[ tag %s mismatch: %v ]", a.XPath, err))
+			continue
+		}
+		expected := vars.ResolveAll(ctx, a.Expected)
 		if actual != expected {
 			failures = append(failures,
-				fmt.Sprintf("[ tag %s mismatch: expected=%s actual=%s ]", r.Key, expected, actual))
+				fmt.Sprintf("[ tag %s mismatch: expected=%s actual=%s ]", a.XPath, expected, actual))
 		}
 	}
 

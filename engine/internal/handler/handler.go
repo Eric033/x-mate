@@ -13,6 +13,15 @@ type StepResult struct {
 	ExtractedVars map[string]string
 }
 
+// Assertion represents a single verification assertion parsed from <Verify><result>.
+type Assertion struct {
+	XPath      string // XML XPath, e.g. "//RESP_CODE"
+	JSONPath   string // JSONPath, e.g. "$.ret_code"
+	IsHeader   bool   // HTTP header verification
+	HeaderName string
+	Expected   string // expected value (variable-unresolved raw value)
+}
+
 // StepData holds parsed data from the step XML element.
 type StepData struct {
 	StepType    string
@@ -25,11 +34,8 @@ type StepData struct {
 	Attrs map[string]string
 	// Test data pairs from <value> elements: xpath=value
 	Values []KV
-	// Expected results from <result> elements: xpath@@@expected
-	Results []KV
-	// Verify element results
-	VerifyResults []VerifyEntry
-	VerifyValues  []string // raw <value> text inside <Verify>
+	// Unified assertion list from <Verify><result>
+	Assertions []Assertion
 	// Save keys: name → locator
 	Saves []SaveEntry
 	// HTTP-specific
@@ -42,14 +48,6 @@ type StepData struct {
 type KV struct {
 	Key   string
 	Value string
-}
-
-// VerifyEntry represents a <result> inside <Verify> for HTTP steps.
-type VerifyEntry struct {
-	Name       string // xpath or jsonpath expression
-	IsHeader   string // "True" or "False"
-	HeaderName string
-	Value      string // expected value
 }
 
 // SaveEntry represents a <key> inside <save>.

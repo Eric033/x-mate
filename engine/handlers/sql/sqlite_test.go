@@ -84,10 +84,10 @@ func TestSelectHandler_VerifyResults(t *testing.T) {
 		Attrs: map[string]string{
 			"_action_text": "SELECT name, email, status FROM test_users WHERE status = 'ACTIVE' ORDER BY id",
 		},
-		Results: []handler.KV{
-			{Key: "name[0]", Value: "Alice"},
-			{Key: "name[1]", Value: "Bob"},
-			{Key: "email[0]", Value: "alice@t.com"},
+		Assertions: []handler.Assertion{
+			{XPath: "name[0]", Expected: "Alice"},
+			{XPath: "name[1]", Expected: "Bob"},
+			{XPath: "email[0]", Expected: "alice@t.com"},
 		},
 	}
 
@@ -110,8 +110,8 @@ func TestSelectHandler_VerifyFailure(t *testing.T) {
 		Attrs: map[string]string{
 			"_action_text": "SELECT name, email, status FROM test_users WHERE status = 'ACTIVE' ORDER BY id",
 		},
-		Results: []handler.KV{
-			{Key: "name[0]", Value: "WRONG_NAME"},
+		Assertions: []handler.Assertion{
+			{XPath: "name[0]", Expected: "WRONG_NAME"},
 		},
 	}
 
@@ -209,7 +209,7 @@ func TestUpdateHandler_Verify(t *testing.T) {
 		Attrs: map[string]string{
 			"_action_text": "UPDATE test_users SET status = 'INACTIVE' WHERE name = 'Alice'",
 		},
-		VerifyValues: []string{"1"},
+		Assertions: []handler.Assertion{{Expected: "1"}},
 	}
 
 	result := h.Execute(data, ctx)
@@ -231,7 +231,7 @@ func TestUpdateHandler_VerifyFailure(t *testing.T) {
 		Attrs: map[string]string{
 			"_action_text": "UPDATE test_users SET status = 'INACTIVE' WHERE name = 'Alice'",
 		},
-		VerifyValues: []string{"999"},
+		Assertions: []handler.Assertion{{Expected: "999"}},
 	}
 
 	result := h.Execute(data, ctx)
@@ -304,8 +304,8 @@ func TestSelectHandler_SQLTemplateVar(t *testing.T) {
 		Attrs: map[string]string{
 			"_action_text": "SELECT email FROM test_users WHERE name = '{{target_name}}'",
 		},
-		Results: []handler.KV{
-			{Key: "email[0]", Value: "bob@t.com"},
+		Assertions: []handler.Assertion{
+			{XPath: "email[0]", Expected: "bob@t.com"},
 		},
 	}
 

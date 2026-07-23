@@ -7,21 +7,27 @@
       <value name="/Request/Header/TRAN_CODE">TRAN001</value>
       <value name="/Request/Body/AMOUNT">10000</value>
       <Verify>
-        <result name="//RESP_CODE">000000</result>
-        <result name="//RESP_MSG">SUCCESS</result>
-        <result name="//BALANCE">50000</result>
+        <result name="//resp_code">000000</result>
+        <result name="//resp_msg">SUCCESS</result>
+        <result name="//balance">50000</result>
       </Verify>
       <save>
-        <key name="tcp_resp_code">//RESP_CODE</key>
-        <key name="tcp_balance">//BALANCE</key>
+        <key name="tcp_resp_code">//resp_code</key>
+        <key name="tcp_balance">//balance</key>
       </save>
     </step>
 
     <!-- 步骤2: 验证提取的变量 -->
-    <step desc="验证TCP提取变量">
+    <step desc="验证TCP提取变量-resp_code">
       <Action type="runtime_verify" />
       <Verify>
         <result name="">{{tcp_resp_code}} == 000000</result>
+      </Verify>
+    </step>
+
+    <step desc="验证TCP提取变量-balance">
+      <Action type="runtime_verify" />
+      <Verify>
         <result name="">{{tcp_balance}} == 50000</result>
       </Verify>
     </step>

@@ -123,6 +123,8 @@ func (m *TCPMock) handleConn(conn net.Conn) {
 		response[6+len(respXML)] = '>'
 	}
 
+	// Reset deadline before writing (previously set by read idle timeout)
+	conn.SetDeadline(time.Time{})
 	conn.Write(response)
 }
 

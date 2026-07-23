@@ -160,11 +160,11 @@ func (h *HTTPHandler) Execute(data *handler.StepData, ctx *context.TestContext) 
 		return &handler.StepResult{Success: false, FailureMessage: err.Error()}
 	}
 
-	// Verify results
+	// Verify results using unified Assertions
 	ok := true
 	var failureMsg string
-	if len(data.VerifyResults) > 0 {
-		ok, failureMsg = h.verify(resp, data.VerifyResults, ctx)
+	if len(data.Assertions) > 0 {
+		ok, failureMsg = h.verify(resp, data.Assertions, ctx)
 	}
 
 	// Extract vars
@@ -179,28 +179,32 @@ func (h *HTTPHandler) Execute(data *handler.StepData, ctx *context.TestContext) 
 	}
 }
 
-func (h *HTTPHandler) verify(resp *sampler.HTTPResponse, entries []handler.VerifyEntry, ctx *context.TestContext) (bool, string) {
+func (h *HTTPHandler) verify(resp *sampler.HTTPResponse, assertions []handler.Assertion, ctx *context.TestContext) (bool, string) {
 	var failures []string
-	for _, e := range entries {
+	for _, a := range assertions {
 		var actual string
-		if e.IsHeader == "True" {
-			actual = resp.Headers.Get(e.HeaderName)
-		} else {
-			// Body verification: JSONPath or XPath
-			if strings.HasPrefix(e.Name, "$") {
-				actual = jsonpathGet(e.Name, resp.Body)
-			} else if strings.HasPrefix(e.Name, "/") {
-				val, err := xmlhelper.Get(e.Name, resp.Body)
-				if err == nil {
-					actual = val
-				}
+		if a.IsHeader {
+			actual = resp.Headers.Get(a.HeaderName)
+		} else if a.JSONPath != "" {
+			actual = jsonpathGet(a.JSONPath, resp.Body)
+		} else if a.XPath != "" {
+			val, err := xmlhelper.Get(a.XPath, resp.Body)
+			if err == nil {
+				actual = val
 			}
 		}
 
-		expected := vars.ResolveAll(ctx, e.Value)
+		expected := vars.ResolveAll(ctx, a.Expected)
+		name := a.XPath
+		if a.JSONPath != "" {
+			name = a.JSONPath
+		}
+		if a.IsHeader {
+			name = a.HeaderName
+		}
 		if actual != expected {
 			failures = append(failures,
-				fmt.Sprintf("[ tag %s mismatch: expected=%s actual=%s ]", e.Name, expected, actual))
+				fmt.Sprintf("[ tag %s mismatch: expected=%s actual=%s ]", name, expected, actual))
 		}
 	}
 

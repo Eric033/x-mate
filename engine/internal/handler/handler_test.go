@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/Eric033/x-mate/engine/internal/context"
@@ -74,12 +75,33 @@ func TestParseStep_BasicSQL(t *testing.T) {
 }
 
 func TestParseStep_WithValuesAndResults(t *testing.T) {
+	// Step-level <result> without <Verify> should now return an error
 	raw := `<step desc="login">
 		<Action type="HTTP" server_index="1" trancode="T002"/>
 		<value name="username">admin</value>
 		<value name="password">secret</value>
 		<result name="//code">0</result>
 		<result name="//msg">ok</result>
+	</step>`
+
+	_, err := ParseStep(raw)
+	if err == nil {
+		t.Fatal("expected error for step-level <result> outside <Verify>")
+	}
+	if !strings.Contains(err.Error(), "must be inside <Verify>") {
+		t.Errorf("expected 'must be inside <Verify>' error, got: %v", err)
+	}
+}
+
+func TestParseStep_WithVerifyResults(t *testing.T) {
+	raw := `<step desc="login">
+		<Action type="HTTP" server_index="1" trancode="T002"/>
+		<value name="username">admin</value>
+		<value name="password">secret</value>
+		<Verify>
+			<result name="//code">0</result>
+			<result name="//msg">ok</result>
+		</Verify>
 	</step>`
 
 	data, err := ParseStep(raw)
@@ -99,11 +121,14 @@ func TestParseStep_WithValuesAndResults(t *testing.T) {
 	if data.Values[1].Key != "password" || data.Values[1].Value != "secret" {
 		t.Errorf("Values[1] = %+v", data.Values[1])
 	}
-	if len(data.Results) != 2 {
-		t.Fatalf("len(Results) = %d, want 2", len(data.Results))
+	if len(data.Assertions) != 2 {
+		t.Fatalf("len(Assertions) = %d, want 2", len(data.Assertions))
 	}
-	if data.Results[0].Key != "//code" || data.Results[0].Value != "0" {
-		t.Errorf("Results[0] = %+v", data.Results[0])
+	if data.Assertions[0].XPath != "//code" || data.Assertions[0].Expected != "0" {
+		t.Errorf("Assertions[0] = %+v", data.Assertions[0])
+	}
+	if data.Assertions[1].XPath != "//msg" || data.Assertions[1].Expected != "ok" {
+		t.Errorf("Assertions[1] = %+v", data.Assertions[1])
 	}
 }
 
@@ -124,17 +149,19 @@ func TestParseStep_WithVerifyAndSave(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if len(data.VerifyResults) != 1 {
-		t.Fatalf("len(VerifyResults) = %d, want 1", len(data.VerifyResults))
+	if len(data.Assertions) != 2 {
+		t.Fatalf("len(Assertions) = %d, want 2", len(data.Assertions))
 	}
-	if data.VerifyResults[0].Name != "//status" {
-		t.Errorf("VerifyResults[0].Name = %q", data.VerifyResults[0].Name)
+	// First assertion: <result> with XPath
+	if data.Assertions[0].XPath != "//status" {
+		t.Errorf("Assertions[0].XPath = %q", data.Assertions[0].XPath)
 	}
-	if data.VerifyResults[0].Value != "200" {
-		t.Errorf("VerifyResults[0].Value = %q", data.VerifyResults[0].Value)
+	if data.Assertions[0].Expected != "200" {
+		t.Errorf("Assertions[0].Expected = %q", data.Assertions[0].Expected)
 	}
-	if len(data.VerifyValues) != 1 || data.VerifyValues[0] != "raw_value_1" {
-		t.Errorf("VerifyValues = %v", data.VerifyValues)
+	// Second assertion: <value> text maps to assertion with empty XPath
+	if data.Assertions[1].XPath != "" || data.Assertions[1].Expected != "raw_value_1" {
+		t.Errorf("Assertions[1] = %+v", data.Assertions[1])
 	}
 	if len(data.Saves) != 1 || data.Saves[0].Name != "session_id" || data.Saves[0].Locator != "//session" {
 		t.Errorf("Saves = %+v", data.Saves)

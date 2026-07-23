@@ -20,7 +20,7 @@ func (h *XMLSet8Handler) Execute(data *handler.StepData, ctx *context.TestContex
 	}
 
 	// Verify
-	ok, msg := base.Verify(response, data.Results)
+	ok, msg := base.Verify(response, data.Assertions, ctx)
 	base.ExtractVars(response, data.Saves, ctx)
 
 	return &handler.StepResult{
@@ -45,7 +45,7 @@ func (h *XMLSetSASHandler) Execute(data *handler.StepData, ctx *context.TestCont
 		return &handler.StepResult{Success: false, FailureMessage: err.Error(), RequestData: request}
 	}
 
-	ok, msg := base.Verify(response, data.Results)
+	ok, msg := base.Verify(response, data.Assertions, ctx)
 	base.ExtractVars(response, data.Saves, ctx)
 
 	return &handler.StepResult{
@@ -70,7 +70,7 @@ func (h *XMLSetHandler) Execute(data *handler.StepData, ctx *context.TestContext
 		return &handler.StepResult{Success: false, FailureMessage: err.Error(), RequestData: request}
 	}
 
-	ok, msg := base.Verify(response, data.Results)
+	ok, msg := base.Verify(response, data.Assertions, ctx)
 	base.ExtractVars(response, data.Saves, ctx)
 
 	return &handler.StepResult{
@@ -95,7 +95,7 @@ func (h *MCAHandler) Execute(data *handler.StepData, ctx *context.TestContext) *
 		return &handler.StepResult{Success: false, FailureMessage: err.Error(), RequestData: request}
 	}
 
-	ok, msg := base.Verify(response, data.Results)
+	ok, msg := base.Verify(response, data.Assertions, ctx)
 	// MCA: store full response (no offset stripping), no preProcess on extracted values
 	ctx.Set("prevResult", response)
 	for _, s := range data.Saves {

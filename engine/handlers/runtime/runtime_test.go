@@ -236,8 +236,8 @@ func TestRuntimeVerifyHandler_Execute_TrueExpression(t *testing.T) {
 
 	data := &handler.StepData{
 		StepType: "runtime_verify",
-		VerifyValues: []string{
-			"{{value}} > 50",
+		Assertions: []handler.Assertion{
+			{Expected: "{{value}} > 50"},
 		},
 	}
 
@@ -255,8 +255,8 @@ func TestRuntimeVerifyHandler_Execute_FalseExpression(t *testing.T) {
 
 	data := &handler.StepData{
 		StepType: "runtime_verify",
-		VerifyValues: []string{
-			"{{value}} > 50",
+		Assertions: []handler.Assertion{
+			{Expected: "{{value}} > 50"},
 		},
 	}
 
@@ -276,7 +276,7 @@ func TestRuntimeVerifyHandler_Execute_EmptyExpression(t *testing.T) {
 
 	data := &handler.StepData{
 		StepType: "runtime_verify",
-		// No VerifyValues, no VerifyResults
+		// No assertions
 	}
 
 	h := &RuntimeVerifyHandler{}
@@ -293,8 +293,8 @@ func TestRuntimeVerifyHandler_Execute_VerifyResults(t *testing.T) {
 
 	data := &handler.StepData{
 		StepType: "runtime_verify",
-		VerifyResults: []handler.VerifyEntry{
-			{Name: "count", Value: "{{count}} == 5"},
+		Assertions: []handler.Assertion{
+			{XPath: "count", Expected: "{{count}} == 5"},
 		},
 	}
 
@@ -312,8 +312,8 @@ func TestRuntimeVerifyHandler_Execute_VariableNotFound(t *testing.T) {
 
 	data := &handler.StepData{
 		StepType: "runtime_verify",
-		VerifyValues: []string{
-			"{{value}} > 50",
+		Assertions: []handler.Assertion{
+			{Expected: "{{value}} > 50"},
 		},
 	}
 
@@ -331,8 +331,8 @@ func TestRuntimeVerifyHandler_Execute_StringComparison(t *testing.T) {
 
 	data := &handler.StepData{
 		StepType: "runtime_verify",
-		VerifyValues: []string{
-			"{{status}} == ok",
+		Assertions: []handler.Assertion{
+			{Expected: "{{status}} == ok"},
 		},
 	}
 
@@ -350,8 +350,8 @@ func TestRuntimeVerifyHandler_Execute_SaveVars(t *testing.T) {
 
 	data := &handler.StepData{
 		StepType: "runtime_verify",
-		VerifyValues: []string{
-			"1 == 1",
+		Assertions: []handler.Assertion{
+			{Expected: "1 == 1"},
 		},
 		Saves: []handler.SaveEntry{
 			{Name: "saved_result", Locator: "$.result"},
@@ -385,8 +385,8 @@ func TestRuntimeVerifyHandler_Execute_SaveVarNoPrevResult(t *testing.T) {
 
 	data := &handler.StepData{
 		StepType: "runtime_verify",
-		VerifyValues: []string{
-			"1 == 1",
+		Assertions: []handler.Assertion{
+			{Expected: "1 == 1"},
 		},
 		Saves: []handler.SaveEntry{
 			{Name: "saved_result", Locator: "$.result"},

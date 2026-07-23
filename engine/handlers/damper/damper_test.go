@@ -160,8 +160,8 @@ func TestTCPDamperSetHandler_Execute_Verify(t *testing.T) {
 		Values: []handler.KV{
 			{Key: "//value", Value: "test_val"},
 		},
-		Results: []handler.KV{
-			{Key: "//status", Value: "OK"},
+		Assertions: []handler.Assertion{
+			{XPath: "//status", Expected: "OK"},
 		},
 	}
 
@@ -195,8 +195,8 @@ func TestTCPDamperSetHandler_Execute_VerifyMismatch(t *testing.T) {
 		Values: []handler.KV{
 			{Key: "//value", Value: "test_val"},
 		},
-		Results: []handler.KV{
-			{Key: "//status", Value: "WRONG_STATUS"},
+		Assertions: []handler.Assertion{
+			{XPath: "//status", Expected: "WRONG_STATUS"},
 		},
 	}
 
@@ -365,8 +365,8 @@ func TestMCADamperSetHandler_Execute_Verify(t *testing.T) {
 		Values: []handler.KV{
 			{Key: "//value", Value: "mca_test"},
 		},
-		Results: []handler.KV{
-			{Key: "//status", Value: "OK"},
+		Assertions: []handler.Assertion{
+			{XPath: "//status", Expected: "OK"},
 		},
 	}
 
@@ -400,8 +400,8 @@ func TestMCADamperSetHandler_Execute_VerifyMismatch(t *testing.T) {
 		Values: []handler.KV{
 			{Key: "//value", Value: "mca_test"},
 		},
-		Results: []handler.KV{
-			{Key: "//status", Value: "WRONG"},
+		Assertions: []handler.Assertion{
+			{XPath: "//status", Expected: "WRONG"},
 		},
 	}
 

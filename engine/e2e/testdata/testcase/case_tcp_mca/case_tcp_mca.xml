@@ -6,8 +6,8 @@
       <value name="//TransactionId">MCA001</value>
       <value name="//FIELD1">TESTDATA</value>
       <Verify>
-        <result name="//RESP_CODE">000000</result>
-        <result name="//RESP_MSG">SUCCESS</result>
+        <result name="//resp_code">000000</result>
+        <result name="//resp_msg">SUCCESS</result>
       </Verify>
     </step>
   </action>

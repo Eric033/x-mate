@@ -185,9 +185,9 @@ func TestHTTPHandler_Execute_GET_Success(t *testing.T) {
 		Attrs: map[string]string{
 			"api": "/api/status",
 		},
-		VerifyResults: []handler.VerifyEntry{
-			{Name: "$.status", Value: "ok"},
-			{Name: "$.code", Value: "0"},
+		Assertions: []handler.Assertion{
+			{JSONPath: "$.status", Expected: "ok"},
+			{JSONPath: "$.code", Expected: "0"},
 		},
 		Saves: []handler.SaveEntry{
 			{Name: "saved_status", Locator: "$.status"},
@@ -232,8 +232,8 @@ func TestHTTPHandler_Execute_NestedJSON(t *testing.T) {
 		Attrs: map[string]string{
 			"api": "/api/user",
 		},
-		VerifyResults: []handler.VerifyEntry{
-			{Name: "$.user.name", Value: "Alice"},
+		Assertions: []handler.Assertion{
+			{JSONPath: "$.user.name", Expected: "Alice"},
 		},
 	}
 
@@ -260,8 +260,8 @@ func TestHTTPHandler_Execute_VerifyMismatch(t *testing.T) {
 		Attrs: map[string]string{
 			"api": "/api/status",
 		},
-		VerifyResults: []handler.VerifyEntry{
-			{Name: "$.status", Value: "wrong"},
+		Assertions: []handler.Assertion{
+			{JSONPath: "$.status", Expected: "wrong"},
 		},
 	}
 
@@ -291,9 +291,9 @@ func TestHTTPHandler_Execute_XMLResponse(t *testing.T) {
 		Attrs: map[string]string{
 			"api": "/api/xml",
 		},
-		VerifyResults: []handler.VerifyEntry{
-			{Name: "//status", Value: "ok"},
-			{Name: "//code", Value: "0"},
+		Assertions: []handler.Assertion{
+			{XPath: "//status", Expected: "ok"},
+			{XPath: "//code", Expected: "0"},
 		},
 	}
 
@@ -323,8 +323,8 @@ func TestHTTPHandler_Execute_WithHeaders(t *testing.T) {
 		Headers: []handler.KV{
 			{Key: "Authorization", Value: "Bearer test-token"},
 		},
-		VerifyResults: []handler.VerifyEntry{
-			{Name: "$.auth", Value: "Bearer test-token"},
+		Assertions: []handler.Assertion{
+			{JSONPath: "$.auth", Expected: "Bearer test-token"},
 		},
 	}
 
@@ -351,8 +351,8 @@ func TestHTTPHandler_Execute_HeaderVerify(t *testing.T) {
 		Attrs: map[string]string{
 			"api": "/api/header-check",
 		},
-		VerifyResults: []handler.VerifyEntry{
-			{Name: "X-Custom", IsHeader: "True", HeaderName: "X-Custom", Value: "custom_val"},
+		Assertions: []handler.Assertion{
+			{XPath: "X-Custom", IsHeader: true, HeaderName: "X-Custom", Expected: "custom_val"},
 		},
 	}
 
@@ -455,9 +455,9 @@ func TestHTTPHandler_Execute_WithQueryParams(t *testing.T) {
 			{Key: "key1", Value: "val1"},
 			{Key: "key2", Value: "val2"},
 		},
-		VerifyResults: []handler.VerifyEntry{
-			{Name: "$.key1", Value: "val1"},
-			{Name: "$.key2", Value: "val2"},
+		Assertions: []handler.Assertion{
+			{JSONPath: "$.key1", Expected: "val1"},
+			{JSONPath: "$.key2", Expected: "val2"},
 		},
 	}
 
@@ -547,8 +547,8 @@ func TestVerify_JSONPath(t *testing.T) {
 		Attrs: map[string]string{
 			"api": "/api/status",
 		},
-		VerifyResults: []handler.VerifyEntry{
-			{Name: "$.status", Value: "ok"},
+		Assertions: []handler.Assertion{
+			{JSONPath: "$.status", Expected: "ok"},
 		},
 	}
 

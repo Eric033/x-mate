@@ -18,13 +18,10 @@ var (
 type RuntimeVerifyHandler struct{}
 
 func (h *RuntimeVerifyHandler) Execute(data *handler.StepData, ctx *context.TestContext) *handler.StepResult {
-	// Get expression from Verify results
+	// Get expression from unified Assertions
 	var expr string
-	for _, r := range data.VerifyResults {
-		expr += r.Value
-	}
-	for _, v := range data.VerifyValues {
-		expr += v
+	for _, a := range data.Assertions {
+		expr += a.Expected
 	}
 
 	if expr == "" {

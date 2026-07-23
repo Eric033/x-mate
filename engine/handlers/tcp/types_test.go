@@ -123,9 +123,9 @@ func TestXMLSet8Handler_Execute_Success(t *testing.T) {
 			{Key: "//username", Value: "admin"},
 			{Key: "//password", Value: "secret"},
 		},
-		Results: []handler.KV{
-			{Key: "//username", Value: "admin"},
-			{Key: "//password", Value: "secret"},
+		Assertions: []handler.Assertion{
+			{XPath: "//username", Expected: "admin"},
+			{XPath: "//password", Expected: "secret"},
 		},
 	}
 
@@ -216,8 +216,8 @@ func TestXMLSetSASHandler_Execute_Success(t *testing.T) {
 		Values: []handler.KV{
 			{Key: "//username", Value: "sas_user"},
 		},
-		Results: []handler.KV{
-			{Key: "//username", Value: "sas_user"},
+		Assertions: []handler.Assertion{
+			{XPath: "//username", Expected: "sas_user"},
 		},
 	}
 
@@ -251,8 +251,8 @@ func TestXMLSetSASHandler_Execute_VerifyMismatch(t *testing.T) {
 		Values: []handler.KV{
 			{Key: "//username", Value: "admin"},
 		},
-		Results: []handler.KV{
-			{Key: "//username", Value: "WRONG_VALUE"},
+		Assertions: []handler.Assertion{
+			{XPath: "//username", Expected: "WRONG_VALUE"},
 		},
 	}
 
@@ -403,8 +403,8 @@ func TestMCAHandler_Execute_VerifyMismatch(t *testing.T) {
 		Values: []handler.KV{
 			{Key: "//username", Value: "admin"},
 		},
-		Results: []handler.KV{
-			{Key: "//username", Value: "WRONG"},
+		Assertions: []handler.Assertion{
+			{XPath: "//username", Expected: "WRONG"},
 		},
 	}
 

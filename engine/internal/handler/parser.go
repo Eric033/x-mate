@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/xml"
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -165,26 +166,38 @@ func ParseStep(rawXML string) (*StepData, error) {
 		})
 	}
 
-	// Parse results (expected, legacy format)
-	for _, r := range step.Results {
-		data.Results = append(data.Results, KV{
-			Key:   r.Name,
-			Value: strings.TrimSpace(r.Content),
-		})
+	// Pre-check: step-level <result> without <Verify> is unsupported
+	if len(step.Results) > 0 {
+		return nil, fmt.Errorf("parse error: unsupported: result elements must be inside <Verify>")
 	}
 
-	// Parse Verify
+	// Parse Verify → unified Assertions
 	if step.Verify != nil {
 		for _, r := range step.Verify.Results {
-			data.VerifyResults = append(data.VerifyResults, VerifyEntry{
-				Name:       r.Name,
-				IsHeader:   r.IsHeader,
-				HeaderName: r.HeaderName,
-				Value:      strings.TrimSpace(r.Content),
-			})
+			a := Assertion{
+				Expected: strings.TrimSpace(r.Content),
+			}
+			// Determine the locator type from the name attribute
+			if strings.EqualFold(r.IsHeader, "true") {
+				a.IsHeader = true
+				a.HeaderName = r.HeaderName
+				a.XPath = r.Name // store name for display/logging
+			} else if strings.HasPrefix(r.Name, "$") {
+				a.JSONPath = r.Name
+			} else if strings.HasPrefix(r.Name, "/") {
+				a.XPath = r.Name
+			} else {
+				// For SQL-style assertions (e.g. "cnt[0]", "status[0]"),
+				// or runtime expressions, store in XPath
+				a.XPath = r.Name
+			}
+			data.Assertions = append(data.Assertions, a)
 		}
+		// <Verify><value> elements: store as assertions with empty XPath (for SQL compatibility)
 		for _, v := range step.Verify.Values {
-			data.VerifyValues = append(data.VerifyValues, strings.TrimSpace(v.Content))
+			data.Assertions = append(data.Assertions, Assertion{
+				Expected: strings.TrimSpace(v.Content),
+			})
 		}
 	}
 
