@@ -75,6 +75,52 @@ func (m *DBPoolManager) RegisterPool(name string, db *sql.DB) {
 	m.pools[name] = db
 }
 
+// AddPool opens and registers a database connection pool for a named service.
+// It generates the DSN from the provided parameters and performs a fail-fast
+// connectivity check via Ping. Supported driver types: sqlite3, oracle, mysql.
+func (m *DBPoolManager) AddPool(serviceName, driverType, address, database, username, password string) error {
+	var dsn string
+	switch strings.ToLower(driverType) {
+	case "sqlite3":
+		dsn = database
+	case "oracle":
+		if strings.Contains(address, ":") {
+			dsn = fmt.Sprintf("oracle://%s:%s@%s/%s", username, password, address, database)
+		} else {
+			dsn = fmt.Sprintf("oracle://%s:%s@%s:1521/%s", username, password, address, database)
+		}
+	case "mysql":
+		if strings.Contains(address, ":") {
+			dsn = fmt.Sprintf("%s:%s@tcp(%s)/%s", username, password, address, database)
+		} else {
+			dsn = fmt.Sprintf("%s:%s@tcp(%s:3306)/%s", username, password, address, database)
+		}
+	default:
+		return fmt.Errorf("unsupported database type: %s", driverType)
+	}
+
+	db, err := sql.Open(driverType, dsn)
+	if err != nil {
+		return fmt.Errorf("open %s: %w", driverType, err)
+	}
+
+	// Test connection (fail-fast)
+	if err := db.Ping(); err != nil {
+		db.Close()
+		return fmt.Errorf("ping %s: %w", driverType, err)
+	}
+
+	db.SetMaxOpenConns(10)
+	db.SetMaxIdleConns(5)
+	db.SetConnMaxLifetime(5 * time.Second)
+	db.SetConnMaxIdleTime(60 * time.Second)
+
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.pools[serviceName] = db
+	return nil
+}
+
 // Close closes all pools.
 func (m *DBPoolManager) Close() {
 	for _, db := range m.pools {

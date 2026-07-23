@@ -54,8 +54,27 @@ func jsonpathGet(jsonPath, jsonStr string) string {
 				return ""
 			}
 			current = rest[:endIdx]
+		} else if strings.HasPrefix(rest, `{`) {
+			// Nested object — extract until matching closing brace
+			depth := 0
+			endIdx := -1
+			for i, ch := range rest {
+				if ch == '{' {
+					depth++
+				} else if ch == '}' {
+					depth--
+					if depth == 0 {
+						endIdx = i + 1
+						break
+					}
+				}
+			}
+			if endIdx < 0 {
+				return ""
+			}
+			current = rest[:endIdx]
 		} else {
-			// Numeric or other value
+			// Numeric, boolean, null, or other primitive value
 			endIdx := strings.IndexAny(rest, ",}\n")
 			if endIdx < 0 {
 				current = strings.TrimSpace(rest)

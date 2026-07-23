@@ -73,7 +73,7 @@ func TestJsonpathGet_EmptyJson(t *testing.T) {
 	}
 }
 
-func TestHtmlUnescape(t *testing.T) {
+func TestHtmlUnescape_Extra(t *testing.T) {
 	tests := []struct {
 		input string
 		want  string

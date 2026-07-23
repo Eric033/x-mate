@@ -201,7 +201,7 @@ func TestRegisterPool(t *testing.T) {
 	}
 }
 
-func TestNewDBPoolManager(t *testing.T) {
+func TestDBPoolManager_New(t *testing.T) {
 	mgr := NewDBPoolManager()
 	if mgr == nil {
 		t.Fatal("NewDBPoolManager returned nil")
