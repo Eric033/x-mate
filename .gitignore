@@ -1,2 +1,35 @@
+# Go binaries
+engine/engine
+engine/tcpmock
+*/engine
+*/tcpmock
+
+# Go build output
 engine/bin/
+bin/
+dist/
+
+# Coverage
+coverage.out
+*.coverprofile
+
+# Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# Environment
+.env
+
+# macOS
 .DS_Store
+
+# Editor
+*.swp
+*.swo
+*~
+
+# Temp reports
+*.html
+*.xml
