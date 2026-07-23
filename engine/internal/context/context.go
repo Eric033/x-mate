@@ -46,6 +46,7 @@ type TestContext struct {
 	Verbose     bool
 	DryRun      bool
 	Concurrency int // max concurrent goroutines (0/1 = serial)
+	RunAll      bool   // skip all flags filtering, run every case
 }
 
 // ServerEntry represents a target server address.
@@ -168,9 +169,10 @@ func (c *TestContext) Clone() *TestContext {
 		Flags:      c.Flags,
 		EnvName:    c.EnvName,
 		ParentGUID: c.ParentGUID,
-		Verbose:    c.Verbose,
-		DryRun:     c.DryRun,
+		Verbose:     c.Verbose,
+		DryRun:      c.DryRun,
 		Concurrency: c.Concurrency,
+		RunAll:      c.RunAll,
 	}
 
 	for k, v := range c.Variables {

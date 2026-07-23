@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<case guid="099666ab-5ec3-4028-8ed8-97888da53f38"  flags="Smoke Regression P0" title="Flags-Multi: 多标签匹配测试(flags=Smoke Regression P0)">
+  <action>
+    <step desc="验证用例执行">
+      <Action type="runtime_verify" expression="1 == 1" />
+    </step>
+  </action>
+</case>

@@ -353,14 +353,28 @@ func (r *Runner) runCase(ctx *context.TestContext, dirName string) CaseResult {
 		title = dirName
 	}
 
-	// Check flags filter for skip logic.
-	// Only filter when ctx.Flags is set (non-empty).
-	// When ctx.Flags is empty, all cases execute (backward compat).
-	if ctx.Flags != "" && (tc.Flags == "" || tc.Flags != ctx.Flags) {
-		r.Logger("%s --- SKIPPED: %s (flags=%q, ctx.Flags=%q)", caseGUID, title, tc.Flags, ctx.Flags)
-		result.Status = CaseSkipped
-		result.Duration = time.Since(start)
-		return result
+	// Check flags filter — multi-tag, case-insensitive, run-all support
+	if !ctx.RunAll && ctx.Flags != "" {
+		caseFlags := strings.Fields(tc.Flags)
+		cmdFlags := strings.Fields(ctx.Flags)
+		matched := false
+		for _, cf := range caseFlags {
+			for _, cli := range cmdFlags {
+				if strings.EqualFold(cf, cli) {
+					matched = true
+					break
+				}
+			}
+			if matched {
+				break
+			}
+		}
+		if !matched {
+			r.Logger("%s --- SKIPPED: %s (flags=%q, ctx.Flags=%q)", caseGUID, title, tc.Flags, ctx.Flags)
+			result.Status = CaseSkipped
+			result.Duration = time.Since(start)
+			return result
+		}
 	}
 
 	ctx.GenerateRandomVars()

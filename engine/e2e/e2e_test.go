@@ -144,6 +144,7 @@ func TestE2E_AllCases(t *testing.T) {
 		"case_rsa",
 		"case_full_flow",
 		"case_flags_skip",
+		"case_flags_multi",
 	}
 	ran := make(map[string]bool)
 	for _, cr := range report.Results {
@@ -300,6 +301,53 @@ func TestE2E_FlagsFilter(t *testing.T) {
 	// Most other cases (flags="core") should be skipped
 	if report.SkippedCases == 0 {
 		t.Error("expected some skipped cases with flags=extended")
+	}
+}
+
+
+// TestE2E_FlagsMultiTag tests multi-tag matching with case-insensitive comparison.
+// The case case_flags_multi has flags="Smoke Regression P0".
+// Setting ctx.Flags="smoke" should match "Smoke" (case-insensitive).
+// Setting ctx.Flags="regression p0" should also match.
+func TestE2E_FlagsMultiTag(t *testing.T) {
+	ctx, r, _, cleanup := setupE2E(t)
+	defer cleanup()
+
+	// Set flags to a single tag that matches one of the multi-tags on case_flags_multi
+	ctx.Flags = "smoke"
+
+	report, _ := r.Run(ctx)
+
+	t.Logf("Flags 'smoke': %d total, %d passed, %d skipped, %d error",
+		report.TotalCases, report.PassedCases, report.SkippedCases, report.ErrorCases)
+
+	ranFlagsMulti := false
+	for _, cr := range report.Results {
+		if cr.CaseName == "case_flags_multi" {
+			ranFlagsMulti = true
+			t.Logf("  case_flags_multi status: %s", cr.Status)
+		}
+	}
+	if !ranFlagsMulti {
+		t.Error("case_flags_multi should have executed with flags=smoke")
+	}
+
+	// Now test with a multi-tag context flag
+	ctx2, r2, _, cleanup2 := setupE2E(t)
+	defer cleanup2()
+	ctx2.Flags = "regression p0"
+
+	report2, _ := r2.Run(ctx2)
+
+	ranFlagsMulti2 := false
+	for _, cr := range report2.Results {
+		if cr.CaseName == "case_flags_multi" {
+			ranFlagsMulti2 = true
+			t.Logf("  case_flags_multi with 'regression p0' status: %s", cr.Status)
+		}
+	}
+	if !ranFlagsMulti2 {
+		t.Error("case_flags_multi should have executed with flags='regression p0'")
 	}
 }
 

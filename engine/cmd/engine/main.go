@@ -39,6 +39,8 @@ func main() {
 	fs.StringVar(&cfg.DamperServer, "damper-server", "", "Damper server address ip:port:tcpPort:httpPort")
 	fs.StringVar(&cfg.EnvName, "env-name", "UNDEFINED", "Environment name")
 	fs.StringVar(&cfg.ParentGUID, "parent-guid", "92508788-4c1c-11e9-808b-005056a01111", "Parent GUID")
+	var runAll bool
+	fs.BoolVar(&runAll, "run-all", false, "Run all cases, ignore flags filtering")
 	fs.IntVar(&cfg.Concurrency, "concurrency", 1, "Max concurrent test cases (1 = serial)")
 
 	var startMock bool
@@ -89,6 +91,7 @@ func main() {
 	// Initialize context
 	ctx := context.New()
 	cfg.InitContext(ctx)
+	ctx.RunAll = runAll
 
 	// Initialize handler registry
 	registry := handler.NewRegistry()
