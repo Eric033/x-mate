@@ -21,7 +21,11 @@ import (
 	httpHandler "github.com/Eric033/x-mate/engine/handlers/http"
 	"github.com/Eric033/x-mate/engine/handlers/rsa"
 	"github.com/Eric033/x-mate/engine/handlers/runtime"
+	sqlHandler "github.com/Eric033/x-mate/engine/handlers/sql"
 	"github.com/Eric033/x-mate/engine/handlers/tcp"
+
+	// SQLite driver (other drivers like oracle/mysql can be added by callers)
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
@@ -88,9 +92,23 @@ func main() {
 	cfg.InitContext(ctx)
 	ctx.RunAll = runAll
 
+	// Initialize DB pool manager
+	dbManager := sampler.NewDBPoolManager()
+	defer dbManager.Close()
+
+	// Try to initialize DB pools from service definitions
+	// (not fail-fast — handlers will return errors if DB is unavailable)
+	for name, svc := range cfg.Services {
+		if svc.DB != nil {
+			if err := dbManager.AddPool(name, svc.DB.Type, svc.DB.Address, svc.DB.Database, svc.DB.Username, svc.DB.Password); err != nil {
+				log.Printf("Warning: could not init DB pool for service %q: %v", name, err)
+			}
+		}
+	}
+
 	// Initialize handler registry
 	registry := handler.NewRegistry()
-	registerHandlers(registry, cfg)
+	registerHandlers(registry, dbManager)
 
 	// Create runner
 	r := runner.NewRunner(registry)
@@ -167,7 +185,7 @@ func startMockServer() {
 }
 
 // registerHandlers registers all built-in step type handlers.
-func registerHandlers(reg *handler.Registry, cfg *config.Config) {
+func registerHandlers(reg *handler.Registry, dbManager *sampler.DBPoolManager) {
 	// TCP handlers
 	reg.Register("xml_set_8", &tcp.XMLSet8Handler{})
 	reg.Register("xml_set_sas", &tcp.XMLSetSASHandler{})
@@ -178,13 +196,10 @@ func registerHandlers(reg *handler.Registry, cfg *config.Config) {
 	reg.Register("http", &httpHandler.HTTPHandler{UseDamper: false})
 	reg.Register("damper_set", &httpHandler.HTTPHandler{UseDamper: true})
 
-	// SQL handlers (initialized lazily when services have DB configured)
-	dbManager := sampler.NewDBPoolManager()
-	if len(cfg.Services) > 0 {
-		// DB pool initialization would go here with the real driver
-		// For now, the SQL handlers accept nil pool and will error gracefully
-		_ = dbManager
-	}
+	// SQL handlers — use the pre-initialized pool manager
+	reg.Register("sql_exe", &sqlHandler.SelectHandler{PoolManager: dbManager})
+	reg.Register("sql_select", &sqlHandler.SelectHandler{PoolManager: dbManager})
+	reg.Register("sql_update", &sqlHandler.UpdateHandler{PoolManager: dbManager})
 
 	// Damper handlers
 	reg.Register("tcp_damper_set", &damper.TCPDamperSetHandler{})
