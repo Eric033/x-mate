@@ -12,6 +12,52 @@ import (
 // PrintReport outputs a human-readable test report to the given writer.
 func PrintReport(w io.Writer, r *runner.Report) {
 	fmt.Fprintf(w, "\n")
+
+	// Dry-run or normal header
+	if r.ErrorCases > 0 || r.DryRunValidated > 0 {
+		// Detect dry-run mode: no passed/failed/skipped, but has validated count
+		if r.PassedCases == 0 && r.FailedCases == 0 && r.SkippedCases == 0 && r.DryRunValidated > 0 {
+			printDryRunReport(w, r)
+			return
+		}
+	}
+
+	printNormalReport(w, r)
+}
+
+// printDryRunReport outputs a report specialized for dry-run validation.
+func printDryRunReport(w io.Writer, r *runner.Report) {
+	fmt.Fprintf(w, "========================================\n")
+	fmt.Fprintf(w, "     Test Execution Report (DRY-RUN)\n")
+	fmt.Fprintf(w, "========================================\n")
+	fmt.Fprintf(w, "Start:  %s\n", r.StartTime.Format(time.RFC3339))
+	fmt.Fprintf(w, "End:    %s\n", r.EndTime.Format(time.RFC3339))
+	fmt.Fprintf(w, "Total:  %s\n", r.EndTime.Sub(r.StartTime))
+	fmt.Fprintf(w, "\n")
+
+	validCount := r.DryRunValidated
+	errorCount := r.ErrorCases
+	totalCount := validCount + errorCount
+
+	fmt.Fprintf(w, "Cases:  %d total, %d valid, %d errors\n", totalCount, validCount, errorCount)
+	fmt.Fprintf(w, "\n")
+
+	// List each case
+	for _, cr := range r.Results {
+		if cr.Status == runner.CaseError {
+			fmt.Fprintf(w, "  ⚠ ERROR  %s\n", cr.CaseName)
+		}
+	}
+
+	fmt.Fprintf(w, "\n")
+	if errorCount > 0 {
+		fmt.Fprintf(w, "⚠ %d case(s) have configuration errors that must be fixed before execution.\n", errorCount)
+	}
+	fmt.Fprintf(w, "========================================\n")
+}
+
+// printNormalReport outputs the standard execution report.
+func printNormalReport(w io.Writer, r *runner.Report) {
 	fmt.Fprintf(w, "========================================\n")
 	fmt.Fprintf(w, "          Test Execution Report\n")
 	fmt.Fprintf(w, "========================================\n")

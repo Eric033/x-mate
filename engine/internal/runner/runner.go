@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -53,7 +52,11 @@ type Report struct {
 	SkippedCases int
 	ErrorCases   int
 	Results      []CaseResult
-	mu           sync.Mutex // protects Results for concurrent access
+
+	// DryRunValidated tracks the number of valid cases in dry-run mode.
+	DryRunValidated int
+
+	mu sync.Mutex // protects Results for concurrent access
 }
 
 // appendResult safely appends a case result to the report, counting by Status.
@@ -94,81 +97,331 @@ func NewRunner(registry *handler.Registry) *Runner {
 	}
 }
 
-// Run executes all test cases in the testBase directory.
+// Run executes all test cases. In dry-run mode, it validates configuration
+// without making any network calls or modifying files. In normal mode, it
+// builds a plan and then executes each case.
 func (r *Runner) Run(ctx *context.TestContext) (*Report, error) {
-	report := &Report{StartTime: time.Now()}
-	defer func() {
-		report.EndTime = time.Now()
-	}()
-
-	// Scan testcase directories
-	testcaseDir := filepath.Join(ctx.TestBase, "testcase")
-	entries, err := os.ReadDir(testcaseDir)
-	if err != nil {
-		r.Logger("ERROR: cannot read testcase directory: %v", err)
-		return report, fmt.Errorf("read testcase directory %s: %w", testcaseDir, err)
+	if ctx.DryRun {
+		return r.dryRunCases(ctx), nil
 	}
 
-	var caseDirs []string
-	for _, e := range entries {
-		if e.IsDir() {
-			caseDirs = append(caseDirs, e.Name())
+	// Build plan first
+	plans, err := r.BuildPlan(ctx)
+	if err != nil {
+		report := &Report{StartTime: time.Now(), EndTime: time.Now()}
+		return report, err
+	}
+
+	// Execute plan
+	return r.executePlans(ctx, plans), nil
+}
+
+// ---------------------------------------------------------------------------
+// Dry-run
+// ---------------------------------------------------------------------------
+
+// dryRunCases validates all test case configurations without executing them.
+func (r *Runner) dryRunCases(ctx *context.TestContext) *Report {
+	report := &Report{StartTime: time.Now()}
+	defer func() { report.EndTime = time.Now() }()
+
+	plans, err := r.BuildPlan(ctx)
+	if err != nil {
+		r.Logger("DRY-RUN ERROR: %v", err)
+		return report
+	}
+
+	for _, plan := range plans {
+		if plan.hasBlockingErrors() {
+			// Case has blocking validation errors — report each one
+			for _, pe := range plan.Errors {
+				if pe.Severity == "error" {
+					loc := plan.DirName
+					if pe.Phase != "" {
+						loc += " [" + pe.Phase + "]"
+					}
+					r.Logger("DRY-RUN ERROR: %s: %s", loc, pe.Message)
+				}
+			}
+			// Report as an Error case
+			cr := CaseResult{
+				CaseName: plan.DirName,
+				Status:   CaseError,
+				Duration: 0,
+			}
+			report.appendResult(cr)
+		} else {
+			// Case is valid (may have non-blocking warnings)
+			stepCount := len(plan.Setup) + len(plan.Action) + len(plan.Teardown)
+			r.Logger("DRY-RUN OK: %s (%d steps)", plan.DirName, stepCount)
+			// Log any non-blocking warnings
+			for _, pe := range plan.Errors {
+				loc := plan.DirName
+				if pe.Phase != "" {
+					loc += " [" + pe.Phase + "]"
+				}
+				r.Logger("DRY-RUN WARN: %s: %s", loc, pe.Message)
+			}
+			report.DryRunValidated++
 		}
 	}
-	sort.Strings(caseDirs)
 
-	// Determine concurrency
+	return report
+}
+
+// ---------------------------------------------------------------------------
+// Execute plan
+// ---------------------------------------------------------------------------
+
+// executePlans runs all test cases from their pre-built plans, handling
+// parallel/serial dispatch.
+func (r *Runner) executePlans(ctx *context.TestContext, plans []CasePlan) *Report {
+	report := &Report{StartTime: time.Now()}
+	defer func() { report.EndTime = time.Now() }()
+
 	concurrency := ctx.Concurrency
 	if concurrency < 1 {
 		concurrency = 1
 	}
 
-	// Parallel dispatch helpers
 	var wg sync.WaitGroup
-	sem := make(chan struct{}, concurrency) // semaphore for parallel goroutines
-	parallelCh := make(chan parallelResult, len(caseDirs))
+	sem := make(chan struct{}, concurrency)
+	parallelCh := make(chan parallelResult, len(plans))
 
-	for _, dirName := range caseDirs {
-		// Dry-run mode: skip execution
-		if ctx.DryRun {
-			r.dryRunCase(ctx, dirName)
-			continue
-		}
-
-		// Parse XML to check parallel attribute
-		isParallel := r.isCaseParallel(ctx, dirName)
-
-		if isParallel && concurrency > 1 {
+	for _, plan := range plans {
+		if plan.Parallel && concurrency > 1 {
 			// Parallel case: acquire semaphore slot, launch goroutine
-			sem <- struct{}{} // blocks if at capacity
+			sem <- struct{}{}
 			wg.Add(1)
-			go func(name string) {
+			go func(p CasePlan) {
 				defer wg.Done()
 				defer func() { <-sem }()
-
-				// Clone context for isolation
 				caseCtx := ctx.Clone()
-				cr := r.runCase(caseCtx, name)
+				cr := r.executePlan(caseCtx, p)
 				parallelCh <- parallelResult{CaseResult: cr}
-			}(dirName)
+			}(plan)
 		} else {
-			// Serial case: wait for all parallel goroutines to finish first
+			// Serial case: wait for all parallel goroutines first
 			wg.Wait()
-			// Drain any remaining parallel results
 			r.drainParallelResults(report, parallelCh)
-
-			// Execute serially
-			caseResult := r.runCase(ctx, dirName)
+			caseResult := r.executePlan(ctx, plan)
 			report.appendResult(caseResult)
 		}
 	}
 
-	// Wait for all remaining parallel goroutines
 	wg.Wait()
 	r.drainParallelResults(report, parallelCh)
 
-	return report, nil
+	return report
 }
+
+// drainParallelResults drains all available results from the parallel channel.
+func (r *Runner) drainParallelResults(report *Report, ch chan parallelResult) {
+	for {
+		select {
+		case pr := <-ch:
+			report.appendResult(pr.CaseResult)
+		default:
+			return
+		}
+	}
+}
+
+// executePlan executes a single test case from its pre-built CasePlan.
+func (r *Runner) executePlan(ctx *context.TestContext, plan CasePlan) CaseResult {
+	start := time.Now()
+	result := CaseResult{CaseName: plan.DirName}
+
+	// If the plan has blocking validation errors from BuildPlan, report immediately.
+	// The faulty steps were excluded from Setup/Action/Teardown during BuildPlan.
+	// Non-blocking warnings are reported by the logger but do not block execution.
+	if plan.hasBlockingErrors() {
+		result.Status = CaseError
+		result.Duration = time.Since(start)
+		return result
+	}
+
+	// Ensure GUID (write to XML file for persistent tracking)
+	data, caseGUID, err := ensureCaseGUID(plan.RawXML, plan.XMLPath)
+	if err != nil {
+		r.Logger("WARN: %s: guid write: %v", plan.DirName, err)
+	}
+	_ = data // data is used by ensureCaseGUID to write to file; we keep the plan.RawXML reference
+	ctx.Set("case_guid", caseGUID)
+
+	// Determine title
+	title := plan.Title
+	if title == "" {
+		title = plan.DirName
+	}
+
+	// Check flags filter — multi-tag, case-insensitive, run-all support
+	if !ctx.RunAll && ctx.Flags != "" {
+		caseFlags := strings.Fields(plan.Flags)
+		cmdFlags := strings.Fields(ctx.Flags)
+		matched := false
+		for _, cf := range caseFlags {
+			for _, cli := range cmdFlags {
+				if strings.EqualFold(cf, cli) {
+					matched = true
+					break
+				}
+			}
+			if matched {
+				break
+			}
+		}
+		if !matched {
+			r.Logger("%s --- SKIPPED: %s (flags=%q, ctx.Flags=%q)", caseGUID, title, plan.Flags, ctx.Flags)
+			result.Status = CaseSkipped
+			result.Duration = time.Since(start)
+			return result
+		}
+	}
+
+	ctx.GenerateRandomVars()
+	r.Logger("%s === CASE: %s ===", caseGUID, title)
+
+	// Execute phases with a sequential step counter
+	stepSeq := 0
+	for _, ps := range plan.Setup {
+		stepSeq++
+		report := r.runPlanStep(ctx, "setup", ps, caseGUID, stepSeq)
+		result.Steps = append(result.Steps, report)
+	}
+	for _, ps := range plan.Action {
+		stepSeq++
+		report := r.runPlanStep(ctx, "action", ps, caseGUID, stepSeq)
+		result.Steps = append(result.Steps, report)
+	}
+	for _, ps := range plan.Teardown {
+		stepSeq++
+		report := r.runPlanStep(ctx, "teardown", ps, caseGUID, stepSeq)
+		result.Steps = append(result.Steps, report)
+	}
+
+	// Check for zero steps (error condition)
+	if stepSeq == 0 {
+		r.Logger("ERROR: %s: case has zero steps (setup/action/teardown are all empty)", title)
+		result.Status = CaseError
+		result.Duration = time.Since(start)
+		return result
+	}
+
+	// Cleanup temporary variables
+	ctx.CleanupTemporary()
+
+	// Determine pass/fail from steps
+	allPass := true
+	for _, s := range result.Steps {
+		if !s.Pass {
+			allPass = false
+			break
+		}
+	}
+	if allPass {
+		result.Status = CasePassed
+	} else {
+		result.Status = CaseFailed
+	}
+
+	result.Duration = time.Since(start)
+	r.Logger("%s === CASE END: %s (%s) ===", caseGUID, title, result.Duration)
+	return result
+}
+
+// runPlanStep executes a single step using pre-parsed step data from a CasePlan.
+func (r *Runner) runPlanStep(ctx *context.TestContext, phase string, ps ParsedStep, caseGUID string, stepSeq int) StepReport {
+	report := StepReport{
+		Phase: phase,
+		Desc:  ps.Desc,
+	}
+
+	stepData := ps.Data
+	report.Type = stepData.StepType
+
+	// Log header prefix: shortGUID + stepN
+	prefix := fmt.Sprintf("%s STEP%d", shortGUID(caseGUID), stepSeq)
+
+	// Step header
+	stepInfo := fmt.Sprintf("type=%s", stepData.StepType)
+	if stepData.TranCode != "" {
+		stepInfo += fmt.Sprintf(", tranCode=%s", stepData.TranCode)
+	}
+	r.Logger("%s --- STEP [%s] %s: %s ---", prefix, phase, ps.Desc, stepInfo)
+
+	// Log step input data (test values and expected results)
+	if len(stepData.Values) > 0 {
+		var sb strings.Builder
+		for _, v := range stepData.Values {
+			sb.WriteString(fmt.Sprintf("      %s = %s\n", v.Key, v.Value))
+		}
+		r.Logger("%s   Values:\n%s", prefix, sb.String())
+	}
+	if len(stepData.Assertions) > 0 {
+		var sb strings.Builder
+		for _, a := range stepData.Assertions {
+			name := a.XPath
+			if a.JSONPath != "" {
+				name = a.JSONPath
+			}
+			sb.WriteString(fmt.Sprintf("      %s = %s\n", name, a.Expected))
+		}
+		r.Logger("%s   Assertions:\n%s", prefix, sb.String())
+	}
+
+	// Generate system variables for this step
+	if stepData.Server != "" {
+		ctx.GenerateSystemVars(stepData.Server)
+	} else {
+		ctx.GenerateSystemVarsLegacy(stepData.ServerIndex)
+	}
+
+	// Route to handler
+	h := r.Registry.Get(stepData.StepType)
+	if h == nil {
+		report.Pass = false
+		report.Message = fmt.Sprintf("no handler for step type: %s", stepData.StepType)
+		return report
+	}
+
+	// Execute
+	result := h.Execute(stepData, ctx)
+	report.Pass = result.Success
+	report.Message = result.FailureMessage
+
+	// Log request data
+	if result.RequestData != "" {
+		r.Logger("%s   Request:\n%s", prefix, indentLines(result.RequestData, "    "))
+	}
+
+	// Log response data
+	if result.ResponseData != "" {
+		r.Logger("%s   Response:\n%s", prefix, indentLines(result.ResponseData, "    "))
+	}
+
+	// Log pass/fail with verification details
+	if result.Success {
+		r.Logger("%s   PASS", prefix)
+	} else {
+		r.Logger("%s   FAIL: %s", prefix, result.FailureMessage)
+	}
+
+	// Log extracted variables
+	if len(result.ExtractedVars) > 0 {
+		var parts []string
+		for k, v := range result.ExtractedVars {
+			parts = append(parts, fmt.Sprintf("%s=%s", k, v))
+		}
+		r.Logger("%s   Extracted: %s", prefix, strings.Join(parts, ", "))
+	}
+
+	return report
+}
+
+// ---------------------------------------------------------------------------
+// Internal helpers (shared by BuildPlan and execution)
+// ---------------------------------------------------------------------------
 
 // isCaseParallel checks whether a test case has parallel="true" attribute.
 func (r *Runner) isCaseParallel(ctx *context.TestContext, dirName string) bool {
@@ -184,18 +437,6 @@ func (r *Runner) isCaseParallel(ctx *context.TestContext, dirName string) bool {
 	}
 
 	return strings.EqualFold(tc.Parallel, "true")
-}
-
-// drainParallelResults drains all available results from the parallel channel.
-func (r *Runner) drainParallelResults(report *Report, ch chan parallelResult) {
-	for {
-		select {
-		case pr := <-ch:
-			report.appendResult(pr.CaseResult)
-		default:
-			return
-		}
-	}
 }
 
 // findCaseXML finds the first .xml file in the case directory.
@@ -253,22 +494,6 @@ func ensureCaseGUID(data []byte, xmlPath string) ([]byte, string, error) {
 	return newData, guid, nil
 }
 
-// dryRunCase validates a test case XML without executing it.
-func (r *Runner) dryRunCase(ctx *context.TestContext, dirName string) {
-	caseDir := filepath.Join(ctx.TestBase, "testcase", dirName)
-	xmlPath, err := findCaseXML(caseDir)
-	if err != nil {
-		r.Logger("DRY-RUN ERROR: %s: %v", dirName, err)
-		return
-	}
-	data, err := os.ReadFile(xmlPath)
-	if err != nil {
-		r.Logger("DRY-RUN ERROR: %s: %v", dirName, err)
-		return
-	}
-	r.Logger("DRY-RUN OK: %s (%d bytes)", dirName, len(data))
-}
-
 // caseXML represents the parsed test case XML.
 type caseXML struct {
 	XMLName  xml.Name `xml:"case"`
@@ -277,9 +502,9 @@ type caseXML struct {
 	GUID     string   `xml:"guid,attr"`
 	Parallel string   `xml:"parallel,attr"`
 	Flags    string   `xml:"flags,attr"`
-	Setup    *phaseXML `xml:"setup"`
-	Action   *phaseXML `xml:"action"`
-	Teardown *phaseXML `xml:"teardown"`
+	Setup    *phaseXML  `xml:"setup"`
+	Action   *phaseXML  `xml:"action"`
+	Teardown *phaseXML  `xml:"teardown"`
 }
 
 type phaseXML struct {
@@ -307,7 +532,22 @@ func indentLines(s, prefix string) string {
 	return prefix + strings.ReplaceAll(s, "\n", "\n"+prefix)
 }
 
-// runCase executes a single test case.
+// truncateLog truncates a string for logging.
+func truncateLog(s string) string {
+	s = strings.ReplaceAll(s, "\n", " ")
+	if len(s) > 200 {
+		return s[:200] + "..."
+	}
+	return s
+}
+
+// ---------------------------------------------------------------------------
+// Legacy runCase / runStep (kept for reference, no longer used by Run)
+// ---------------------------------------------------------------------------
+
+// runCase executes a single test case by re-reading its XML file.
+// It is kept for backward compatibility but is no longer called by Run().
+// The new execution path uses executePlan() with a CasePlan.
 func (r *Runner) runCase(ctx *context.TestContext, dirName string) CaseResult {
 	start := time.Now()
 	result := CaseResult{CaseName: dirName}
@@ -436,7 +676,7 @@ func (r *Runner) runCase(ctx *context.TestContext, dirName string) CaseResult {
 	return result
 }
 
-// runStep executes a single step.
+// runStep executes a single step by parsing its XML at runtime.
 func (r *Runner) runStep(ctx *context.TestContext, phase string, s stepXML, caseGUID string, stepSeq int) StepReport {
 	report := StepReport{
 		Phase: phase,
@@ -529,13 +769,4 @@ func (r *Runner) runStep(ctx *context.TestContext, phase string, s stepXML, case
 	}
 
 	return report
-}
-
-// truncateLog truncates a string for logging.
-func truncateLog(s string) string {
-	s = strings.ReplaceAll(s, "\n", " ")
-	if len(s) > 200 {
-		return s[:200] + "..."
-	}
-	return s
 }

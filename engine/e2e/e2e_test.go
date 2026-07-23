@@ -157,7 +157,8 @@ func TestE2E_AllCases(t *testing.T) {
 	}
 }
 
-// TestE2E_DryRun verifies that dry-run mode parses XML without executing.
+// TestE2E_DryRun verifies that dry-run mode validates all test case configurations
+// without making any network calls or modifying files.
 func TestE2E_DryRun(t *testing.T) {
 	ctx, r, _, cleanup := setupE2E(t)
 	defer cleanup()
@@ -165,17 +166,24 @@ func TestE2E_DryRun(t *testing.T) {
 	ctx.DryRun = true
 	report, _ := r.Run(ctx)
 
-	// In dry-run mode, all cases are parsed but not executed
-	t.Logf("Dry-run: %d cases parsed", report.TotalCases)
-
-	// dry-run cases don't get added to Results (they're silently validated)
 	// At minimum, verify no panic occurred and report is populated
 	if report == nil {
 		t.Fatal("report should not be nil")
 	}
 
-	// In dry-run mode, the runner skips execution so TotalCases stays 0
-	// Verify the runner didn't crash
+	// In dry-run mode, valid cases are counted in DryRunValidated (not added to Results)
+	if report.DryRunValidated == 0 {
+		t.Error("expected at least 1 validated case in dry-run")
+	}
+
+	// Report should have no passed/failed/skipped cases (those are execution-time statuses)
+	if report.PassedCases > 0 || report.FailedCases > 0 {
+		t.Errorf("expected 0 passed/failed in dry-run, got passed=%d failed=%d",
+			report.PassedCases, report.FailedCases)
+	}
+
+	t.Logf("Dry-run: %d cases validated, %d errors, %d skipped-placeholder",
+		report.DryRunValidated, report.ErrorCases, report.SkippedCases)
 }
 
 // TestE2E_Parallel verifies parallel case execution with concurrency>1.

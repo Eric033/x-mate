@@ -74,7 +74,7 @@ func TestRunner_Run_NoTestCases(t *testing.T) {
 func TestRunner_Run_DryRun(t *testing.T) {
 	tmpDir := setupTempTestCaseDir(t)
 
-	// Create a test case
+	// Create a test case with a registered handler
 	caseXML := `<case flags="core" title="TestDryRun">
 		<action>
 			<step desc="dry run step">
@@ -91,6 +91,9 @@ func TestRunner_Run_DryRun(t *testing.T) {
 	ctx.DryRun = true
 
 	registry := handler.NewRegistry()
+	// Register the xml_set handler so dry-run validation passes
+	registry.Register("xml_set", &dummyRunnerHandler{success: true})
+
 	runner := NewRunner(registry)
 	runner.Logger = func(format string, args ...interface{}) {
 		logBuf.WriteString(fmt.Sprintf(format, args...))
@@ -99,8 +102,15 @@ func TestRunner_Run_DryRun(t *testing.T) {
 
 	report, _ := runner.Run(ctx)
 
+	// Dry-run should show 1 validated case, 0 errors, 0 total cases in Results
+	if report.DryRunValidated != 1 {
+		t.Errorf("expected 1 validated case in dry-run, got %d", report.DryRunValidated)
+	}
+	if report.ErrorCases != 0 {
+		t.Errorf("expected 0 errors in dry-run, got %d", report.ErrorCases)
+	}
 	if report.TotalCases != 0 {
-		t.Errorf("expected 0 cases in dry-run mode, got %d", report.TotalCases)
+		t.Errorf("expected 0 total (result) cases in dry-run, got %d (validated cases are not in Results)", report.TotalCases)
 	}
 
 	logStr := logBuf.String()
@@ -264,11 +274,15 @@ func TestRunner_Run_UnregisteredHandler(t *testing.T) {
 	runner := NewRunner(registry)
 	report, _ := runner.Run(ctx)
 
+	// BuildPlan detects the unregistered handler and reports as Error (not Failed)
 	if report.TotalCases != 1 {
 		t.Errorf("expected 1 case, got %d", report.TotalCases)
 	}
-	if report.FailedCases != 1 {
-		t.Errorf("expected 1 failed, got %d", report.FailedCases)
+	if report.ErrorCases != 1 {
+		t.Errorf("expected 1 error, got %d (failed=%d)", report.ErrorCases, report.FailedCases)
+	}
+	if report.FailedCases != 0 {
+		t.Errorf("expected 0 failed, got %d", report.FailedCases)
 	}
 
 	if len(report.Results) != 1 {
@@ -276,16 +290,12 @@ func TestRunner_Run_UnregisteredHandler(t *testing.T) {
 	}
 
 	result := report.Results[0]
-	if result.Status != CaseFailed {
-		t.Errorf("expected Status 'failed', got '%s'", result.Status)
+	if result.Status != CaseError {
+		t.Errorf("expected Status 'error', got '%s'", result.Status)
 	}
-
-	step := result.Steps[0]
-	if step.Pass {
-		t.Fatal("expected step to fail")
-	}
-	if !strings.Contains(step.Message, "no handler") {
-		t.Errorf("expected 'no handler' in message, got '%s'", step.Message)
+	// The step was excluded from execution by BuildPlan, so there are 0 steps
+	if len(result.Steps) != 0 {
+		t.Errorf("expected 0 steps (validation error caught in BuildPlan), got %d", len(result.Steps))
 	}
 }
 
@@ -514,8 +524,15 @@ func TestRunner_Run_DryRunError(t *testing.T) {
 
 	report, _ := runner.Run(ctx)
 
-	if report.TotalCases != 0 {
-		t.Errorf("expected 0 cases in dry-run, got %d", report.TotalCases)
+	// Dry-run with a missing XML file: 1 error case, 0 validated
+	if report.TotalCases != 1 {
+		t.Errorf("expected 1 error case in dry-run, got %d", report.TotalCases)
+	}
+	if report.ErrorCases != 1 {
+		t.Errorf("expected 1 error in dry-run, got %d", report.ErrorCases)
+	}
+	if report.DryRunValidated != 0 {
+		t.Errorf("expected 0 validated in dry-run, got %d", report.DryRunValidated)
 	}
 
 	logStr := logBuf.String()
