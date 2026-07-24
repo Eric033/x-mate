@@ -26,11 +26,15 @@ func TestLoadYAML_NotFound(t *testing.T) {
 	if err != nil {
 		t.Errorf("expected no error for missing config, got: %v", err)
 	}
+	if cfg.SystemID != context.DefaultSystemID {
+		t.Errorf("SystemID = %q, want default %q", cfg.SystemID, context.DefaultSystemID)
+	}
 }
 
 func TestLoadYAML_ExplicitPath_EnvironmentName(t *testing.T) {
 	cfg := Default()
 	cfg.ConfigPath = writeTempYAML(t, `
+system-id: ABCDEF
 environment:
   name: TEST_ENV
 services:
@@ -42,6 +46,17 @@ services:
 	}
 	if cfg.EnvName != "TEST_ENV" {
 		t.Errorf("EnvName = %q, want TEST_ENV", cfg.EnvName)
+	}
+	if cfg.SystemID != "ABCDEF" {
+		t.Errorf("SystemID = %q, want ABCDEF", cfg.SystemID)
+	}
+}
+
+func TestLoadYAML_InvalidSystemID(t *testing.T) {
+	cfg := Default()
+	cfg.ConfigPath = writeTempYAML(t, "system-id: ABC123\n")
+	if err := cfg.LoadYAML(); err == nil {
+		t.Fatal("expected invalid system-id error")
 	}
 }
 
@@ -150,6 +165,7 @@ func TestSplitHostPort(t *testing.T) {
 
 func TestInitContext_MultiService(t *testing.T) {
 	cfg := Default()
+	cfg.SystemID = "ABCDEF"
 	cfg.Services = map[string]context.ServiceDef{
 		"ABC": {
 			Address:  "10.0.0.1:9996",
@@ -169,6 +185,13 @@ func TestInitContext_MultiService(t *testing.T) {
 	ctx := context.New()
 	cfg.InitContext(ctx)
 
+	if ctx.SystemID != "ABCDEF" {
+		t.Errorf("ctx.SystemID = %q, want ABCDEF", ctx.SystemID)
+	}
+	if v, ok := ctx.Get("systemID"); !ok || v != "ABCDEF" {
+		t.Errorf("systemID variable = %q, want ABCDEF", v)
+	}
+
 	if v, ok := ctx.Get("ABC.address"); !ok || v != "10.0.0.1:9996" {
 		t.Errorf("ABC.address = %q", v)
 	}
@@ -182,9 +205,17 @@ func TestInitContext_MultiService(t *testing.T) {
 		t.Errorf("XYZ.db.database = %q", v)
 	}
 
-	// First service should set backward-compat vars
-	if v, ok := ctx.Get("serverIP"); !ok || v != "10.0.0.1" {
-		t.Errorf("serverIP = %q", v)
+	// The lexicographically first service should deterministically set the
+	// backward-compatible vars, regardless of map iteration order.
+	for i := 0; i < 100; i++ {
+		iterationCtx := context.New()
+		cfg.InitContext(iterationCtx)
+		if v, ok := iterationCtx.Get("serverIP"); !ok || v != "10.0.0.1" {
+			t.Fatalf("iteration %d: serverIP = %q, want 10.0.0.1", i, v)
+		}
+		if v, ok := iterationCtx.Get("serverPort"); !ok || v != "9996" {
+			t.Fatalf("iteration %d: serverPort = %q, want 9996", i, v)
+		}
 	}
 }
 

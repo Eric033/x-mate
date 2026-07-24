@@ -101,6 +101,8 @@ engine --test-base ./sample --flags core --start-mock --report-file result.log
 
 ```yaml
 # config/qa.yaml
+system-id: ABCDEF
+
 environment:
   name: QA
 
@@ -112,6 +114,10 @@ services:
     address: "localhost"
     database: "test.db"
 ```
+
+`system-id` 是生成交易流水号的 6 位 ASCII 字母系统标识，未配置时默认为
+`ZDHZDH`。`seq_no` 固定为 24 位：`system-id + YYMMDD + 12 位日内自增序号`；
+序号在一次 Engine 执行内唯一，并在交易日期变化后从 `000000000001` 重新开始。
 
 配置文件搜索路径（优先级从高到低）：
 1. `--config` 参数指定路径
@@ -278,9 +284,10 @@ services:
 | 变量 | 说明 |
 |---|---|
 | `{{random_8}}` | 每个用例生成的 8 位随机数 |
-| `{{seq_no}}` | 每步生成的序列号 |
-| `{{date_str_6}}` | 每步生成的 6 位日期字符串 |
-| `{{time_str_6}}` | 每步生成的 6 位时间字符串 |
+| `{{systemID}}` | YAML 配置的 6 位系统标识 |
+| `{{seq_no}}` | 每步生成的 24 位日内自增流水号 |
+| `{{date_str_6}}` | 每步生成的 YYMMDD 交易日期 |
+| `{{time_str_6}}` | 每步生成的 YYMMDDHH 小时时间 |
 | `{{case_guid}}` | 用例自动生成的 UUID |
 
 ### 变量提取

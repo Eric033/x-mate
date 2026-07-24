@@ -1,6 +1,8 @@
 package context
 
 import (
+	"fmt"
+	"sync"
 	"testing"
 	"time"
 )
@@ -67,7 +69,9 @@ func TestClone_WithServices(t *testing.T) {
 
 func TestGenerateSystemVars_NoService(t *testing.T) {
 	ctx := New()
-	ctx.GenerateSystemVars("")
+	if err := ctx.GenerateSystemVars(""); err != nil {
+		t.Fatalf("GenerateSystemVars: %v", err)
+	}
 
 	// These should be set regardless
 	if _, ok := ctx.Get("date_str_6"); !ok {
@@ -92,7 +96,9 @@ func TestGenerateSystemVars_WithService(t *testing.T) {
 		"MOCK": {Address: "10.0.0.5:5555"},
 	}
 
-	ctx.GenerateSystemVars("MOCK")
+	if err := ctx.GenerateSystemVars("MOCK"); err != nil {
+		t.Fatalf("GenerateSystemVars: %v", err)
+	}
 
 	ip, ok := ctx.Get("serverIP")
 	if !ok || ip != "10.0.0.5" {
@@ -106,30 +112,170 @@ func TestGenerateSystemVars_WithService(t *testing.T) {
 
 func TestGenerateSystemVars_SeqNo(t *testing.T) {
 	ctx := New()
-	ctx.GenerateSystemVars("")
+	ctx.SystemID = "ABCDEF"
+	now := time.Date(2026, time.July, 23, 14, 5, 6, 0, time.UTC)
 
-	seqNo, ok := ctx.Get("seq_no")
+	if err := ctx.generateTemporalSystemVars(now); err != nil {
+		t.Fatalf("first sequence: %v", err)
+	}
+	assertContextValue(t, ctx, "date_str_6", "260723")
+	assertContextValue(t, ctx, "time_str_6", "26072314")
+	assertContextValue(t, ctx, "time_no", "26072314")
+	assertContextValue(t, ctx, "seq_no", "ABCDEF260723000000000001")
+	assertContextValue(t, ctx, "seq_no_pay", "ABCDEF260723000000000001")
+
+	if err := ctx.generateTemporalSystemVars(now); err != nil {
+		t.Fatalf("second sequence: %v", err)
+	}
+	assertContextValue(t, ctx, "seq_no", "ABCDEF260723000000000002")
+}
+
+func TestGenerateSystemVars_DefaultSystemID(t *testing.T) {
+	ctx := New()
+	now := time.Date(2026, time.July, 23, 0, 0, 0, 0, time.UTC)
+	if err := ctx.generateTemporalSystemVars(now); err != nil {
+		t.Fatalf("generateTemporalSystemVars: %v", err)
+	}
+	assertContextValue(t, ctx, "seq_no", "ZDHZDH260723000000000001")
+}
+
+func TestDailySequenceGenerator_ResetAndOutOfOrderDates(t *testing.T) {
+	generator := newDailySequenceGenerator()
+	dayOne := time.Date(2026, time.July, 23, 23, 59, 59, 0, time.UTC)
+	dayTwo := time.Date(2026, time.July, 24, 0, 0, 0, 0, time.UTC)
+
+	first, err := generator.next(dayOne)
+	if err != nil {
+		t.Fatalf("day one first: %v", err)
+	}
+	second, err := generator.next(dayOne)
+	if err != nil {
+		t.Fatalf("day one second: %v", err)
+	}
+	nextDayFirst, err := generator.next(dayTwo)
+	if err != nil {
+		t.Fatalf("day two first: %v", err)
+	}
+	lateDayOne, err := generator.next(dayOne)
+	if err != nil {
+		t.Fatalf("late day one: %v", err)
+	}
+
+	if first != "260723000000000001" {
+		t.Errorf("day one first = %q", first)
+	}
+	if second != "260723000000000002" {
+		t.Errorf("day one second = %q", second)
+	}
+	if nextDayFirst != "260724000000000001" {
+		t.Errorf("day two first = %q", nextDayFirst)
+	}
+	if lateDayOne != "260723000000000003" {
+		t.Errorf("late day one = %q", lateDayOne)
+	}
+}
+
+func TestDailySequenceGenerator_ConcurrentClonesAreUnique(t *testing.T) {
+	const count = 500
+	root := New()
+	root.SystemID = "ABCDEF"
+	now := time.Date(2026, time.July, 23, 12, 0, 0, 0, time.UTC)
+
+	results := make(chan string, count)
+	errs := make(chan error, count)
+	var wg sync.WaitGroup
+	for i := 0; i < count; i++ {
+		clone := root.Clone()
+		wg.Add(1)
+		go func(ctx *TestContext) {
+			defer wg.Done()
+			if err := ctx.generateTemporalSystemVars(now); err != nil {
+				errs <- err
+				return
+			}
+			seqNo, ok := ctx.Get("seq_no")
+			if !ok {
+				errs <- fmt.Errorf("seq_no not set")
+				return
+			}
+			results <- seqNo
+		}(clone)
+	}
+	wg.Wait()
+	close(results)
+	close(errs)
+
+	for err := range errs {
+		t.Errorf("concurrent generation: %v", err)
+	}
+	seen := make(map[string]struct{}, count)
+	for seqNo := range results {
+		if len(seqNo) != 24 {
+			t.Errorf("seq_no length = %d, want 24: %q", len(seqNo), seqNo)
+		}
+		if _, exists := seen[seqNo]; exists {
+			t.Errorf("duplicate seq_no: %s", seqNo)
+		}
+		seen[seqNo] = struct{}{}
+	}
+	if len(seen) != count {
+		t.Fatalf("unique seq_no count = %d, want %d", len(seen), count)
+	}
+	if _, ok := seen["ABCDEF260723000000000001"]; !ok {
+		t.Error("first sequence not generated")
+	}
+	if _, ok := seen["ABCDEF260723000000000500"]; !ok {
+		t.Error("last sequence not generated")
+	}
+}
+
+func TestDailySequenceGenerator_Exhausted(t *testing.T) {
+	generator := newDailySequenceGenerator()
+	generator.counters["260723"] = maxDailySequence - 1
+	now := time.Date(2026, time.July, 23, 0, 0, 0, 0, time.UTC)
+
+	last, err := generator.next(now)
+	if err != nil {
+		t.Fatalf("last sequence: %v", err)
+	}
+	if last != "260723999999999999" {
+		t.Errorf("last sequence = %q", last)
+	}
+	if _, err := generator.next(now); err == nil {
+		t.Fatal("expected exhaustion error")
+	}
+}
+
+func TestValidateSystemID(t *testing.T) {
+	tests := []struct {
+		systemID string
+		wantErr  bool
+	}{
+		{systemID: "ZDHZDH"},
+		{systemID: "AbCdEf"},
+		{systemID: "ABCDE", wantErr: true},
+		{systemID: "ABCDEFG", wantErr: true},
+		{systemID: "ABC12F", wantErr: true},
+		{systemID: "测试系统", wantErr: true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.systemID, func(t *testing.T) {
+			err := ValidateSystemID(tt.systemID)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ValidateSystemID(%q) error = %v, wantErr %v", tt.systemID, err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func assertContextValue(t *testing.T, ctx *TestContext, key, want string) {
+	t.Helper()
+	got, ok := ctx.Get(key)
 	if !ok {
-		t.Fatal("seq_no not set")
+		t.Fatalf("%s not set", key)
 	}
-	if len(seqNo) < 10 {
-		t.Errorf("seq_no too short: %q", seqNo)
-	}
-
-	// Verify format: date_str_6(YMMdd, 5 chars) + 9 digits + 00 = 16 chars
-	if len(seqNo) != 16 {
-		t.Errorf("seq_no length = %d, want 16", len(seqNo))
-	}
-
-	// Last two chars should be 00
-	if seqNo[len(seqNo)-2:] != "00" {
-		t.Errorf("seq_no suffix = %q, want 00", seqNo[len(seqNo)-2:])
-	}
-
-	// First char should be last digit of current year
-	yearDigit := time.Now().Year() % 10
-	if seqNo[0] != byte('0'+yearDigit) {
-		t.Errorf("seq_no[0] = %c, want %d", seqNo[0], yearDigit)
+	if got != want {
+		t.Errorf("%s = %q, want %q", key, got, want)
 	}
 }
 
@@ -140,7 +286,9 @@ func TestGenerateSystemVarsLegacy_WithService(t *testing.T) {
 		"SVC2": {Address: "10.0.0.2:8080"},
 	}
 
-	ctx.GenerateSystemVarsLegacy(2)
+	if err := ctx.GenerateSystemVarsLegacy(2); err != nil {
+		t.Fatalf("GenerateSystemVarsLegacy: %v", err)
+	}
 
 	ip, _ := ctx.Get("serverIP")
 	if ip != "10.0.0.1" {
@@ -156,7 +304,9 @@ func TestGenerateSystemVarsLegacy_NoService(t *testing.T) {
 	ctx := New()
 
 	// Should not set serverIP with no services
-	ctx.GenerateSystemVarsLegacy(5)
+	if err := ctx.GenerateSystemVarsLegacy(5); err != nil {
+		t.Fatalf("GenerateSystemVarsLegacy: %v", err)
+	}
 	if _, ok := ctx.Get("serverIP"); ok {
 		t.Error("serverIP should not be set with no services")
 	}
@@ -271,7 +421,7 @@ func TestGetServiceDB(t *testing.T) {
 	ctx.Services = map[string]ServiceDef{
 		"MOCK": {
 			Address: "10.0.0.1:8080",
-			DB: &DBConf{Address: "10.0.0.2:1521", Database: "ORCL"},
+			DB:      &DBConf{Address: "10.0.0.2:1521", Database: "ORCL"},
 		},
 	}
 
