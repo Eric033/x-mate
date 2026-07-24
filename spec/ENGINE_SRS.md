@@ -178,6 +178,7 @@ engine --test-base ./sample --dry-run
 | `DB_user` | `--db-info` | `readonly` | 数据库用户名 |
 | `DB_passwd` | `--db-info` | `readonly` | 数据库密码 |
 | `envName` | `--env-name` | `UNDEFINED` | 环境名称 |
+| `systemID` | YAML `system-id` | `ZDHZDH` | 6位字母系统标识，用于生成流水号 |
 | `DB_info` | `--db-info` | `UNDEFINED` | 数据库完整信息 |
 | `DB_type` | `--db-info` | `UNDEFINED` | 数据库类型 |
 | `tcpDamServerIP` | 从 G_DamplerServer 解析 | - | 挡板 TCP IP |
@@ -307,7 +308,7 @@ engine --test-base ./sample --dry-run
    - 提取 <save>/<key> 子元素列表
 
 5. 生成系统变量：
-   - seq_no：流水号 = date_str_6 + 时间戳后 9 位 + "00"
+   - seq_no：流水号 = 6位系统标识 + YYMMDD + 12位日内自增序号
    - serverIP / serverPort：根据 server_index 选择目标服务器
 
 6. 等待 sleep 毫秒
@@ -694,10 +695,10 @@ engine --test-base ./sample --dry-run
 
 | 变量名 | 生成时机 | 值 | 说明 |
 |--------|----------|-----|------|
-| `date_str_6` | 步骤执行前 | 当前日期 YMMdd 格式 | 用于生成流水号 |
-| `time_str_6` | 步骤执行前 | 当前时间 YMMddHH 格式 | 用于生成流水号 |
-| `seq_no` | 步骤执行前 | date_str_6 + 时间戳末9位 + "00" | 18位流水号 |
-| `seq_no_pay` | 步骤执行前 | date_str_6 后5位 + 时间戳末9位 + "00" | 支付流水号 |
+| `date_str_6` | 步骤执行前 | 当前交易日期 YYMMDD | 6位交易日期 |
+| `time_str_6` | 步骤执行前 | 当前时间 YYMMDDHH | 8位小时时间 |
+| `seq_no` | 步骤执行前 | 6位系统标识 + YYMMDD + 12位日内自增序号 | 24位流水号，一次执行过程中唯一 |
+| `seq_no_pay` | 步骤执行前 | 与 seq_no 相同 | 兼容旧模板的别名 |
 | `time_no` | 步骤执行前 | time_str_6 | 时间编号 |
 | `serverIP` | 步骤执行前 | server_<server_index> | 当前步骤的目标服务器 IP |
 | `serverPort` | 步骤执行前 | port_<server_index> | 当前步骤的目标服务器端口 |
@@ -707,6 +708,11 @@ engine --test-base ./sample --dry-run
 | `dbips_1` ~ `dbips_N` | 启动时 | 数据库 IP | 数据库 IP 列表 |
 | `dbports_1` ~ `dbports_N` | 启动时 | 数据库端口 | 数据库端口列表 |
 | `dbnames_1` ~ `dbnames_N` | 启动时 | 数据库名 | 数据库名列表 |
+
+流水号规则：系统标识默认为 `ZDHZDH`，可通过环境 YAML 顶层
+`system-id` 覆盖，且必须是 6 位 ASCII 字母。日内序号从
+`000000000001` 递增至 `999999999999`，交易日期变化后从 1 重新开始；
+并行用例共享同一计数器。
 
 #### 3.6.4 变量预处理引擎 (preProcess)
 

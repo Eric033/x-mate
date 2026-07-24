@@ -3,14 +3,49 @@ package context
 import (
 	"fmt"
 	"math/rand"
+	"sort"
 	"strings"
 	"sync"
 	"time"
 )
 
+const (
+	// DefaultSystemID is used when YAML does not provide system-id.
+	DefaultSystemID = "ZDHZDH"
+
+	maxDailySequence uint64 = 999999999999
+)
+
+// dailySequenceGenerator allocates one monotonically increasing sequence per
+// transaction date. A root context owns one generator and all parallel clones
+// share it, which guarantees uniqueness for one Engine execution.
+type dailySequenceGenerator struct {
+	mu       sync.Mutex
+	counters map[string]uint64
+}
+
+func newDailySequenceGenerator() *dailySequenceGenerator {
+	return &dailySequenceGenerator{counters: make(map[string]uint64)}
+}
+
+func (g *dailySequenceGenerator) next(now time.Time) (string, error) {
+	tradeDate := now.Format("060102")
+
+	g.mu.Lock()
+	defer g.mu.Unlock()
+
+	current := g.counters[tradeDate]
+	if current >= maxDailySequence {
+		return "", fmt.Errorf("daily seq_no sequence exhausted for %s", tradeDate)
+	}
+	current++
+	g.counters[tradeDate] = current
+	return fmt.Sprintf("%s%012d", tradeDate, current), nil
+}
+
 // ServiceDef defines a named service with address and optional DB.
 type ServiceDef struct {
-	Address  string  `yaml:"address"`             // "ip:port"
+	Address  string  `yaml:"address"` // "ip:port"
 	DB       *DBConf `yaml:"db,omitempty"`
 	TCPPort  int     `yaml:"tcp-port,omitempty"`
 	HTTPPort int     `yaml:"http-port,omitempty"`
@@ -36,18 +71,23 @@ type TestContext struct {
 	TestBase    string
 	Flags       string
 	EnvName     string
+	SystemID    string
 	ParentGUID  string
 	Verbose     bool
 	DryRun      bool
-	Concurrency int // max concurrent goroutines (0/1 = serial)
-	RunAll      bool   // skip all flags filtering, run every case
+	Concurrency int  // max concurrent goroutines (0/1 = serial)
+	RunAll      bool // skip all flags filtering, run every case
+
+	sequenceGenerator *dailySequenceGenerator
 }
 
 // New creates a fresh TestContext.
 func New() *TestContext {
 	return &TestContext{
-		Variables: make(map[string]string),
-		Services:  make(map[string]ServiceDef),
+		Variables:         make(map[string]string),
+		Services:          make(map[string]ServiceDef),
+		SystemID:          DefaultSystemID,
+		sequenceGenerator: newDailySequenceGenerator(),
 	}
 }
 
@@ -133,6 +173,8 @@ func (c *TestContext) Delete(key string) {
 // Clone creates a deep copy of TestContext for parallel case execution.
 // Variables and Services maps are fully copied to ensure isolation.
 func (c *TestContext) Clone() *TestContext {
+	sequenceGenerator := c.getSequenceGenerator()
+
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
@@ -142,11 +184,15 @@ func (c *TestContext) Clone() *TestContext {
 		TestBase:    c.TestBase,
 		Flags:       c.Flags,
 		EnvName:     c.EnvName,
+		SystemID:    c.SystemID,
 		ParentGUID:  c.ParentGUID,
 		Verbose:     c.Verbose,
 		DryRun:      c.DryRun,
 		Concurrency: c.Concurrency,
 		RunAll:      c.RunAll,
+
+		// All case clones in one execution must allocate from the same counter.
+		sequenceGenerator: sequenceGenerator,
 	}
 
 	for k, v := range c.Variables {
@@ -157,6 +203,15 @@ func (c *TestContext) Clone() *TestContext {
 	}
 
 	return clone
+}
+
+func (c *TestContext) getSequenceGenerator() *dailySequenceGenerator {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.sequenceGenerator == nil {
+		c.sequenceGenerator = newDailySequenceGenerator()
+	}
+	return c.sequenceGenerator
 }
 
 // CleanupTemporary removes temporary variables after a test case completes.
@@ -178,33 +233,10 @@ func (c *TestContext) CleanupTemporary() {
 
 // GenerateSystemVars creates the per-step system variables like seq_no.
 // serverName is the service name (from step's "server" field) or "" for legacy.
-func (c *TestContext) GenerateSystemVars(serverName string) {
-	now := time.Now()
-
-	// date_str_6: YMMdd format (year last digit + month + day)
-	dateStr6 := fmt.Sprintf("%d%02d%02d", now.Year()%10, now.Month(), now.Day())
-	c.Set("date_str_6", dateStr6)
-
-	// time_str_6: YMMddHH format
-	timeStr6 := fmt.Sprintf("%d%02d%02d%02d", now.Year()%10, now.Month(), now.Day(), now.Hour())
-	c.Set("time_str_6", timeStr6)
-
-	// seq_no: date_str_6 + timestamp last 9 digits + "00"
-	nano := now.UnixNano()
-	tsStr := fmt.Sprintf("%d", nano)
-	if len(tsStr) >= 9 {
-		tsStr = tsStr[len(tsStr)-9:]
+func (c *TestContext) GenerateSystemVars(serverName string) error {
+	if err := c.generateTemporalSystemVars(time.Now()); err != nil {
+		return err
 	}
-	seqNo := dateStr6 + tsStr + "00"
-	c.Set("seq_no", seqNo)
-
-	// seq_no_pay: last 5 of date_str_6 + timestamp last 9 + "00"
-	if len(dateStr6) >= 5 {
-		c.Set("seq_no_pay", dateStr6[len(dateStr6)-5:]+tsStr+"00")
-	}
-
-	// time_no
-	c.Set("time_no", timeStr6)
 
 	// serverIP / serverPort — from service name or first service
 	if serverName != "" {
@@ -214,50 +246,82 @@ func (c *TestContext) GenerateSystemVars(serverName string) {
 			c.Set("serverPort", port)
 		}
 	} else if len(c.Services) > 0 {
-		// Use first service
-		for _, svc := range c.Services {
+		if svc, ok := c.defaultService(); ok {
 			ip, port := splitHostPort(svc.Address)
 			c.Set("serverIP", ip)
 			c.Set("serverPort", port)
-			break
 		}
 	}
+	return nil
 }
 
 // GenerateSystemVarsLegacy is kept for backward compat with tests.
 // It uses the first service instead of legacy Servers list.
-func (c *TestContext) GenerateSystemVarsLegacy(serverIndex int) {
-	now := time.Now()
-
-	dateStr6 := fmt.Sprintf("%d%02d%02d", now.Year()%10, now.Month(), now.Day())
-	c.Set("date_str_6", dateStr6)
-
-	timeStr6 := fmt.Sprintf("%d%02d%02d%02d", now.Year()%10, now.Month(), now.Day(), now.Hour())
-	c.Set("time_str_6", timeStr6)
-
-	nano := now.UnixNano()
-	tsStr := fmt.Sprintf("%d", nano)
-	if len(tsStr) >= 9 {
-		tsStr = tsStr[len(tsStr)-9:]
+func (c *TestContext) GenerateSystemVarsLegacy(serverIndex int) error {
+	if err := c.generateTemporalSystemVars(time.Now()); err != nil {
+		return err
 	}
-	seqNo := dateStr6 + tsStr + "00"
-	c.Set("seq_no", seqNo)
-
-	if len(dateStr6) >= 5 {
-		c.Set("seq_no_pay", dateStr6[len(dateStr6)-5:]+tsStr+"00")
-	}
-
-	c.Set("time_no", timeStr6)
 
 	// Use first service if available
-	if len(c.Services) > 0 {
-		for _, svc := range c.Services {
-			ip, port := splitHostPort(svc.Address)
-			c.Set("serverIP", ip)
-			c.Set("serverPort", port)
-			break
+	if svc, ok := c.defaultService(); ok {
+		ip, port := splitHostPort(svc.Address)
+		c.Set("serverIP", ip)
+		c.Set("serverPort", port)
+	}
+	return nil
+}
+
+func (c *TestContext) defaultService() (ServiceDef, bool) {
+	if len(c.Services) == 0 {
+		return ServiceDef{}, false
+	}
+	names := make([]string, 0, len(c.Services))
+	for name := range c.Services {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	return c.Services[names[0]], true
+}
+
+// generateTemporalSystemVars creates a 24-character transaction sequence:
+// 6-letter system ID + YYMMDD + 12-digit daily increasing sequence.
+func (c *TestContext) generateTemporalSystemVars(now time.Time) error {
+	systemID := c.SystemID
+	if systemID == "" {
+		systemID = DefaultSystemID
+	}
+	if err := ValidateSystemID(systemID); err != nil {
+		return err
+	}
+
+	dateAndSequence, err := c.getSequenceGenerator().next(now)
+	if err != nil {
+		return err
+	}
+	dateStr6 := now.Format("060102")
+	timeStr6 := now.Format("06010215")
+	seqNo := systemID + dateAndSequence
+
+	c.Set("date_str_6", dateStr6)
+	c.Set("time_str_6", timeStr6)
+	c.Set("seq_no", seqNo)
+	// Keep the legacy variable as an alias so existing templates do not break.
+	c.Set("seq_no_pay", seqNo)
+	c.Set("time_no", timeStr6)
+	return nil
+}
+
+// ValidateSystemID checks the six-letter identifier used as the seq_no prefix.
+func ValidateSystemID(systemID string) error {
+	if len(systemID) != 6 {
+		return fmt.Errorf("system-id must contain exactly 6 letters, got %q", systemID)
+	}
+	for _, ch := range systemID {
+		if (ch < 'A' || ch > 'Z') && (ch < 'a' || ch > 'z') {
+			return fmt.Errorf("system-id must contain only ASCII letters, got %q", systemID)
 		}
 	}
+	return nil
 }
 
 // GenerateRandomVars creates per-case random variables.

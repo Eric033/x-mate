@@ -299,6 +299,40 @@ func TestRunner_Run_UnregisteredHandler(t *testing.T) {
 	}
 }
 
+func TestRunner_Run_InvalidSystemID(t *testing.T) {
+	tmpDir := setupTempTestCaseDir(t)
+	caseXML := `<case flags="core" title="InvalidSystemID">
+		<action>
+			<step desc="must fail before handler">
+				<Action type="mock_handler" server_index="1"/>
+			</step>
+		</action>
+	</case>`
+	createTestCase(t, tmpDir, "invalid-system-id", caseXML)
+
+	ctx := context.New()
+	ctx.TestBase = tmpDir
+	ctx.SystemID = "BAD123"
+
+	registry := handler.NewRegistry()
+	registry.Register("mock_handler", &dummyRunnerHandler{success: true})
+
+	report, err := NewRunner(registry).Run(ctx)
+	if err != nil {
+		t.Fatalf("Run: %v", err)
+	}
+	if report.FailedCases != 1 {
+		t.Fatalf("FailedCases = %d, want 1", report.FailedCases)
+	}
+	step := report.Results[0].Steps[0]
+	if step.Pass {
+		t.Fatal("expected step to fail")
+	}
+	if !strings.Contains(step.Message, "generate system variables") {
+		t.Errorf("message = %q, want system variable error", step.Message)
+	}
+}
+
 func TestRunner_Run_MultipleCases(t *testing.T) {
 	tmpDir := setupTempTestCaseDir(t)
 

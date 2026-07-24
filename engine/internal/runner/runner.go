@@ -371,10 +371,16 @@ func (r *Runner) runPlanStep(ctx *context.TestContext, phase string, ps ParsedSt
 	}
 
 	// Generate system variables for this step
+	var systemVarsErr error
 	if stepData.Server != "" {
-		ctx.GenerateSystemVars(stepData.Server)
+		systemVarsErr = ctx.GenerateSystemVars(stepData.Server)
 	} else {
-		ctx.GenerateSystemVarsLegacy(stepData.ServerIndex)
+		systemVarsErr = ctx.GenerateSystemVarsLegacy(stepData.ServerIndex)
+	}
+	if systemVarsErr != nil {
+		report.Pass = false
+		report.Message = fmt.Sprintf("generate system variables: %v", systemVarsErr)
+		return report
 	}
 
 	// Route to handler
@@ -496,15 +502,15 @@ func ensureCaseGUID(data []byte, xmlPath string) ([]byte, string, error) {
 
 // caseXML represents the parsed test case XML.
 type caseXML struct {
-	XMLName  xml.Name `xml:"case"`
-	Tittle   string   `xml:"tittle,attr"`
-	Title    string   `xml:"title,attr"`
-	GUID     string   `xml:"guid,attr"`
-	Parallel string   `xml:"parallel,attr"`
-	Flags    string   `xml:"flags,attr"`
-	Setup    *phaseXML  `xml:"setup"`
-	Action   *phaseXML  `xml:"action"`
-	Teardown *phaseXML  `xml:"teardown"`
+	XMLName  xml.Name  `xml:"case"`
+	Tittle   string    `xml:"tittle,attr"`
+	Title    string    `xml:"title,attr"`
+	GUID     string    `xml:"guid,attr"`
+	Parallel string    `xml:"parallel,attr"`
+	Flags    string    `xml:"flags,attr"`
+	Setup    *phaseXML `xml:"setup"`
+	Action   *phaseXML `xml:"action"`
+	Teardown *phaseXML `xml:"teardown"`
 }
 
 type phaseXML struct {
@@ -723,10 +729,16 @@ func (r *Runner) runStep(ctx *context.TestContext, phase string, s stepXML, case
 	}
 
 	// Generate system variables for this step
+	var systemVarsErr error
 	if stepData.Server != "" {
-		ctx.GenerateSystemVars(stepData.Server)
+		systemVarsErr = ctx.GenerateSystemVars(stepData.Server)
 	} else {
-		ctx.GenerateSystemVarsLegacy(stepData.ServerIndex)
+		systemVarsErr = ctx.GenerateSystemVarsLegacy(stepData.ServerIndex)
+	}
+	if systemVarsErr != nil {
+		report.Pass = false
+		report.Message = fmt.Sprintf("generate system variables: %v", systemVarsErr)
+		return report
 	}
 
 	// Route to handler
