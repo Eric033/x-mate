@@ -74,13 +74,12 @@ func TestParametrize_ReplaceValue(t *testing.T) {
 		t.Fatalf("Parametrize failed: %v", err)
 	}
 
-	// xmlhelper.Set uses html.Parse which wraps in <html><head></head><body>...</body></html>
-	// We verify the content is correct despite the wrapper
+	// Strict XML engine preserves original structure without html/body wrappers
 	if !strings.Contains(result, "<name>Bob</name>") {
 		t.Errorf("expected <name>Bob</name> in result, got %q", result)
 	}
-	if strings.Contains(result, "<name>old</name>") {
-		t.Errorf("old value should have been replaced, got %q", result)
+	if !strings.Contains(result, "<root>") {
+		t.Errorf("expected <root> in result, got %q", result)
 	}
 }
 

@@ -40,7 +40,8 @@ func NewTCPMock() (*TCPMock, error) {
 }
 
 // ResponseXML is the canned response XML used by the TCP mock.
-var ResponseXML = `<Response><Header><TRAN_CODE>TRAN001</TRAN_CODE><RESP_CODE>000000</RESP_CODE><RESP_MSG>SUCCESS</RESP_MSG></Header><Body><AMOUNT>100</AMOUNT><BALANCE>50000</BALANCE></Body></Response>`
+// Tags use lowercase to match test case assertion XPath expressions.
+var ResponseXML = `<Response><Header><tran_code>TRAN001</tran_code><resp_code>000000</resp_code><resp_msg>SUCCESS</resp_msg></Header><Body><amount>100</amount><balance>50000</balance></Body></Response>`
 
 func (m *TCPMock) acceptLoop() {
 	for {

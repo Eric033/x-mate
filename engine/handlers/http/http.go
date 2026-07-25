@@ -208,7 +208,9 @@ func (h *HTTPHandler) verify(resp *sampler.HTTPResponse, assertions []handler.As
 			actual = jsonpathGet(a.JSONPath, resp.Body)
 		} else if a.XPath != "" {
 			val, err := xmlhelper.Get(a.XPath, resp.Body)
-			if err == nil {
+			if err != nil {
+				actual = fmt.Sprintf("ERROR: %v", err)
+			} else {
 				actual = val
 			}
 		}

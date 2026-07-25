@@ -20,7 +20,12 @@ func verifyAssertions(response string, assertions []handler.Assertion, ctx *cont
 		if a.XPath == "" {
 			continue
 		}
-		actual, _ := xmlhelper.Get(a.XPath, response)
+		actual, err := xmlhelper.Get(a.XPath, response)
+		if err != nil {
+			failures = append(failures,
+				fmt.Sprintf("[ tag %s mismatch: %v ]", a.XPath, err))
+			continue
+		}
 		expected := vars.ResolveAll(ctx, a.Expected)
 		if actual != expected {
 			failures = append(failures,
@@ -50,8 +55,14 @@ func (h *TCPDamperSetHandler) Execute(data *handler.StepData, ctx *context.TestC
 		return &handler.StepResult{Success: false, FailureMessage: err.Error()}
 	}
 
-	// Add @ prefix to TRAN_CODE
-	parametrized, _ = xmlhelper.Set("//TRAN_CODE", "@"+getTranCode(parametrized), parametrized)
+	// Add @ prefix to TRAN_CODE (if present)
+	tid, err := xmlhelper.Get("//TRAN_CODE", parametrized)
+	if err == nil {
+		parametrized, err = xmlhelper.Set("//TRAN_CODE", "@"+tid, parametrized)
+		if err != nil {
+			return &handler.StepResult{Success: false, FailureMessage: err.Error(), RequestData: parametrized}
+		}
+	}
 
 	// Send to damper TCP server (service name or legacy)
 	addr := ""
@@ -95,8 +106,8 @@ func (h *TCPDamperSetHandler) Execute(data *handler.StepData, ctx *context.TestC
 	// Extract
 	ctx.Set("prevResult", response)
 	for _, s := range data.Saves {
-		val, _ := xmlhelper.Get(s.Locator, response)
-		if val != "" {
+		val, err := xmlhelper.Get(s.Locator, response)
+		if err == nil && val != "" {
 			ctx.Set(s.Name, val)
 		}
 	}
@@ -129,9 +140,14 @@ func (h *MCADamperSetHandler) Execute(data *handler.StepData, ctx *context.TestC
 		return &handler.StepResult{Success: false, FailureMessage: err.Error()}
 	}
 
-	// Add @ prefix to _TransactionId
-	tid, _ := xmlhelper.Get("//_TransactionId", parametrized)
-	parametrized, _ = xmlhelper.Set("//_TransactionId", "@"+tid, parametrized)
+	// Add @ prefix to _TransactionId (if present)
+	tid, err := xmlhelper.Get("//_TransactionId", parametrized)
+	if err == nil {
+		parametrized, err = xmlhelper.Set("//_TransactionId", "@"+tid, parametrized)
+		if err != nil {
+			return &handler.StepResult{Success: false, FailureMessage: err.Error(), RequestData: parametrized}
+		}
+	}
 
 	// Append \r\n
 	payload := append([]byte(parametrized), '\r', '\n')
@@ -178,8 +194,8 @@ func (h *MCADamperSetHandler) Execute(data *handler.StepData, ctx *context.TestC
 	// Extract
 	ctx.Set("prevResult", response)
 	for _, s := range data.Saves {
-		val, _ := xmlhelper.Get(s.Locator, response)
-		if val != "" {
+		val, err := xmlhelper.Get(s.Locator, response)
+		if err == nil && val != "" {
 			ctx.Set(s.Name, val)
 		}
 	}
@@ -194,11 +210,12 @@ func (h *MCADamperSetHandler) Execute(data *handler.StepData, ctx *context.TestC
 
 // getTranCode extracts //TRAN_CODE text from XML.
 func getTranCode(xml string) string {
-	val, _ := xmlhelper.Get("//TRAN_CODE", xml)
+	val, err := xmlhelper.Get("//TRAN_CODE", xml)
+	if err != nil {
+		return ""
+	}
 	return val
 }
-
-var _ = strings.TrimSpace
 
 // splitHostPort splits "ip:port" into (ip, port).
 func splitHostPort(addr string) (string, string) {
@@ -208,3 +225,5 @@ func splitHostPort(addr string) (string, string) {
 	}
 	return addr[:colonIdx], addr[colonIdx+1:]
 }
+
+

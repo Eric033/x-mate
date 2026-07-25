@@ -1,6 +1,7 @@
 package template
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -50,8 +51,12 @@ func Parametrize(ctx *context.TestContext, templateXML, pairs string) (string, e
 		var err error
 		result, err = xmlhelper.Set(xpathExpr, value, result)
 		if err != nil {
-			// Log but continue
-			continue
+			// If XPath not found, skip silently (user may have specified a field not in template)
+			// All other errors (parse failure, XPath syntax) should propagate
+			if errors.Is(err, xmlhelper.ErrXPathNotFound) {
+				continue
+			}
+			return result, fmt.Errorf("template parametrize set error: %w", err)
 		}
 	}
 	return result, nil

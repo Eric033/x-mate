@@ -41,7 +41,6 @@ func startMockDamperTCPServer(t *testing.T, responsePrefix string, addTrailingCR
 				}
 
 				// Simple XML response that the handlers can parse
-				// NOTE: use lowercase tags because xmlhelper/html.Parse lowercases them
 				response = append(response, []byte(`<response><status>OK</status><tran_code>T001</tran_code></response>`)...)
 
 				if addTrailingCRLF {
@@ -69,11 +68,9 @@ func setupTempTestBase(t *testing.T) (string, func()) {
 	}
 
 	// Template for TCP damper set
-	// NOTE: xmlhelper uses html.Parse which lowercases all tag names.
-	// Use lowercase tags so XPath expressions can match.
 	tmplContent := `<?xml version="1.0" encoding="UTF-8"?>
 <root>
-	<tran_code>T001</tran_code>
+	<TRAN_CODE>T001</TRAN_CODE>
 	<value>__VALUE__</value>
 </root>`
 	if err := os.WriteFile(filepath.Join(tmplDir, "template_T001.xml"), []byte(tmplContent), 0644); err != nil {
@@ -83,7 +80,7 @@ func setupTempTestBase(t *testing.T) (string, func()) {
 	// Template for MCA damper set
 	tmplMCAContent := `<?xml version="1.0" encoding="UTF-8"?>
 <root>
-	<_transactionid>TX123</_transactionid>
+	<_TransactionId>TX123</_TransactionId>
 	<value>__VALUE__</value>
 </root>`
 	if err := os.WriteFile(filepath.Join(tmplDir, "template_MCA001.xml"), []byte(tmplMCAContent), 0644); err != nil {
@@ -512,17 +509,10 @@ func TestMCADamperSetHandler_Execute_TemplateNotFound(t *testing.T) {
 // ---- getTranCode tests ----
 
 func TestGetTranCode(t *testing.T) {
-	// xmlhelper/html.Parse lowercases tags, but getTranCode searches for "//TRAN_CODE" (uppercase).
-	// This is a known limitation of the html.Parse-based XML helper.
-	// The test verifies current behavior (will not find uppercase query on lowercased doc).
-	xml := `<tran_code>T001</tran_code>`
+	xml := `<TRAN_CODE>T001</TRAN_CODE>`
 	got := getTranCode(xml)
-	// getTranCode looks for //TRAN_CODE which won't match lowercased tran_code
-	// This demonstrates the limitation
-	t.Logf("getTranCode result = %q (known limitation)", got)
-	// Expected behavior: returns empty since //TRAN_CODE != //tran_code after html.Parse lowercases
-	if got != "" && got != "T001" {
-		t.Errorf("unexpected value: %q", got)
+	if got != "T001" {
+		t.Errorf("expected 'T001', got %q", got)
 	}
 }
 
