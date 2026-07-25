@@ -241,12 +241,8 @@ func (r *Runner) executePlan(ctx *context.TestContext, plan CasePlan) CaseResult
 		return result
 	}
 
-	// Ensure GUID (write to XML file for persistent tracking)
-	data, caseGUID, err := ensureCaseGUID(plan.RawXML, plan.XMLPath)
-	if err != nil {
-		r.Logger("WARN: %s: guid write: %v", plan.DirName, err)
-	}
-	_ = data // data is used by ensureCaseGUID to write to file; we keep the plan.RawXML reference
+	// Ensure GUID (read-only, no file modification)
+	caseGUID := ensureCaseGUID(plan.RawXML)
 	ctx.Set("case_guid", caseGUID)
 
 	// Determine title
@@ -470,34 +466,14 @@ func generateGUID() string {
 }
 
 // ensureCaseGUID checks if the <case> element has a guid attribute.
-// If missing, it generates a GUID, writes it into the XML file, and returns the updated data.
-func ensureCaseGUID(data []byte, xmlPath string) ([]byte, string, error) {
-	hasGUID, _ := regexp.Match(`(?i)<case\s[^>]*\bguid\s*=`, data)
-	if hasGUID {
-		re := regexp.MustCompile(`(?i)\bguid\s*=\s*"([^"]*)"`)
-		m := re.FindSubmatch(data)
-		if len(m) >= 2 {
-			return data, string(m[1]), nil
-		}
-		return data, "", nil
+// If missing, it generates and returns a new GUID without modifying the original data.
+func ensureCaseGUID(data []byte) string {
+	re := regexp.MustCompile(`(?i)\bguid\s*=\s*"([^"]*)"`)
+	m := re.FindSubmatch(data)
+	if len(m) >= 2 {
+		return string(m[1])
 	}
-
-	guid := generateGUID()
-
-	// Find <case ...> opening tag and insert guid attribute
-	re := regexp.MustCompile(`(?i)(<case)([^>]*)(>)`)
-	newData := re.ReplaceAll(data, []byte(`$1 guid="`+guid+`" $2$3`))
-
-	if string(newData) == string(data) {
-		// Fallback: simple replace
-		newData = []byte(strings.Replace(string(data), "<case>", `<case guid="`+guid+`">`, 1))
-	}
-
-	if err := os.WriteFile(xmlPath, newData, 0644); err != nil {
-		return newData, guid, fmt.Errorf("write guid: %w", err)
-	}
-
-	return newData, guid, nil
+	return generateGUID()
 }
 
 // caseXML represents the parsed test case XML.
@@ -575,11 +551,8 @@ func (r *Runner) runCase(ctx *context.TestContext, dirName string) CaseResult {
 		return result
 	}
 
-	// Auto-generate GUID if missing
-	data, caseGUID, err := ensureCaseGUID(data, xmlPath)
-	if err != nil {
-		r.Logger("WARN: %s: guid write: %v", dirName, err)
-	}
+	// Auto-generate GUID if missing (read-only, no file modification)
+	caseGUID := ensureCaseGUID(data)
 	ctx.Set("case_guid", caseGUID)
 
 	var tc caseXML
