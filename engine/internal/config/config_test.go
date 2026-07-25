@@ -22,12 +22,12 @@ func writeTempYAML(t *testing.T, content string) string {
 func TestLoadYAML_NotFound(t *testing.T) {
 	cfg := Default()
 	err := cfg.LoadYAML()
-	// Should not error when no config file exists
-	if err != nil {
-		t.Errorf("expected no error for missing config, got: %v", err)
+	// Should error when no config path is provided
+	if err == nil {
+		t.Error("expected error for missing config path, got nil")
 	}
-	if cfg.SystemID != context.DefaultSystemID {
-		t.Errorf("SystemID = %q, want default %q", cfg.SystemID, context.DefaultSystemID)
+	if err.Error() != "config: no config path provided" {
+		t.Errorf("unexpected error message: %v", err)
 	}
 }
 

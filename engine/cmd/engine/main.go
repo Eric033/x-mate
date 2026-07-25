@@ -52,6 +52,13 @@ func main() {
 		os.Exit(1)
 	}
 
+	if cfg.ConfigPath == "" {
+		fmt.Fprintln(os.Stderr, "Error: --config <path> is required. Specify the YAML environment configuration file.")
+		fmt.Fprintln(os.Stderr)
+		fs.Usage()
+		os.Exit(1)
+	}
+
 	// Start mock server if requested
 	if startMock {
 		go startMockServer()

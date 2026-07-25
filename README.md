@@ -51,29 +51,29 @@ go build -o engine ./cmd/engine
 
 ```bash
 # 指定 YAML 配置，运行 core 标签的用例
-engine --config qa.yaml --test-base ./sample --flags core
+engine --config ./config/qa.yaml --test-base ./sample --flags core
 
 # 使用默认 flags（core），启动内置 mock 服务器
-engine --test-base ./sample --flags core --start-mock
+engine --config ./config/qa.yaml --test-base ./sample --flags core --start-mock
 
 # 运行所有用例（忽略 flags 过滤）
-engine --test-base ./sample --run-all
+engine --config ./config/qa.yaml --test-base ./sample --run-all
 
 # 仅验证 XML 语法，不实际执行
-engine --dry-run --test-base ./sample --flags core
+engine --config ./config/qa.yaml --dry-run --test-base ./sample --flags core
 ```
 
 ### 更多参数
 
 ```bash
 # 控制并行度（默认 1 = 串行）
-engine --test-base ./sample --flags core --concurrency 4
+engine --config ./config/qa.yaml --test-base ./sample --flags core --concurrency 4
 
 # 启用详细日志
-engine --test-base ./sample --flags core --start-mock --verbose
+engine --config ./config/qa.yaml --test-base ./sample --flags core --start-mock --verbose
 
 # 保存报告到文件
-engine --test-base ./sample --flags core --start-mock --report-file result.log
+engine --config ./config/qa.yaml --test-base ./sample --flags core --start-mock --report-file result.log
 ```
 
 ---
@@ -119,14 +119,9 @@ services:
 `ZDHZDH`。`seq_no` 固定为 24 位：`system-id + YYMMDD + 12 位日内自增序号`；
 序号在一次 Engine 执行内唯一，并在交易日期变化后从 `000000000001` 重新开始。
 
-配置文件搜索路径（优先级从高到低）：
-1. `--config` 参数指定路径
-2. `application.yaml`
-3. `engine.yaml`
-4. `config/application.yaml`
-5. `~/.config/engine/application.yaml`
+`--config` 参数是必填的，用于指定 YAML 环境配置文件路径。支持多文档 YAML（`---` 分隔）。
 
-使用 `--config qa.yaml` 加载 `qa.yaml`，同时支持多文档 YAML（`---` 分隔）。
+示例：`--config ./config/qa.yaml` 加载 `config/qa.yaml`。
 
 ---
 
@@ -325,10 +320,10 @@ services:
 cd engine && go build -o engine ./cmd/engine
 
 # 2. 运行 sample（启动内置 Mock + 仅 core 标签）
-./engine --test-base ./sample --flags core --start-mock
+./engine --config ./sample/config/qa.yaml --test-base ./sample --flags core --start-mock
 
 # 3. 运行全部用例
-./engine --test-base ./sample --run-all --start-mock
+./engine --config ./sample/config/qa.yaml --test-base ./sample --run-all --start-mock
 
 # 4. 指定环境配置
 ./engine --config ./sample/config/qa.yaml --test-base ./sample --flags core --start-mock

@@ -3,7 +3,6 @@ package config
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"sort"
 	"strings"
 
@@ -63,22 +62,7 @@ func Default() *Config {
 func (c *Config) LoadYAML() error {
 	path := c.ConfigPath
 	if path == "" {
-		// Try default locations
-		for _, p := range []string{
-			"application.yaml",
-			"engine.yaml",
-			"config/application.yaml",
-			filepath.Join(os.Getenv("HOME"), ".config", "engine", "application.yaml"),
-		} {
-			if _, err := os.Stat(p); err == nil {
-				path = p
-				break
-			}
-		}
-		if path == "" {
-			// No config file found; not an error when not explicitly needed
-			return nil
-		}
+		return fmt.Errorf("config: no config path provided")
 	}
 
 	data, err := os.ReadFile(path)
