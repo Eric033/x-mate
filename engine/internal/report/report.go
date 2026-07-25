@@ -6,11 +6,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Eric033/x-mate/engine/internal/runner"
+	"github.com/Eric033/x-mate/engine/internal/result"
 )
 
 // PrintReport outputs a human-readable test report to the given writer.
-func PrintReport(w io.Writer, r *runner.Report) {
+func PrintReport(w io.Writer, r *result.Report) {
 	fmt.Fprintf(w, "\n")
 
 	// Dry-run or normal header
@@ -26,7 +26,7 @@ func PrintReport(w io.Writer, r *runner.Report) {
 }
 
 // printDryRunReport outputs a report specialized for dry-run validation.
-func printDryRunReport(w io.Writer, r *runner.Report) {
+func printDryRunReport(w io.Writer, r *result.Report) {
 	fmt.Fprintf(w, "========================================\n")
 	fmt.Fprintf(w, "     Test Execution Report (DRY-RUN)\n")
 	fmt.Fprintf(w, "========================================\n")
@@ -44,8 +44,8 @@ func printDryRunReport(w io.Writer, r *runner.Report) {
 
 	// List each case
 	for _, cr := range r.Results {
-		if cr.Status == runner.CaseError {
-			fmt.Fprintf(w, "  ⚠ ERROR  %s\n", cr.CaseName)
+		if cr.Status == result.Error {
+			fmt.Fprintf(w, "  ⚠ ERROR  %s\n", cr.Name)
 		}
 	}
 
@@ -57,7 +57,7 @@ func printDryRunReport(w io.Writer, r *runner.Report) {
 }
 
 // printNormalReport outputs the standard execution report.
-func printNormalReport(w io.Writer, r *runner.Report) {
+func printNormalReport(w io.Writer, r *result.Report) {
 	fmt.Fprintf(w, "========================================\n")
 	fmt.Fprintf(w, "          Test Execution Report\n")
 	fmt.Fprintf(w, "========================================\n")
@@ -82,15 +82,15 @@ func printNormalReport(w io.Writer, r *runner.Report) {
 			}
 		}
 
-		fmt.Fprintf(w, "  %s  %s  (%s)\n", statusSymbol, cr.CaseName, cr.Duration)
-		if cr.Status == runner.CaseFailed {
+		fmt.Fprintf(w, "  %s  %s  (%s)\n", statusSymbol, cr.Name, cr.Duration)
+		if cr.Status == result.Failed {
 			for _, s := range cr.Steps {
 				if !s.Pass {
 					fmt.Fprintf(w, "         [%s] %s (%s): %s\n", s.Phase, s.Desc, s.Type, s.Message)
 				}
 			}
 		}
-		if cr.Status == runner.CaseError {
+		if cr.Status == result.Error {
 			if len(cr.Steps) == 0 {
 				fmt.Fprintf(w, "         error: no steps executed\n")
 			} else {
@@ -112,15 +112,15 @@ func printNormalReport(w io.Writer, r *runner.Report) {
 }
 
 // statusSymbolFor returns a status symbol for a given case status.
-func statusSymbolFor(status runner.CaseStatus) string {
+func statusSymbolFor(status result.Status) string {
 	switch status {
-	case runner.CasePassed:
+	case result.Passed:
 		return "✓ PASS"
-	case runner.CaseFailed:
+	case result.Failed:
 		return "✗ FAIL"
-	case runner.CaseSkipped:
+	case result.Skipped:
 		return "— SKIP"
-	case runner.CaseError:
+	case result.Error:
 		return "⚠ ERROR"
 	default:
 		return "? UNKN"
@@ -128,13 +128,13 @@ func statusSymbolFor(status runner.CaseStatus) string {
 }
 
 // SummaryLine returns a one-line summary.
-func SummaryLine(r *runner.Report) string {
+func SummaryLine(r *result.Report) string {
 	return fmt.Sprintf("%d cases (%d pass, %d fail, %d skip, %d error)",
 		r.TotalCases, r.PassedCases, r.FailedCases, r.SkippedCases, r.ErrorCases)
 }
 
 // MarkdownReport generates a Markdown-format report string.
-func MarkdownReport(r *runner.Report) string {
+func MarkdownReport(r *result.Report) string {
 	var sb strings.Builder
 	sb.WriteString("# Test Execution Report\n\n")
 	sb.WriteString(fmt.Sprintf("- **Time**: %s ~ %s (%s)\n",
@@ -147,22 +147,22 @@ func MarkdownReport(r *runner.Report) string {
 	sb.WriteString("|------|--------|----------|\n")
 	for _, cr := range r.Results {
 		status := statusEmojiFor(cr.Status)
-		sb.WriteString(fmt.Sprintf("| %s | %s | %s |\n", cr.CaseName, status, cr.Duration))
+		sb.WriteString(fmt.Sprintf("| %s | %s | %s |\n", cr.Name, status, cr.Duration))
 	}
 
 	return sb.String()
 }
 
 // statusEmojiFor returns an emoji status indicator for a given case status.
-func statusEmojiFor(status runner.CaseStatus) string {
+func statusEmojiFor(status result.Status) string {
 	switch status {
-	case runner.CasePassed:
+	case result.Passed:
 		return "✅"
-	case runner.CaseFailed:
+	case result.Failed:
 		return "❌"
-	case runner.CaseSkipped:
+	case result.Skipped:
 		return "⏭"
-	case runner.CaseError:
+	case result.Error:
 		return "⚠"
 	default:
 		return "❓"

@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"sync/atomic"
 	"time"
 
@@ -47,6 +48,8 @@ func main() {
 
 	var reportFile string
 	fs.StringVar(&reportFile, "report-file", "", "Save test report to file")
+	var reportFormat string
+	fs.StringVar(&reportFormat, "report-format", "console", "Report output format: console|json|junit|html")
 
 	if err := fs.Parse(os.Args[1:]); err != nil {
 		os.Exit(1)
@@ -125,12 +128,56 @@ func main() {
 
 	// Run tests
 	log.Printf("Engine starting — testBase=%s flags=%s env=%s", cfg.TestBase, cfg.Flags, cfg.EnvName)
-	result, runErr := r.Run(ctx)
+	runResult, runErr := r.Run(ctx)
 
-	// Print report
-	report.PrintReport(reportWriter, result)
+	// Print console report
+	report.PrintReport(reportWriter, runResult)
 
-	if result.FailedCases > 0 || result.ErrorCases > 0 || runErr != nil {
+	// Generate structured report files based on format
+	if reportFormat != "console" {
+		reportPath := reportFile
+		if reportPath == "" {
+			switch reportFormat {
+			case "json":
+				reportPath = "result.json"
+			case "junit":
+				reportPath = "junit.xml"
+			case "html":
+				reportPath = "report.html"
+			}
+		}
+		if reportPath != "" {
+			var data []byte
+			var writeErr error
+			switch reportFormat {
+			case "json":
+				data, writeErr = runResult.ToJSON()
+			case "junit":
+				data, writeErr = runResult.ToJUnitXML()
+			case "html":
+				data, writeErr = runResult.ToHTML()
+			default:
+				log.Printf("Unknown report format: %s", reportFormat)
+			}
+			if writeErr != nil {
+				log.Printf("Error generating %s report: %v", reportFormat, writeErr)
+			} else {
+				dir := filepath.Dir(reportPath)
+				if dir != "." {
+					if err := os.MkdirAll(dir, 0755); err != nil {
+						log.Printf("Error creating directory %s: %v", dir, err)
+					}
+				}
+				if writeErr := os.WriteFile(reportPath, data, 0644); writeErr != nil {
+					log.Printf("Error writing %s report to %s: %v", reportFormat, reportPath, writeErr)
+				} else {
+					log.Printf("%s report saved to %s", reportFormat, reportPath)
+				}
+			}
+		}
+	}
+
+	if runResult.FailedCases > 0 || runResult.ErrorCases > 0 || runErr != nil {
 		os.Exit(1)
 	}
 }

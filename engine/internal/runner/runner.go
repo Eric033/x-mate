@@ -13,75 +13,23 @@ import (
 
 	"github.com/Eric033/x-mate/engine/internal/context"
 	"github.com/Eric033/x-mate/engine/internal/handler"
+	"github.com/Eric033/x-mate/engine/internal/result"
 )
 
-// CaseStatus represents the explicit status of a test case.
-type CaseStatus string
+// Type aliases for backward compatibility with report package and external callers.
+type (
+	CaseStatus = result.Status
+	CaseResult = result.CaseResult
+	StepReport = result.StepResult
+	Report     = result.Report
+)
 
 const (
-	CasePassed  CaseStatus = "passed"
-	CaseFailed  CaseStatus = "failed"
-	CaseSkipped CaseStatus = "skipped"
-	CaseError   CaseStatus = "error"
+	CasePassed  = result.Passed
+	CaseFailed  = result.Failed
+	CaseSkipped = result.Skipped
+	CaseError   = result.Error
 )
-
-// CaseResult holds the execution result of a single test case.
-type CaseResult struct {
-	CaseName string
-	Status   CaseStatus
-	Steps    []StepReport
-	Duration time.Duration
-}
-
-// StepReport holds the result of a single step.
-type StepReport struct {
-	Phase   string // setup / action / teardown
-	Desc    string
-	Type    string
-	Pass    bool
-	Message string
-}
-
-// Report holds the overall test run report.
-type Report struct {
-	StartTime    time.Time
-	EndTime      time.Time
-	TotalCases   int
-	PassedCases  int
-	FailedCases  int
-	SkippedCases int
-	ErrorCases   int
-	Results      []CaseResult
-
-	// DryRunValidated tracks the number of valid cases in dry-run mode.
-	DryRunValidated int
-
-	mu sync.Mutex // protects Results for concurrent access
-}
-
-// appendResult safely appends a case result to the report, counting by Status.
-func (r *Report) appendResult(cr CaseResult) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	r.Results = append(r.Results, cr)
-	r.TotalCases++
-	switch cr.Status {
-	case CasePassed:
-		r.PassedCases++
-	case CaseFailed:
-		r.FailedCases++
-	case CaseSkipped:
-		r.SkippedCases++
-	case CaseError:
-		r.ErrorCases++
-	}
-}
-
-// parallelResult holds the result of a parallel case execution.
-type parallelResult struct {
-	CaseResult CaseResult
-	Err        error
-}
 
 // Runner orchestrates test case execution.
 type Runner struct {
@@ -100,7 +48,7 @@ func NewRunner(registry *handler.Registry) *Runner {
 // Run executes all test cases. In dry-run mode, it validates configuration
 // without making any network calls or modifying files. In normal mode, it
 // builds a plan and then executes each case.
-func (r *Runner) Run(ctx *context.TestContext) (*Report, error) {
+func (r *Runner) Run(ctx *context.TestContext) (*result.Report, error) {
 	if ctx.DryRun {
 		return r.dryRunCases(ctx), nil
 	}
@@ -108,7 +56,7 @@ func (r *Runner) Run(ctx *context.TestContext) (*Report, error) {
 	// Build plan first
 	plans, err := r.BuildPlan(ctx)
 	if err != nil {
-		report := &Report{StartTime: time.Now(), EndTime: time.Now()}
+		report := &result.Report{StartTime: time.Now(), EndTime: time.Now()}
 		return report, err
 	}
 
@@ -121,14 +69,14 @@ func (r *Runner) Run(ctx *context.TestContext) (*Report, error) {
 // ---------------------------------------------------------------------------
 
 // dryRunCases validates all test case configurations without executing them.
-func (r *Runner) dryRunCases(ctx *context.TestContext) *Report {
-	report := &Report{StartTime: time.Now()}
-	defer func() { report.EndTime = time.Now() }()
+func (r *Runner) dryRunCases(ctx *context.TestContext) *result.Report {
+	rep := &result.Report{StartTime: time.Now()}
+	defer func() { rep.EndTime = time.Now() }()
 
 	plans, err := r.BuildPlan(ctx)
 	if err != nil {
 		r.Logger("DRY-RUN ERROR: %v", err)
-		return report
+		return rep
 	}
 
 	for _, plan := range plans {
@@ -144,12 +92,12 @@ func (r *Runner) dryRunCases(ctx *context.TestContext) *Report {
 				}
 			}
 			// Report as an Error case
-			cr := CaseResult{
-				CaseName: plan.DirName,
-				Status:   CaseError,
+			cr := result.CaseResult{
+				Name:     plan.DirName,
+				Status:   result.Error,
 				Duration: 0,
 			}
-			report.appendResult(cr)
+			rep.AppendResult(cr)
 		} else {
 			// Case is valid (may have non-blocking warnings)
 			stepCount := len(plan.Setup) + len(plan.Action) + len(plan.Teardown)
@@ -162,11 +110,11 @@ func (r *Runner) dryRunCases(ctx *context.TestContext) *Report {
 				}
 				r.Logger("DRY-RUN WARN: %s: %s", loc, pe.Message)
 			}
-			report.DryRunValidated++
+			rep.DryRunValidated++
 		}
 	}
 
-	return report
+	return rep
 }
 
 // ---------------------------------------------------------------------------
@@ -175,9 +123,9 @@ func (r *Runner) dryRunCases(ctx *context.TestContext) *Report {
 
 // executePlans runs all test cases from their pre-built plans, handling
 // parallel/serial dispatch.
-func (r *Runner) executePlans(ctx *context.TestContext, plans []CasePlan) *Report {
-	report := &Report{StartTime: time.Now()}
-	defer func() { report.EndTime = time.Now() }()
+func (r *Runner) executePlans(ctx *context.TestContext, plans []CasePlan) *result.Report {
+	rep := &result.Report{StartTime: time.Now()}
+	defer func() { rep.EndTime = time.Now() }()
 
 	concurrency := ctx.Concurrency
 	if concurrency < 1 {
@@ -203,42 +151,48 @@ func (r *Runner) executePlans(ctx *context.TestContext, plans []CasePlan) *Repor
 		} else {
 			// Serial case: wait for all parallel goroutines first
 			wg.Wait()
-			r.drainParallelResults(report, parallelCh)
+			r.drainParallelResults(rep, parallelCh)
 			caseResult := r.executePlan(ctx, plan)
-			report.appendResult(caseResult)
+			rep.AppendResult(caseResult)
 		}
 	}
 
 	wg.Wait()
-	r.drainParallelResults(report, parallelCh)
+	r.drainParallelResults(rep, parallelCh)
 
-	return report
+	return rep
 }
 
 // drainParallelResults drains all available results from the parallel channel.
-func (r *Runner) drainParallelResults(report *Report, ch chan parallelResult) {
+func (r *Runner) drainParallelResults(report *result.Report, ch chan parallelResult) {
 	for {
 		select {
 		case pr := <-ch:
-			report.appendResult(pr.CaseResult)
+			report.AppendResult(pr.CaseResult)
 		default:
 			return
 		}
 	}
 }
 
+// parallelResult holds the result of a parallel case execution.
+type parallelResult struct {
+	CaseResult result.CaseResult
+	Err        error
+}
+
 // executePlan executes a single test case from its pre-built CasePlan.
-func (r *Runner) executePlan(ctx *context.TestContext, plan CasePlan) CaseResult {
+func (r *Runner) executePlan(ctx *context.TestContext, plan CasePlan) result.CaseResult {
 	start := time.Now()
-	result := CaseResult{CaseName: plan.DirName}
+	cr := result.CaseResult{Name: plan.DirName}
 
 	// If the plan has blocking validation errors from BuildPlan, report immediately.
 	// The faulty steps were excluded from Setup/Action/Teardown during BuildPlan.
 	// Non-blocking warnings are reported by the logger but do not block execution.
 	if plan.hasBlockingErrors() {
-		result.Status = CaseError
-		result.Duration = time.Since(start)
-		return result
+		cr.Status = result.Error
+		cr.Duration = time.Since(start)
+		return cr
 	}
 
 	// Ensure GUID (read-only, no file modification)
@@ -269,9 +223,9 @@ func (r *Runner) executePlan(ctx *context.TestContext, plan CasePlan) CaseResult
 		}
 		if !matched {
 			r.Logger("%s --- SKIPPED: %s (flags=%q, ctx.Flags=%q)", caseGUID, title, plan.Flags, ctx.Flags)
-			result.Status = CaseSkipped
-			result.Duration = time.Since(start)
-			return result
+			cr.Status = result.Skipped
+			cr.Duration = time.Since(start)
+			return cr
 		}
 	}
 
@@ -282,26 +236,26 @@ func (r *Runner) executePlan(ctx *context.TestContext, plan CasePlan) CaseResult
 	stepSeq := 0
 	for _, ps := range plan.Setup {
 		stepSeq++
-		report := r.runPlanStep(ctx, "setup", ps, caseGUID, stepSeq)
-		result.Steps = append(result.Steps, report)
+		sr := r.runPlanStep(ctx, "setup", ps, caseGUID, stepSeq)
+		cr.Steps = append(cr.Steps, sr)
 	}
 	for _, ps := range plan.Action {
 		stepSeq++
-		report := r.runPlanStep(ctx, "action", ps, caseGUID, stepSeq)
-		result.Steps = append(result.Steps, report)
+		sr := r.runPlanStep(ctx, "action", ps, caseGUID, stepSeq)
+		cr.Steps = append(cr.Steps, sr)
 	}
 	for _, ps := range plan.Teardown {
 		stepSeq++
-		report := r.runPlanStep(ctx, "teardown", ps, caseGUID, stepSeq)
-		result.Steps = append(result.Steps, report)
+		sr := r.runPlanStep(ctx, "teardown", ps, caseGUID, stepSeq)
+		cr.Steps = append(cr.Steps, sr)
 	}
 
 	// Check for zero steps (error condition)
 	if stepSeq == 0 {
 		r.Logger("ERROR: %s: case has zero steps (setup/action/teardown are all empty)", title)
-		result.Status = CaseError
-		result.Duration = time.Since(start)
-		return result
+		cr.Status = result.Error
+		cr.Duration = time.Since(start)
+		return cr
 	}
 
 	// Cleanup temporary variables
@@ -309,32 +263,32 @@ func (r *Runner) executePlan(ctx *context.TestContext, plan CasePlan) CaseResult
 
 	// Determine pass/fail from steps
 	allPass := true
-	for _, s := range result.Steps {
+	for _, s := range cr.Steps {
 		if !s.Pass {
 			allPass = false
 			break
 		}
 	}
 	if allPass {
-		result.Status = CasePassed
+		cr.Status = result.Passed
 	} else {
-		result.Status = CaseFailed
+		cr.Status = result.Failed
 	}
 
-	result.Duration = time.Since(start)
-	r.Logger("%s === CASE END: %s (%s) ===", caseGUID, title, result.Duration)
-	return result
+	cr.Duration = time.Since(start)
+	r.Logger("%s === CASE END: %s (%s) ===", caseGUID, title, cr.Duration)
+	return cr
 }
 
 // runPlanStep executes a single step using pre-parsed step data from a CasePlan.
-func (r *Runner) runPlanStep(ctx *context.TestContext, phase string, ps ParsedStep, caseGUID string, stepSeq int) StepReport {
-	report := StepReport{
+func (r *Runner) runPlanStep(ctx *context.TestContext, phase string, ps ParsedStep, caseGUID string, stepSeq int) result.StepResult {
+	sr := result.StepResult{
 		Phase: phase,
 		Desc:  ps.Desc,
 	}
 
 	stepData := ps.Data
-	report.Type = stepData.StepType
+	sr.Type = stepData.StepType
 
 	// Log header prefix: shortGUID + stepN
 	prefix := fmt.Sprintf("%s STEP%d", shortGUID(caseGUID), stepSeq)
@@ -374,51 +328,51 @@ func (r *Runner) runPlanStep(ctx *context.TestContext, phase string, ps ParsedSt
 		systemVarsErr = ctx.GenerateSystemVarsLegacy(stepData.ServerIndex)
 	}
 	if systemVarsErr != nil {
-		report.Pass = false
-		report.Message = fmt.Sprintf("generate system variables: %v", systemVarsErr)
-		return report
+		sr.Pass = false
+		sr.Message = fmt.Sprintf("generate system variables: %v", systemVarsErr)
+		return sr
 	}
 
 	// Route to handler
 	h := r.Registry.Get(stepData.StepType)
 	if h == nil {
-		report.Pass = false
-		report.Message = fmt.Sprintf("no handler for step type: %s", stepData.StepType)
-		return report
+		sr.Pass = false
+		sr.Message = fmt.Sprintf("no handler for step type: %s", stepData.StepType)
+		return sr
 	}
 
 	// Execute
-	result := h.Execute(stepData, ctx)
-	report.Pass = result.Success
-	report.Message = result.FailureMessage
+	hResult := h.Execute(stepData, ctx)
+	sr.Pass = hResult.Success
+	sr.Message = hResult.FailureMessage
 
 	// Log request data
-	if result.RequestData != "" {
-		r.Logger("%s   Request:\n%s", prefix, indentLines(result.RequestData, "    "))
+	if hResult.RequestData != "" {
+		r.Logger("%s   Request:\n%s", prefix, indentLines(hResult.RequestData, "    "))
 	}
 
 	// Log response data
-	if result.ResponseData != "" {
-		r.Logger("%s   Response:\n%s", prefix, indentLines(result.ResponseData, "    "))
+	if hResult.ResponseData != "" {
+		r.Logger("%s   Response:\n%s", prefix, indentLines(hResult.ResponseData, "    "))
 	}
 
 	// Log pass/fail with verification details
-	if result.Success {
+	if hResult.Success {
 		r.Logger("%s   PASS", prefix)
 	} else {
-		r.Logger("%s   FAIL: %s", prefix, result.FailureMessage)
+		r.Logger("%s   FAIL: %s", prefix, hResult.FailureMessage)
 	}
 
 	// Log extracted variables
-	if len(result.ExtractedVars) > 0 {
+	if len(hResult.ExtractedVars) > 0 {
 		var parts []string
-		for k, v := range result.ExtractedVars {
+		for k, v := range hResult.ExtractedVars {
 			parts = append(parts, fmt.Sprintf("%s=%s", k, v))
 		}
 		r.Logger("%s   Extracted: %s", prefix, strings.Join(parts, ", "))
 	}
 
-	return report
+	return sr
 }
 
 // ---------------------------------------------------------------------------
@@ -530,25 +484,25 @@ func truncateLog(s string) string {
 // runCase executes a single test case by re-reading its XML file.
 // It is kept for backward compatibility but is no longer called by Run().
 // The new execution path uses executePlan() with a CasePlan.
-func (r *Runner) runCase(ctx *context.TestContext, dirName string) CaseResult {
+func (r *Runner) runCase(ctx *context.TestContext, dirName string) result.CaseResult {
 	start := time.Now()
-	result := CaseResult{CaseName: dirName}
+	cr := result.CaseResult{Name: dirName}
 
 	caseDir := filepath.Join(ctx.TestBase, "testcase", dirName)
 	xmlPath, err := findCaseXML(caseDir)
 	if err != nil {
 		r.Logger("ERROR: %s: %v", dirName, err)
-		result.Status = CaseError
-		result.Duration = time.Since(start)
-		return result
+		cr.Status = result.Error
+		cr.Duration = time.Since(start)
+		return cr
 	}
 
 	data, err := os.ReadFile(xmlPath)
 	if err != nil {
 		r.Logger("ERROR: %s: %v", dirName, err)
-		result.Status = CaseError
-		result.Duration = time.Since(start)
-		return result
+		cr.Status = result.Error
+		cr.Duration = time.Since(start)
+		return cr
 	}
 
 	// Auto-generate GUID if missing (read-only, no file modification)
@@ -558,9 +512,9 @@ func (r *Runner) runCase(ctx *context.TestContext, dirName string) CaseResult {
 	var tc caseXML
 	if err := xml.Unmarshal(data, &tc); err != nil {
 		r.Logger("ERROR: %s: parse XML: %v", dirName, err)
-		result.Status = CaseError
-		result.Duration = time.Since(start)
-		return result
+		cr.Status = result.Error
+		cr.Duration = time.Since(start)
+		return cr
 	}
 
 	// Determine title
@@ -590,9 +544,9 @@ func (r *Runner) runCase(ctx *context.TestContext, dirName string) CaseResult {
 		}
 		if !matched {
 			r.Logger("%s --- SKIPPED: %s (flags=%q, ctx.Flags=%q)", caseGUID, title, tc.Flags, ctx.Flags)
-			result.Status = CaseSkipped
-			result.Duration = time.Since(start)
-			return result
+			cr.Status = result.Skipped
+			cr.Duration = time.Since(start)
+			return cr
 		}
 	}
 
@@ -604,33 +558,33 @@ func (r *Runner) runCase(ctx *context.TestContext, dirName string) CaseResult {
 	if tc.Setup != nil {
 		for _, s := range tc.Setup.Steps {
 			stepSeq++
-			report := r.runStep(ctx, "setup", s, caseGUID, stepSeq)
-			result.Steps = append(result.Steps, report)
+			sr := r.runStep(ctx, "setup", s, caseGUID, stepSeq)
+			cr.Steps = append(cr.Steps, sr)
 		}
 	}
 
 	if tc.Action != nil {
 		for _, s := range tc.Action.Steps {
 			stepSeq++
-			report := r.runStep(ctx, "action", s, caseGUID, stepSeq)
-			result.Steps = append(result.Steps, report)
+			sr := r.runStep(ctx, "action", s, caseGUID, stepSeq)
+			cr.Steps = append(cr.Steps, sr)
 		}
 	}
 
 	if tc.Teardown != nil {
 		for _, s := range tc.Teardown.Steps {
 			stepSeq++
-			report := r.runStep(ctx, "teardown", s, caseGUID, stepSeq)
-			result.Steps = append(result.Steps, report)
+			sr := r.runStep(ctx, "teardown", s, caseGUID, stepSeq)
+			cr.Steps = append(cr.Steps, sr)
 		}
 	}
 
 	// Check for zero steps (error condition)
 	if stepSeq == 0 {
 		r.Logger("ERROR: %s: case has zero steps (setup/action/teardown are all empty)", title)
-		result.Status = CaseError
-		result.Duration = time.Since(start)
-		return result
+		cr.Status = result.Error
+		cr.Duration = time.Since(start)
+		return cr
 	}
 
 	// Cleanup temporary variables
@@ -638,26 +592,26 @@ func (r *Runner) runCase(ctx *context.TestContext, dirName string) CaseResult {
 
 	// Determine pass/fail from steps
 	allPass := true
-	for _, s := range result.Steps {
+	for _, s := range cr.Steps {
 		if !s.Pass {
 			allPass = false
 			break
 		}
 	}
 	if allPass {
-		result.Status = CasePassed
+		cr.Status = result.Passed
 	} else {
-		result.Status = CaseFailed
+		cr.Status = result.Failed
 	}
 
-	result.Duration = time.Since(start)
-	r.Logger("%s === CASE END: %s (%s) ===", caseGUID, title, result.Duration)
-	return result
+	cr.Duration = time.Since(start)
+	r.Logger("%s === CASE END: %s (%s) ===", caseGUID, title, cr.Duration)
+	return cr
 }
 
 // runStep executes a single step by parsing its XML at runtime.
-func (r *Runner) runStep(ctx *context.TestContext, phase string, s stepXML, caseGUID string, stepSeq int) StepReport {
-	report := StepReport{
+func (r *Runner) runStep(ctx *context.TestContext, phase string, s stepXML, caseGUID string, stepSeq int) result.StepResult {
+	sr := result.StepResult{
 		Phase: phase,
 		Desc:  s.Desc,
 	}
@@ -665,12 +619,12 @@ func (r *Runner) runStep(ctx *context.TestContext, phase string, s stepXML, case
 	// Parse the step XML
 	stepData, err := handler.ParseStep("<step desc=\"" + s.Desc + "\">" + s.Inner + "</step>")
 	if err != nil {
-		report.Pass = false
-		report.Message = fmt.Sprintf("parse error: %v", err)
-		return report
+		sr.Pass = false
+		sr.Message = fmt.Sprintf("parse error: %v", err)
+		return sr
 	}
 
-	report.Type = stepData.StepType
+	sr.Type = stepData.StepType
 	// Log header prefix: shortGUID + stepN
 	prefix := fmt.Sprintf("%s STEP%d", shortGUID(caseGUID), stepSeq)
 
@@ -709,49 +663,49 @@ func (r *Runner) runStep(ctx *context.TestContext, phase string, s stepXML, case
 		systemVarsErr = ctx.GenerateSystemVarsLegacy(stepData.ServerIndex)
 	}
 	if systemVarsErr != nil {
-		report.Pass = false
-		report.Message = fmt.Sprintf("generate system variables: %v", systemVarsErr)
-		return report
+		sr.Pass = false
+		sr.Message = fmt.Sprintf("generate system variables: %v", systemVarsErr)
+		return sr
 	}
 
 	// Route to handler
 	h := r.Registry.Get(stepData.StepType)
 	if h == nil {
-		report.Pass = false
-		report.Message = fmt.Sprintf("no handler for step type: %s", stepData.StepType)
-		return report
+		sr.Pass = false
+		sr.Message = fmt.Sprintf("no handler for step type: %s", stepData.StepType)
+		return sr
 	}
 
 	// Execute
-	result := h.Execute(stepData, ctx)
-	report.Pass = result.Success
-	report.Message = result.FailureMessage
+	hResult := h.Execute(stepData, ctx)
+	sr.Pass = hResult.Success
+	sr.Message = hResult.FailureMessage
 
 	// Log request data (single log call with embedded newlines)
-	if result.RequestData != "" {
-		r.Logger("%s   Request:\n%s", prefix, indentLines(result.RequestData, "    "))
+	if hResult.RequestData != "" {
+		r.Logger("%s   Request:\n%s", prefix, indentLines(hResult.RequestData, "    "))
 	}
 
 	// Log response data (single log call with embedded newlines)
-	if result.ResponseData != "" {
-		r.Logger("%s   Response:\n%s", prefix, indentLines(result.ResponseData, "    "))
+	if hResult.ResponseData != "" {
+		r.Logger("%s   Response:\n%s", prefix, indentLines(hResult.ResponseData, "    "))
 	}
 
 	// Log pass/fail with verification details
-	if result.Success {
+	if hResult.Success {
 		r.Logger("%s   PASS", prefix)
 	} else {
-		r.Logger("%s   FAIL: %s", prefix, result.FailureMessage)
+		r.Logger("%s   FAIL: %s", prefix, hResult.FailureMessage)
 	}
 
 	// Log extracted variables
-	if len(result.ExtractedVars) > 0 {
+	if len(hResult.ExtractedVars) > 0 {
 		var parts []string
-		for k, v := range result.ExtractedVars {
+		for k, v := range hResult.ExtractedVars {
 			parts = append(parts, fmt.Sprintf("%s=%s", k, v))
 		}
 		r.Logger("%s   Extracted: %s", prefix, strings.Join(parts, ", "))
 	}
 
-	return report
+	return sr
 }

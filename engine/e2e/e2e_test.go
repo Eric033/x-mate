@@ -113,12 +113,12 @@ func TestE2E_AllCases(t *testing.T) {
 	for _, cr := range report.Results {
 		for _, s := range cr.Steps {
 			if s.Pass {
-				t.Logf("  ✓ %s / %s (%s)", cr.CaseName, s.Desc, s.Phase)
+				t.Logf("  ✓ %s / %s (%s)", cr.Name, s.Desc, s.Phase)
 			} else {
-				t.Errorf("  ✗ %s / %s (%s): %s", cr.CaseName, s.Desc, s.Phase, s.Message)
+				t.Errorf("  ✗ %s / %s (%s): %s", cr.Name, s.Desc, s.Phase, s.Message)
 			}
 		}
-		t.Logf("  [%s] %s", cr.Status, cr.CaseName)
+		t.Logf("  [%s] %s", cr.Status, cr.Name)
 	}
 
 	t.Logf("Results: %d/%d passed, %d failed, %d skipped, %d error",
@@ -148,7 +148,7 @@ func TestE2E_AllCases(t *testing.T) {
 	}
 	ran := make(map[string]bool)
 	for _, cr := range report.Results {
-		ran[cr.CaseName] = true
+		ran[cr.Name] = true
 	}
 	for _, name := range expected {
 		if !ran[name] {
@@ -200,9 +200,9 @@ func TestE2E_Parallel(t *testing.T) {
 	for _, cr := range report.Results {
 		for _, s := range cr.Steps {
 			if s.Pass {
-				t.Logf("  ✓ %s / %s", cr.CaseName, s.Desc)
+				t.Logf("  ✓ %s / %s", cr.Name, s.Desc)
 			} else {
-				t.Errorf("  ✗ %s / %s: %s", cr.CaseName, s.Desc, s.Message)
+				t.Errorf("  ✗ %s / %s: %s", cr.Name, s.Desc, s.Message)
 			}
 		}
 	}
@@ -225,11 +225,11 @@ func TestE2E_HTTPBasicOnly(t *testing.T) {
 
 	httpCases := 0
 	for _, cr := range report.Results {
-		if strings.HasPrefix(cr.CaseName, "case_http_") {
+		if strings.HasPrefix(cr.Name, "case_http_") {
 			httpCases++
 			for _, s := range cr.Steps {
 				if !s.Pass {
-					t.Errorf("  ✗ %s / %s: %s", cr.CaseName, s.Desc, s.Message)
+					t.Errorf("  ✗ %s / %s: %s", cr.Name, s.Desc, s.Message)
 				}
 			}
 		}
@@ -250,11 +250,11 @@ func TestE2E_SQLOnly(t *testing.T) {
 
 	sqlCases := 0
 	for _, cr := range report.Results {
-		if strings.HasPrefix(cr.CaseName, "case_sql_") {
+		if strings.HasPrefix(cr.Name, "case_sql_") {
 			sqlCases++
 			for _, s := range cr.Steps {
 				if !s.Pass {
-					t.Errorf("  ✗ %s / %s: %s", cr.CaseName, s.Desc, s.Message)
+					t.Errorf("  ✗ %s / %s: %s", cr.Name, s.Desc, s.Message)
 				}
 			}
 		}
@@ -286,9 +286,9 @@ func TestE2E_FlagsFilter(t *testing.T) {
 	executedNames := []string{}
 	for _, cr := range report.Results {
 		if cr.Status == "skipped" {
-			skippedNames = append(skippedNames, cr.CaseName)
+			skippedNames = append(skippedNames, cr.Name)
 		} else {
-			executedNames = append(executedNames, cr.CaseName)
+			executedNames = append(executedNames, cr.Name)
 		}
 	}
 
@@ -331,7 +331,7 @@ func TestE2E_FlagsMultiTag(t *testing.T) {
 
 	ranFlagsMulti := false
 	for _, cr := range report.Results {
-		if cr.CaseName == "case_flags_multi" {
+		if cr.Name == "case_flags_multi" {
 			ranFlagsMulti = true
 			t.Logf("  case_flags_multi status: %s", cr.Status)
 		}
@@ -349,7 +349,7 @@ func TestE2E_FlagsMultiTag(t *testing.T) {
 
 	ranFlagsMulti2 := false
 	for _, cr := range report2.Results {
-		if cr.CaseName == "case_flags_multi" {
+		if cr.Name == "case_flags_multi" {
 			ranFlagsMulti2 = true
 			t.Logf("  case_flags_multi with 'regression p0' status: %s", cr.Status)
 		}

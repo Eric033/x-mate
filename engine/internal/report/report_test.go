@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Eric033/x-mate/engine/internal/runner"
+	"github.com/Eric033/x-mate/engine/internal/result"
 )
 
 // ---- PrintReport tests ----
@@ -15,7 +15,7 @@ func TestPrintReport_AllPass(t *testing.T) {
 	start := time.Now().Add(-2 * time.Second)
 	end := time.Now()
 
-	r := &runner.Report{
+	r := &result.Report{
 		StartTime:    start,
 		EndTime:      end,
 		TotalCases:   2,
@@ -23,20 +23,20 @@ func TestPrintReport_AllPass(t *testing.T) {
 		FailedCases:  0,
 		SkippedCases: 0,
 		ErrorCases:   0,
-		Results: []runner.CaseResult{
+		Results: []result.CaseResult{
 			{
-				CaseName: "case_login",
-				Status:   runner.CasePassed,
+				Name:     "case_login",
+				Status:   result.Passed,
 				Duration: 1 * time.Second,
-				Steps: []runner.StepReport{
+				Steps: []result.StepResult{
 					{Phase: "action", Desc: "login step", Type: "HTTP", Pass: true, Message: ""},
 				},
 			},
 			{
-				CaseName: "case_logout",
-				Status:   runner.CasePassed,
+				Name:     "case_logout",
+				Status:   result.Passed,
 				Duration: 500 * time.Millisecond,
-				Steps: []runner.StepReport{
+				Steps: []result.StepResult{
 					{Phase: "action", Desc: "logout step", Type: "HTTP", Pass: true, Message: ""},
 				},
 			},
@@ -59,7 +59,7 @@ func TestPrintReport_WithFailures(t *testing.T) {
 	start := time.Now().Add(-1 * time.Minute)
 	end := time.Now()
 
-	r := &runner.Report{
+	r := &result.Report{
 		StartTime:    start,
 		EndTime:      end,
 		TotalCases:   1,
@@ -67,12 +67,12 @@ func TestPrintReport_WithFailures(t *testing.T) {
 		FailedCases:  1,
 		SkippedCases: 0,
 		ErrorCases:   0,
-		Results: []runner.CaseResult{
+		Results: []result.CaseResult{
 			{
-				CaseName: "case_fail",
-				Status:   runner.CaseFailed,
+				Name:     "case_fail",
+				Status:   result.Failed,
 				Duration: 2 * time.Second,
-				Steps: []runner.StepReport{
+				Steps: []result.StepResult{
 					{Phase: "action", Desc: "step1", Type: "HTTP", Pass: true, Message: ""},
 					{Phase: "action", Desc: "step2", Type: "SQL", Pass: false, Message: "connection timeout"},
 				},
@@ -93,7 +93,7 @@ func TestPrintReport_WithFailures(t *testing.T) {
 }
 
 func TestPrintReport_EmptyReport(t *testing.T) {
-	r := &runner.Report{
+	r := &result.Report{
 		StartTime:    time.Now(),
 		EndTime:      time.Now(),
 		TotalCases:   0,
@@ -116,7 +116,7 @@ func TestPrintReport_WithSkippedAndError(t *testing.T) {
 	start := time.Now().Add(-30 * time.Second)
 	end := time.Now()
 
-	r := &runner.Report{
+	r := &result.Report{
 		StartTime:    start,
 		EndTime:      end,
 		TotalCases:   4,
@@ -124,27 +124,27 @@ func TestPrintReport_WithSkippedAndError(t *testing.T) {
 		FailedCases:  1,
 		SkippedCases: 1,
 		ErrorCases:   1,
-		Results: []runner.CaseResult{
+		Results: []result.CaseResult{
 			{
-				CaseName: "case_ok",
-				Status:   runner.CasePassed,
+				Name:     "case_ok",
+				Status:   result.Passed,
 				Duration: 1 * time.Second,
-				Steps:    []runner.StepReport{{Phase: "action", Desc: "ok", Type: "HTTP", Pass: true}},
+				Steps:    []result.StepResult{{Phase: "action", Desc: "ok", Type: "HTTP", Pass: true}},
 			},
 			{
-				CaseName: "case_fail",
-				Status:   runner.CaseFailed,
+				Name:     "case_fail",
+				Status:   result.Failed,
 				Duration: 500 * time.Millisecond,
-				Steps:    []runner.StepReport{{Phase: "action", Desc: "fail", Type: "HTTP", Pass: false, Message: "error msg"}},
+				Steps:    []result.StepResult{{Phase: "action", Desc: "fail", Type: "HTTP", Pass: false, Message: "error msg"}},
 			},
 			{
-				CaseName: "case_skip",
-				Status:   runner.CaseSkipped,
+				Name:     "case_skip",
+				Status:   result.Skipped,
 				Duration: 0,
 			},
 			{
-				CaseName: "case_error",
-				Status:   runner.CaseError,
+				Name:     "case_error",
+				Status:   result.Error,
 				Duration: 10 * time.Millisecond,
 			},
 		},
@@ -180,7 +180,7 @@ func TestPrintReport_WithSkippedAndError(t *testing.T) {
 // ---- SummaryLine tests ----
 
 func TestSummaryLine_Normal(t *testing.T) {
-	r := &runner.Report{
+	r := &result.Report{
 		TotalCases:   5,
 		PassedCases:  3,
 		FailedCases:  2,
@@ -196,7 +196,7 @@ func TestSummaryLine_Normal(t *testing.T) {
 }
 
 func TestSummaryLine_AllPass(t *testing.T) {
-	r := &runner.Report{
+	r := &result.Report{
 		TotalCases:   10,
 		PassedCases:  10,
 		FailedCases:  0,
@@ -212,7 +212,7 @@ func TestSummaryLine_AllPass(t *testing.T) {
 }
 
 func TestSummaryLine_ZeroCases(t *testing.T) {
-	r := &runner.Report{
+	r := &result.Report{
 		TotalCases:   0,
 		PassedCases:  0,
 		FailedCases:  0,
@@ -228,7 +228,7 @@ func TestSummaryLine_ZeroCases(t *testing.T) {
 }
 
 func TestSummaryLine_WithSkippedAndError(t *testing.T) {
-	r := &runner.Report{
+	r := &result.Report{
 		TotalCases:   10,
 		PassedCases:  6,
 		FailedCases:  1,
@@ -249,7 +249,7 @@ func TestMarkdownReport_Normal(t *testing.T) {
 	start := time.Date(2025, 1, 15, 10, 30, 0, 0, time.UTC)
 	end := time.Date(2025, 1, 15, 10, 32, 30, 0, time.UTC)
 
-	r := &runner.Report{
+	r := &result.Report{
 		StartTime:    start,
 		EndTime:      end,
 		TotalCases:   2,
@@ -257,18 +257,18 @@ func TestMarkdownReport_Normal(t *testing.T) {
 		FailedCases:  1,
 		SkippedCases: 0,
 		ErrorCases:   0,
-		Results: []runner.CaseResult{
+		Results: []result.CaseResult{
 			{
-				CaseName: "case_a",
-				Status:   runner.CasePassed,
+				Name:     "case_a",
+				Status:   result.Passed,
 				Duration: 1 * time.Minute,
-				Steps:    []runner.StepReport{{Phase: "action", Pass: true}},
+				Steps:    []result.StepResult{{Phase: "action", Pass: true}},
 			},
 			{
-				CaseName: "case_b",
-				Status:   runner.CaseFailed,
+				Name:     "case_b",
+				Status:   result.Failed,
 				Duration: 30 * time.Second,
-				Steps:    []runner.StepReport{{Phase: "action", Pass: false, Message: "fail"}},
+				Steps:    []result.StepResult{{Phase: "action", Pass: false, Message: "fail"}},
 			},
 		},
 	}
@@ -306,7 +306,7 @@ func TestMarkdownReport_Normal(t *testing.T) {
 
 func TestMarkdownReport_AllPass(t *testing.T) {
 	now := time.Now()
-	r := &runner.Report{
+	r := &result.Report{
 		StartTime:    now,
 		EndTime:      now.Add(5 * time.Second),
 		TotalCases:   1,
@@ -314,12 +314,12 @@ func TestMarkdownReport_AllPass(t *testing.T) {
 		FailedCases:  0,
 		SkippedCases: 0,
 		ErrorCases:   0,
-		Results: []runner.CaseResult{
+		Results: []result.CaseResult{
 			{
-				CaseName: "test_ok",
-				Status:   runner.CasePassed,
+				Name:     "test_ok",
+				Status:   result.Passed,
 				Duration: 5 * time.Second,
-				Steps:    []runner.StepReport{{Phase: "action", Pass: true}},
+				Steps:    []result.StepResult{{Phase: "action", Pass: true}},
 			},
 		},
 	}
@@ -339,7 +339,7 @@ func TestMarkdownReport_AllPass(t *testing.T) {
 
 func TestMarkdownReport_EmptyReport(t *testing.T) {
 	now := time.Now()
-	r := &runner.Report{
+	r := &result.Report{
 		StartTime:    now,
 		EndTime:      now,
 		TotalCases:   0,
@@ -359,7 +359,7 @@ func TestMarkdownReport_EmptyReport(t *testing.T) {
 func TestMarkdownReport_WithSkippedAndError(t *testing.T) {
 	now := time.Now()
 
-	r := &runner.Report{
+	r := &result.Report{
 		StartTime:    now,
 		EndTime:      now,
 		TotalCases:   4,
@@ -367,24 +367,24 @@ func TestMarkdownReport_WithSkippedAndError(t *testing.T) {
 		FailedCases:  0,
 		SkippedCases: 2,
 		ErrorCases:   1,
-		Results: []runner.CaseResult{
+		Results: []result.CaseResult{
 			{
-				CaseName: "case_ok",
-				Status:   runner.CasePassed,
+				Name:     "case_ok",
+				Status:   result.Passed,
 				Duration: 1 * time.Second,
-				Steps:    []runner.StepReport{{Phase: "action", Pass: true}},
+				Steps:    []result.StepResult{{Phase: "action", Pass: true}},
 			},
 			{
-				CaseName: "case_skip_a",
-				Status:   runner.CaseSkipped,
+				Name:   "case_skip_a",
+				Status: result.Skipped,
 			},
 			{
-				CaseName: "case_skip_b",
-				Status:   runner.CaseSkipped,
+				Name:   "case_skip_b",
+				Status: result.Skipped,
 			},
 			{
-				CaseName: "case_err",
-				Status:   runner.CaseError,
+				Name:   "case_err",
+				Status: result.Error,
 			},
 		},
 	}

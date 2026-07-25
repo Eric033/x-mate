@@ -167,8 +167,8 @@ func TestRunner_Run_SingleCase(t *testing.T) {
 	}
 
 	result := report.Results[0]
-	if result.CaseName != "case001" {
-		t.Errorf("expected CaseName 'case001', got '%s'", result.CaseName)
+	if result.Name != "case001" {
+		t.Errorf("expected Name 'case001', got '%s'", result.Name)
 	}
 	if result.Status != CasePassed {
 		t.Errorf("expected Status 'passed', got '%s'", result.Status)
