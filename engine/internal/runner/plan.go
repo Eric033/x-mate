@@ -10,6 +10,8 @@ import (
 
 	"github.com/Eric033/x-mate/engine/internal/context"
 	"github.com/Eric033/x-mate/engine/internal/handler"
+
+	"github.com/antchfx/xmlquery"
 )
 
 // CasePlan holds the parsed and validated plan for a test case.
@@ -265,9 +267,38 @@ func (r *Runner) validateAndParseStep(ctx *context.TestContext, phase string, s 
 	// paths.
 	_ = stepData.Assertions // validation placeholder
 
+	// Validate XPath syntax in value expressions (blocking)
+	for _, v := range stepData.Values {
+		if isXPathExpr(v.Key) {
+			if _, err := compileXPath(v.Key); err != nil {
+				errs = append(errs, PlanError{
+					Phase:    phase,
+					Severity: "error",
+					Message:  fmt.Sprintf("invalid XPath expression %q: %v", v.Key, err),
+				})
+			}
+		}
+	}
+
 	return ParsedStep{
 		Desc:  s.Desc,
 		Phase: phase,
 		Data:  stepData,
 	}, errs
+}
+
+// isXPathExpr returns true if the string looks like an XPath expression.
+func isXPathExpr(s string) bool {
+	return strings.HasPrefix(s, "//") || strings.HasPrefix(s, "/")
+}
+
+// compileXPath checks whether the XPath expression is syntactically valid.
+func compileXPath(expr string) (interface{}, error) {
+	// Use xmlquery to validate XPath syntax
+	doc, err := xmlquery.Parse(strings.NewReader("<root/>"))
+	if err != nil {
+		return nil, err
+	}
+	_, err = xmlquery.Query(doc, expr)
+	return nil, err
 }

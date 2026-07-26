@@ -84,7 +84,7 @@ func (r *Runner) dryRunCases(ctx *context.TestContext) *result.Report {
 			// Case has blocking validation errors — report each one
 			for _, pe := range plan.Errors {
 				if pe.Severity == "error" {
-					loc := plan.DirName
+					loc := planLoc(plan)
 					if pe.Phase != "" {
 						loc += " [" + pe.Phase + "]"
 					}
@@ -101,10 +101,10 @@ func (r *Runner) dryRunCases(ctx *context.TestContext) *result.Report {
 		} else {
 			// Case is valid (may have non-blocking warnings)
 			stepCount := len(plan.Setup) + len(plan.Action) + len(plan.Teardown)
-			r.Logger("DRY-RUN OK: %s (%d steps)", plan.DirName, stepCount)
+			r.Logger("DRY-RUN OK: %s (%d steps)", planLoc(plan), stepCount)
 			// Log any non-blocking warnings
 			for _, pe := range plan.Errors {
-				loc := plan.DirName
+				loc := planLoc(plan)
 				if pe.Phase != "" {
 					loc += " [" + pe.Phase + "]"
 				}
@@ -115,6 +115,13 @@ func (r *Runner) dryRunCases(ctx *context.TestContext) *result.Report {
 	}
 
 	return rep
+}
+
+func planLoc(plan CasePlan) string {
+	if plan.XMLPath != "" {
+		return plan.XMLPath
+	}
+	return plan.DirName
 }
 
 // ---------------------------------------------------------------------------

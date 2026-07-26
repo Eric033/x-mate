@@ -2,6 +2,7 @@ package xmlhelper
 
 import (
 	"errors"
+	"os"
 	"strings"
 	"testing"
 )
@@ -324,6 +325,135 @@ func TestGet_Whitespace(t *testing.T) {
 	// InnerText does NOT trim whitespace; but we TrimSpace in Get
 	if val != "spaced" {
 		t.Fatalf("expected 'spaced', got %q", val)
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Golden file tests
+// ---------------------------------------------------------------------------
+
+func TestGoldenFile_AttributeReadAndSet(t *testing.T) {
+	input, err := os.ReadFile("testdata/golden_input.xml")
+	if err != nil {
+		t.Fatalf("read golden input: %v", err)
+	}
+	xmlStr := string(input)
+
+	// 1. Read attribute
+	val, err := Get("//Order/@id", xmlStr)
+	if err != nil {
+		t.Fatalf("Get @id: %v", err)
+	}
+	if val != "A001" {
+		t.Fatalf("expected 'A001', got %q", val)
+	}
+
+	// 2. Modify attribute
+	result, err := Set("//Order/@status", "DONE", xmlStr)
+	if err != nil {
+		t.Fatalf("Set @status: %v", err)
+	}
+
+	// 3. Verify against golden file
+	expected, err := os.ReadFile("testdata/golden_attr_set.xml")
+	if err != nil {
+		t.Fatalf("read golden expected: %v", err)
+	}
+	if strings.TrimSpace(result) != strings.TrimSpace(string(expected)) {
+		t.Fatalf("result does not match golden file.\nGot:\n%s\n\nExpected:\n%s", result, string(expected))
+	}
+}
+
+func TestGoldenFile_IndexSelectAndSet(t *testing.T) {
+	input, err := os.ReadFile("testdata/golden_input.xml")
+	if err != nil {
+		t.Fatalf("read golden input: %v", err)
+	}
+	xmlStr := string(input)
+
+	// 1. Read first item amount
+	val1, err := Get("//Item[1]/Amount", xmlStr)
+	if err != nil {
+		t.Fatalf("Get Item[1]/Amount: %v", err)
+	}
+	if val1 != "100" {
+		t.Fatalf("Item[1] expected '100', got %q", val1)
+	}
+
+	// 2. Read second item amount
+	val2, err := Get("//Item[2]/Amount", xmlStr)
+	if err != nil {
+		t.Fatalf("Get Item[2]/Amount: %v", err)
+	}
+	if val2 != "200" {
+		t.Fatalf("Item[2] expected '200', got %q", val2)
+	}
+
+	// 3. Modify second item only
+	result, err := Set("//Item[2]/Amount", "999", xmlStr)
+	if err != nil {
+		t.Fatalf("Set Item[2]/Amount: %v", err)
+	}
+
+	// 4. Verify first item unchanged
+	valAfter, err := Get("//Item[1]/Amount", result)
+	if err != nil {
+		t.Fatalf("Get Item[1]/Amount after set: %v", err)
+	}
+	if valAfter != "100" {
+		t.Fatalf("Item[1] should be unchanged '100', got %q", valAfter)
+	}
+
+	// 5. Verify against golden file
+	expected, err := os.ReadFile("testdata/golden_index_set.xml")
+	if err != nil {
+		t.Fatalf("read golden expected: %v", err)
+	}
+	if strings.TrimSpace(result) != strings.TrimSpace(string(expected)) {
+		t.Fatalf("result does not match golden file.\nGot:\n%s\n\nExpected:\n%s", result, string(expected))
+	}
+}
+
+func TestGet_AttributeCondition(t *testing.T) {
+	xmlStr := `<root><Order id="A001"><Amount>100</Amount></Order><Order id="B002"><Amount>200</Amount></Order></root>`
+
+	val, err := Get("//Order[@id='A001']/Amount", xmlStr)
+	if err != nil {
+		t.Fatalf("Get with attribute condition: %v", err)
+	}
+	if val != "100" {
+		t.Fatalf("expected '100', got %q", val)
+	}
+}
+
+func TestQueryAll_MultipleItems(t *testing.T) {
+	xmlStr := `<root><Item>A</Item><Item>B</Item><Item>C</Item></root>`
+
+	results, err := QueryAll("//Item", xmlStr)
+	if err != nil {
+		t.Fatalf("QueryAll: %v", err)
+	}
+	if len(results) != 3 {
+		t.Fatalf("expected 3 items, got %d", len(results))
+	}
+	if results[0] != "A" || results[1] != "B" || results[2] != "C" {
+		t.Fatalf("expected [A B C], got %v", results)
+	}
+}
+
+func TestQueryAll_NotFound(t *testing.T) {
+	xmlStr := `<root><Item>A</Item></root>`
+	_, err := QueryAll("//Missing", xmlStr)
+	if !errors.Is(err, ErrXPathNotFound) {
+		t.Fatalf("expected ErrXPathNotFound, got %v", err)
+	}
+}
+
+func TestGet_IndexOutOfBounds(t *testing.T) {
+	xmlStr := `<root><Item>A</Item></root>`
+	_, err := Get("//Item[5]", xmlStr)
+	if !errors.Is(err, ErrXPathNotFound) {
+		t.Fatalf("expected ErrXPathNotFound for out-of-bounds, got %v", err)
 	}
 }
 
