@@ -33,3 +33,4 @@ __pycache__/
 # Temp reports
 *.html
 *.xml
+!engine/internal/xmlhelper/testdata/*.xml

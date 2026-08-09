@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Request version="1.0">
+  <Order id="A001" status="NEW">
+    <Items>
+      <Item type="normal">
+        <Amount>100</Amount>
+      </Item>
+      <Item type="discount">
+        <Amount>999</Amount>
+      </Item>
+    </Items>
+  </Order>
+</Request>
